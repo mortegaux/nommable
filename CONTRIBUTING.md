@@ -14,7 +14,7 @@ Prerequisites: Node.js 20+ and npm 9+.
 To also prove the built container serves the app (needs Docker):
 
 ```bash
-docker build -t nommable:ci . && ./scripts/ci/smoke-test.sh nommable:ci
+docker build -t nommable:ci . && bash ./scripts/ci/smoke-test.sh nommable:ci
 ```
 
 The smoke test starts the container with throwaway dummy secrets, waits for
