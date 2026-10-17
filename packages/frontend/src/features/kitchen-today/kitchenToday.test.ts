@@ -119,9 +119,9 @@ describe('parseLocalDay / daysUntil', () => {
 describe('getExpiringItems', () => {
   it('includes expired and soon-expiring items, soonest first', () => {
     const items = [
-      pantryItem({ id: 'a', name: 'Yogurt', expirationDate: new Date('2026-10-20') }),
-      pantryItem({ id: 'b', name: 'Milk', expirationDate: new Date('2026-10-15') }),
-      pantryItem({ id: 'c', name: 'Cheese', expirationDate: new Date('2026-10-17') }),
+      pantryItem({ id: 'a', name: 'Yogurt', expirationDate: new Date(2026, 9, 20) }),
+      pantryItem({ id: 'b', name: 'Milk', expirationDate: new Date(2026, 9, 15) }),
+      pantryItem({ id: 'c', name: 'Cheese', expirationDate: new Date(2026, 9, 17) }),
     ];
     const result = getExpiringItems(items, 7, TODAY);
     expect(result.map((r) => r.item.id)).toEqual(['b', 'c', 'a']);
@@ -130,7 +130,7 @@ describe('getExpiringItems', () => {
 
   it('excludes items expiring beyond the window and items with no date', () => {
     const items = [
-      pantryItem({ id: 'a', name: 'Rice', expirationDate: new Date('2026-11-01') }),
+      pantryItem({ id: 'a', name: 'Rice', expirationDate: new Date(2026, 10, 1) }),
       pantryItem({ id: 'b', name: 'Beans' }),
     ];
     expect(getExpiringItems(items, 7, TODAY)).toEqual([]);
@@ -367,7 +367,7 @@ describe('summarizeKitchenToday', () => {
         pantryItem({
           id: 'a',
           name: 'Milk',
-          expirationDate: new Date('2026-10-17'),
+          expirationDate: new Date(2026, 9, 17),
           isLowStock: true,
         }),
       ],
