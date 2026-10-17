@@ -84,4 +84,4 @@ jobs:
         run: docker build -t nommable:ci .
 
       - name: Smoke test — /health and app root
-        run: ./scripts/ci/smoke-test.sh nommable:ci
+        run: bash ./scripts/ci/smoke-test.sh nommable:ci
