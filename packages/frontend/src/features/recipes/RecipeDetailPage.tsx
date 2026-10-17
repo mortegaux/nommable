@@ -1192,14 +1192,20 @@ export default function RecipeDetailPage() {
               {recipe.sourceUrl && (
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">Source</h3>
-                  <a
-                    href={recipe.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline break-all"
-                  >
-                    {recipe.sourceUrl}
-                  </a>
+                  {/* Only http(s) URLs become links: a stored javascript: URL
+                      (possible in legacy rows) must never be a clickable href. */}
+                  {/^https?:\/\//i.test(recipe.sourceUrl) ? (
+                    <a
+                      href={recipe.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline break-all"
+                    >
+                      {recipe.sourceUrl}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground break-all">{recipe.sourceUrl}</span>
+                  )}
                 </div>
               )}
             </div>

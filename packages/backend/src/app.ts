@@ -10,6 +10,7 @@ import routes from './api/routes';
 import { errorHandler } from './api/middleware';
 import { swaggerSpec } from './config/swagger';
 import { ImageStorageService } from './services/image-storage.service';
+import { ALLOWED_MIMES as ALLOWED_UPLOAD_MIMES } from './utils/image-validation';
 
 export function createApp(): express.Express {
   const app = express();
@@ -57,7 +58,12 @@ export function createApp(): express.Express {
       res.status(404).json({ error: 'Image not found' });
       return;
     }
-    res.setHeader('Content-Type', restored.mimeType);
+    // Serve only allowlisted raster MIME types. A stored `image/svg+xml` row
+    // (e.g. legacy data from before content validation) would otherwise be
+    // served as SVG from this origin — stored XSS. Anything else is served
+    // as a generic JPEG so the bytes can never execute as script.
+    const safeMime = ALLOWED_UPLOAD_MIMES.has(restored.mimeType) ? restored.mimeType : 'image/jpeg';
+    res.setHeader('Content-Type', safeMime);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.send(restored.buffer);
   });

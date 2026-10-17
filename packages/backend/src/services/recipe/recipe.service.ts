@@ -11,6 +11,25 @@ import {
 import { AppError } from '../../api/middleware';
 import { GamificationService } from '../gamification/gamification.service';
 import { SystemSettingsService } from '../settings/system-settings.service';
+import { assertSafeExternalLink } from '../../utils/ssrf-guard';
+
+/**
+ * sourceUrl is rendered as a clickable link on the recipe detail page, so it
+ * must be http(s) only: a stored `javascript:` URL would be clickable XSS.
+ * Applies to manual creates/updates; imports are covered by the scraper's
+ * SSRF guard (which also restricts to http/https).
+ */
+function assertSafeSourceUrl(sourceUrl: unknown): void {
+  if (sourceUrl === undefined || sourceUrl === null || sourceUrl === '') return;
+  if (typeof sourceUrl !== 'string') {
+    throw new AppError(400, 'sourceUrl must be a string');
+  }
+  try {
+    assertSafeExternalLink(sourceUrl);
+  } catch {
+    throw new AppError(400, 'sourceUrl must be an http or https URL');
+  }
+}
 
 export class RecipeService {
   private recipeRepo: Repository<Recipe>;
@@ -24,6 +43,7 @@ export class RecipeService {
   }
 
   async create(userId: string, dto: RecipeCreateDto, isAiGenerated = false): Promise<Recipe> {
+    assertSafeSourceUrl(dto.sourceUrl);
     const recipe = this.recipeRepo.create({
       userId,
       title: dto.title,
@@ -276,7 +296,10 @@ export class RecipeService {
     if (dto.cookTime !== undefined) recipe.cookTime = dto.cookTime;
     if (dto.difficulty !== undefined) recipe.difficulty = dto.difficulty;
     if (dto.imageUrl !== undefined) recipe.imageUrl = dto.imageUrl;
-    if (dto.sourceUrl !== undefined) recipe.sourceUrl = dto.sourceUrl;
+    if (dto.sourceUrl !== undefined) {
+      assertSafeSourceUrl(dto.sourceUrl);
+      recipe.sourceUrl = dto.sourceUrl;
+    }
     if (dto.notes !== undefined) recipe.notes = dto.notes;
     if (dto.instructions !== undefined) recipe.instructions = dto.instructions;
     if (dto.categories !== undefined) recipe.categories = dto.categories;
@@ -356,7 +379,11 @@ export class RecipeService {
     return Array.from(categories).sort();
   }
 
-  async bulkUpdate(ids: string[], userId: string, updates: { tags?: string[]; categories?: string[] }): Promise<number> {
+  async bulkUpdate(
+    ids: string[],
+    userId: string,
+    updates: { tags?: string[]; categories?: string[] }
+  ): Promise<number> {
     const sharedRecipes = await SystemSettingsService.isSharedRecipesEnabled();
     const recipes = await this.recipeRepo.find({
       where: sharedRecipes
@@ -372,7 +399,7 @@ export class RecipeService {
     }
 
     // Update each recipe
-    recipes.forEach(recipe => {
+    recipes.forEach((recipe) => {
       if (updates.tags !== undefined) {
         // Merge tags (add new ones, keep existing)
         const existingTags = recipe.tags || [];

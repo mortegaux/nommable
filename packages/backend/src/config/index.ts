@@ -57,7 +57,7 @@ interface Config {
 
 function parseCorsOrigin(value: string): string | string[] | boolean {
   if (value === '*') return true;
-  if (value.includes(',')) return value.split(',').map(s => s.trim());
+  if (value.includes(',')) return value.split(',').map((s) => s.trim());
   return value;
 }
 
@@ -192,7 +192,9 @@ if (
   config.env === 'production' &&
   authSecret === 'nommable-dev-secret-key-change-this-in-production'
 ) {
-  console.error('FATAL: BETTER_AUTH_SECRET (or JWT_SECRET as legacy alias) is required in production. Set a long random string.');
+  console.error(
+    'FATAL: BETTER_AUTH_SECRET (or JWT_SECRET as legacy alias) is required in production. Set a long random string.'
+  );
   process.exit(1);
 }
 // ENCRYPTION_KEY must be explicitly set in production. Note: we check the raw
@@ -209,7 +211,18 @@ if (
   process.env.SEED_ADMIN_ON_BOOT === 'true' &&
   config.admin.password === 'admin'
 ) {
-  console.error('FATAL: ADMIN_PASSWORD must be changed from the default when SEED_ADMIN_ON_BOOT=true.');
+  console.error(
+    'FATAL: ADMIN_PASSWORD must be changed from the default when SEED_ADMIN_ON_BOOT=true.'
+  );
+  process.exit(1);
+}
+// CORS_ORIGIN=* resolves to `origin: true`, which reflects ANY origin while
+// credentials are enabled — any website could then make credentialed
+// cross-origin API calls as the signed-in user. Refuse to boot prod that way.
+if (config.env === 'production' && (process.env.CORS_ORIGIN || '').trim() === '*') {
+  console.error(
+    'FATAL: CORS_ORIGIN=* is not allowed in production with credentials enabled. Set an explicit origin list.'
+  );
   process.exit(1);
 }
 

@@ -1,18 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
 import { config } from '../config';
 import { AppDataSource } from '../db/data-source';
-
-const MIME_TO_EXT: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/jpg': '.jpg',
-  'image/png': '.png',
-  'image/gif': '.gif',
-  'image/webp': '.webp',
-  'image/heic': '.heic',
-  'image/heif': '.heif',
-};
+import { assertSafeScrapeUrl, fetchWithGuardedRedirects } from '../utils/ssrf-guard';
+import { ALLOWED_MIMES, mimeToExt, detectImageType } from '../utils/image-validation';
 
 const EXT_TO_MIME: Record<string, string> = {
   '.jpg': 'image/jpeg',
@@ -176,6 +167,12 @@ export class ImageStorageService {
   /**
    * Save an image buffer to both the unified upload directory and database.
    * Used by AI-generated images, uploaded images, and downloaded recipe images.
+   *
+   * The stored MIME type comes from the buffer's magic bytes, never from a
+   * caller-supplied content type: a stored `image/svg+xml` row would be
+   * served as SVG from the app's origin by the uploads fallback route
+   * (stored XSS), so anything that is not a detected allowlisted raster
+   * image is rejected here.
    */
   static async saveImageBuffer(
     subdir: 'recipes' | 'profiles',
@@ -185,10 +182,16 @@ export class ImageStorageService {
   ): Promise<{ filename: string; imageUrl: string; filePath: string }> {
     await this.initialize();
 
-    const normalizedMime = (mimeType || 'image/jpeg').toLowerCase().split(';')[0].trim();
-    const ext =
-      MIME_TO_EXT[normalizedMime] ||
-      (normalizedMime.includes('png') ? '.png' : normalizedMime.includes('webp') ? '.webp' : '.jpg');
+    const detected = detectImageType(buffer);
+    if (!detected || !ALLOWED_MIMES.has(detected)) {
+      throw new Error('Unsupported image content: not a recognized allowlisted image type');
+    }
+    // Caller-supplied mimeType is ignored for storage: the detected type is
+    // the only trustworthy one. (It is kept as a parameter for call-site
+    // compatibility.)
+    void mimeType;
+    const normalizedMime = detected;
+    const ext = mimeToExt[normalizedMime] || '.jpg';
 
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const filename = `${prefix}-${uniqueSuffix}${ext}`;
@@ -236,6 +239,9 @@ export class ImageStorageService {
 
   /**
    * Persist an already-uploaded Multer disk file into database and mirror directories.
+   * The file already passed the upload middleware's content check; this
+   * re-verifies the bytes (defense in depth) and stores the *detected* MIME
+   * type, never a caller-supplied one.
    */
   static async persistUploadedDiskFile(
     subdir: 'recipes' | 'profiles',
@@ -246,8 +252,17 @@ export class ImageStorageService {
     await this.initialize();
 
     const safeFilename = path.basename(filename);
-    const ext = path.extname(safeFilename).toLowerCase();
-    const resolvedMime = (mimeType || EXT_TO_MIME[ext] || 'image/jpeg').toLowerCase().split(';')[0].trim();
+    const resolvedMime = await (async () => {
+      try {
+        const head = (await fs.promises.readFile(diskFilePath)).subarray(0, 12);
+        const detected = detectImageType(head);
+        if (detected && ALLOWED_MIMES.has(detected)) return detected;
+      } catch {
+        // Fall through to the extension-based MIME below.
+      }
+      const ext = path.extname(safeFilename).toLowerCase();
+      return (mimeType || EXT_TO_MIME[ext] || 'image/jpeg').toLowerCase().split(';')[0].trim();
+    })();
 
     try {
       const buffer = await fs.promises.readFile(diskFilePath);
@@ -337,6 +352,13 @@ export class ImageStorageService {
   /**
    * Download an external recipe image URL and store it locally in the unified
    * recipe image storage + PostgreSQL. If downloading fails, returns the original URL.
+   *
+   * The URL comes from a scraped page, so it is attacker-influenced: it gets
+   * the same SSRF treatment as recipe imports (public-IP validation +
+   * per-hop redirect validation). Content must be a detected allowlisted
+   * raster image — an SVG served from this origin would be stored XSS, so
+   * SVG (or any non-allowlisted content) is rejected and the original URL
+   * is kept instead.
    */
   static async localizeExternalImage(externalUrl?: string): Promise<string | undefined> {
     if (!externalUrl || typeof externalUrl !== 'string') return externalUrl;
@@ -346,18 +368,22 @@ export class ImageStorageService {
     }
 
     try {
-      const response = await axios.get(trimmed, {
+      const safeUrl = await assertSafeScrapeUrl(trimmed);
+      const response = await fetchWithGuardedRedirects(safeUrl, {
         responseType: 'arraybuffer',
         timeout: 12000,
         maxContentLength: 10 * 1024 * 1024,
         headers: {
           'User-Agent': 'Nommable/1.0 (Recipe Importer; +https://github.com/mortegaux/nommable)',
-          Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
         },
       });
 
-      const contentType = (response.headers['content-type'] as string) || 'image/jpeg';
-      if (!contentType.startsWith('image/')) {
+      const contentType = ((response.headers['content-type'] as string) || '')
+        .toLowerCase()
+        .split(';')[0]
+        .trim();
+      if (!ALLOWED_MIMES.has(contentType)) {
         return trimmed;
       }
 
@@ -365,8 +391,13 @@ export class ImageStorageService {
       if (buffer.length < 100) {
         return trimmed;
       }
+      // Trust magic bytes, not the remote server's Content-Type header.
+      const detected = detectImageType(buffer);
+      if (!detected || !ALLOWED_MIMES.has(detected)) {
+        return trimmed;
+      }
 
-      const { imageUrl } = await this.saveImageBuffer('recipes', buffer, contentType, 'recipe');
+      const { imageUrl } = await this.saveImageBuffer('recipes', buffer, detected, 'recipe');
       return imageUrl;
     } catch {
       // Fallback to original remote URL if hotlink download is blocked

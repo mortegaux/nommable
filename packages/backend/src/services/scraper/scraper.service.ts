@@ -1,114 +1,28 @@
-import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import * as path from 'path';
-import * as dns from 'dns';
-import * as net from 'net';
 import { RecipeCreateDto } from '@nommable/shared';
+import {
+  assertSafeScrapeUrl,
+  fetchWithGuardedRedirects,
+  resolveRedirectChain,
+} from '../../utils/ssrf-guard';
 
 const execFileAsync = promisify(execFile);
-
-
-/**
- * SSRF guard for user-supplied recipe URLs.
- *
- * The scraper fetches arbitrary URLs server-side (axios + a Python subprocess),
- * so a malicious URL could probe the internal network, hit cloud metadata
- * endpoints (169.254.169.254), or reach loopback services. This validates that
- * the URL is http(s) and that every DNS-resolved address is a public IP.
- *
- * Note: this checks at request time; it does not defend against DNS rebinding
- * between validation and fetch, nor against redirects to internal IPs during
- * fetch. For this app's threat model (authenticated users importing recipes)
- * that trade-off is acceptable.
- */
-function ipv4ToInt(ip: string): number {
-  return ip.split('.').reduce((acc, oct) => (acc << 8) + parseInt(oct, 10), 0) >>> 0;
-}
-
-function isBlockedIp(ip: string): boolean {
-  if (net.isIPv4(ip)) {
-    const n = ipv4ToInt(ip);
-    const inCidr = (base: string, bits: number): boolean => {
-      const mask = bits === 0 ? 0 : (~0 << (32 - bits)) >>> 0;
-      return (n & mask) === (ipv4ToInt(base) & mask);
-    };
-    return (
-      inCidr('0.0.0.0', 8) || // software scope ("this host")
-      inCidr('10.0.0.0', 8) || // private
-      inCidr('100.64.0.0', 10) || // carrier-grade NAT
-      inCidr('127.0.0.0', 8) || // loopback
-      inCidr('169.254.0.0', 16) || // link-local (cloud metadata endpoints live here)
-      inCidr('172.16.0.0', 12) || // private
-      inCidr('192.0.0.0', 24) || // IETF protocol assignments
-      inCidr('192.0.2.0', 24) || // TEST-NET-1
-      inCidr('192.168.0.0', 16) || // private
-      inCidr('198.18.0.0', 15) || // benchmarking
-      inCidr('198.51.100.0', 24) || // TEST-NET-2
-      inCidr('203.0.113.0', 24) || // TEST-NET-3
-      inCidr('224.0.0.0', 4) || // multicast
-      inCidr('240.0.0.0', 4) // reserved
-    );
-  }
-  if (net.isIPv6(ip)) {
-    const lower = ip.toLowerCase();
-    // fe80::/10 link-local covers fe80: through febf: — check the 10-bit prefix,
-    // not just the fe80: literal (the old check missed fe81:–febf:).
-    const isLinkLocal = lower.startsWith('fe80:') || lower.startsWith('fe90:') ||
-      lower.startsWith('fea0:') || lower.startsWith('feb0:');
-    return (
-      lower === '::' ||
-      lower === '::1' ||
-      isLinkLocal || // link-local (fe80::/10)
-      lower.startsWith('fc00:') || // unique local
-      lower.startsWith('fd00:') || // unique local
-      lower.startsWith('ff') // multicast
-    );
-  }
-  return true; // unrecognized format: block by default
-}
-
-export async function assertSafeScrapeUrl(rawUrl: string): Promise<string> {
-  let parsed: URL;
-  try {
-    parsed = new URL(rawUrl);
-  } catch {
-    throw new Error('Invalid URL provided');
-  }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    throw new Error('Only http and https URLs can be imported');
-  }
-  if (parsed.username || parsed.password) {
-    throw new Error('URLs with embedded credentials are not allowed');
-  }
-
-  const host = parsed.hostname;
-  if (net.isIP(host) && isBlockedIp(host)) {
-    throw new Error('URL host is not allowed');
-  }
-
-  let addresses: dns.LookupAddress[];
-  try {
-    addresses = await dns.promises.lookup(host, { all: true });
-  } catch {
-    throw new Error('Could not resolve URL host');
-  }
-  if (addresses.length === 0 || addresses.some((a) => isBlockedIp(a.address))) {
-    throw new Error('URL host is not allowed');
-  }
-
-  return parsed.toString();
-}
 
 export class ScraperService {
   async scrapeRecipe(url: string): Promise<Partial<RecipeCreateDto>> {
     // Validate before any network access (SSRF protection)
     const safeUrl = await assertSafeScrapeUrl(url);
 
-    // 1. Try Python recipe-scrapers library first (supports 600+ sites)
+    // 1. Try Python recipe-scrapers library first (supports 600+ sites).
+    // recipe-scrapers follows redirects with its own client, so resolve the
+    // redirect chain (with per-hop SSRF validation) first and hand it the
+    // final URL instead of the user-supplied one.
     try {
-      const pythonResult = await this.scrapWithPython(safeUrl);
+      const finalUrl = await resolveRedirectChain(safeUrl);
+      const pythonResult = await this.scrapWithPython(finalUrl);
       if (pythonResult) {
         return pythonResult;
       }
@@ -146,7 +60,9 @@ export class ScraperService {
       }
       return manual;
     } catch (directError: any) {
-      console.warn(`Direct scraper fetch failed (${directError.message}), attempting bypass fallbacks...`);
+      console.warn(
+        `Direct scraper fetch failed (${directError.message}), attempting bypass fallbacks...`
+      );
 
       // 3. Fallback for WordPress / Cloudflare-protected blogs (WP REST API)
       try {
@@ -188,14 +104,16 @@ export class ScraperService {
 
     for (const ua of userAgents) {
       try {
-        const response = await axios.get(url, {
+        // Guarded fetch: re-validates every redirect target (plain axios
+        // maxRedirects would let a public URL 302 to an internal address).
+        const response = await fetchWithGuardedRedirects(url, {
           headers: {
             'User-Agent': ua,
-            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            Accept:
+              'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
           },
           timeout: 10000,
-          maxRedirects: 5,
         });
 
         if (response.data && typeof response.data === 'string') {
@@ -275,7 +193,9 @@ export class ScraperService {
 
       for (const endpoint of endpoints) {
         try {
-          const res = await axios.get(endpoint, {
+          // Same origin as the validated URL, but redirects still need
+          // per-hop validation — use the guarded fetch.
+          const res = await fetchWithGuardedRedirects(endpoint, {
             headers: {
               'User-Agent':
                 'Nommable/1.0 (Recipe Importer; +https://github.com/mortegaux/nommable)',
@@ -322,14 +242,10 @@ export class ScraperService {
     // WP Recipe Maker (WPRM) extraction
     if ($('.wprm-recipe').length > 0) {
       const title =
-        $('.wprm-recipe-name').first().text().trim() ||
-        post.title?.rendered ||
-        'Untitled Recipe';
+        $('.wprm-recipe-name').first().text().trim() || post.title?.rendered || 'Untitled Recipe';
 
       const description =
-        $('.wprm-recipe-summary').first().text().trim() ||
-        post.excerpt?.rendered ||
-        undefined;
+        $('.wprm-recipe-summary').first().text().trim() || post.excerpt?.rendered || undefined;
 
       const imageUrl =
         $('img.wprm-recipe-image').first().attr('src') ||
@@ -368,10 +284,7 @@ export class ScraperService {
 
       const instructions: string[] = [];
       $('.wprm-recipe-instruction-text, .wprm-recipe-instruction').each((_, el) => {
-        const text = $(el)
-          .text()
-          .trim()
-          .replace(/\s+/g, ' ');
+        const text = $(el).text().trim().replace(/\s+/g, ' ');
         if (text) instructions.push(text);
       });
 
@@ -408,13 +321,12 @@ export class ScraperService {
   private async scrapeWithArchive(url: string): Promise<Partial<RecipeCreateDto> | null> {
     try {
       const archiveUrl = `https://web.archive.org/web/${url}`;
-      const res = await axios.get(archiveUrl, {
+      const res = await fetchWithGuardedRedirects(archiveUrl, {
         headers: {
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         },
         timeout: 15000,
-        maxRedirects: 5,
       });
 
       if (res.data) {
@@ -513,7 +425,9 @@ export class ScraperService {
         if (recipe) {
           return {
             title: recipe.name ? this.cleanHtmlEntities(recipe.name) : undefined,
-            description: recipe.description ? this.cleanHtmlEntities(recipe.description) : undefined,
+            description: recipe.description
+              ? this.cleanHtmlEntities(recipe.description)
+              : undefined,
             servings: this.parseServings(recipe.recipeYield),
             prepTime: this.parseDuration(recipe.prepTime),
             cookTime: this.parseDuration(recipe.cookTime),
@@ -574,9 +488,7 @@ export class ScraperService {
       '';
 
     const imageUrl =
-      $('[itemprop="image"]').attr('src') ||
-      $('meta[property="og:image"]').attr('content') ||
-      '';
+      $('[itemprop="image"]').attr('src') || $('meta[property="og:image"]').attr('content') || '';
 
     const ingredients = this.extractSectionContent($, ['ingredients']);
     const instructions = this.extractSectionContent($, [
@@ -592,12 +504,14 @@ export class ScraperService {
       description: description.trim() ? this.cleanHtmlEntities(description.trim()) : undefined,
       imageUrl: imageUrl || undefined,
       sourceUrl,
-      instructions: instructions.length > 0
-        ? instructions
-        : ['Manual entry required - could not auto-extract instructions'],
-      ingredients: ingredients.length > 0
-        ? ingredients.map((ing, index) => ({ ...this.parseIngredientString(ing), order: index }))
-        : [{ name: 'Manual entry required - could not auto-extract ingredients', order: 0 }],
+      instructions:
+        instructions.length > 0
+          ? instructions
+          : ['Manual entry required - could not auto-extract instructions'],
+      ingredients:
+        ingredients.length > 0
+          ? ingredients.map((ing, index) => ({ ...this.parseIngredientString(ing), order: index }))
+          : [{ name: 'Manual entry required - could not auto-extract ingredients', order: 0 }],
     };
   }
 
@@ -647,18 +561,26 @@ export class ScraperService {
     const nestedLists = el.find('ul, ol');
     if (nestedLists.length > 0) {
       nestedLists.each((_, list) => {
-        $(list).children('li').each((_, li) => {
-          const item = $(li).text().trim();
-          if (item) results.push(item);
-        });
+        $(list)
+          .children('li')
+          .each((_, li) => {
+            const item = $(li).text().trim();
+            if (item) results.push(item);
+          });
       });
       return;
     }
 
     if (tag === 'p') {
       const content = el.text().trim();
-      if (content && !(el.children('strong, b').length > 0 && el.children().text().trim() === content)) {
-        const lines = content.split(/\n/).map((l) => l.replace(/^\d+[.)]\s*/, '').trim()).filter(Boolean);
+      if (
+        content &&
+        !(el.children('strong, b').length > 0 && el.children().text().trim() === content)
+      ) {
+        const lines = content
+          .split(/\n/)
+          .map((l) => l.replace(/^\d+[.)]\s*/, '').trim())
+          .filter(Boolean);
         results.push(...lines);
       }
     }
@@ -742,10 +664,42 @@ export class ScraperService {
     const withoutNotes = cleaned.replace(/\([^)]+\)/g, '').trim();
 
     const units = [
-      'cup', 'cups', 'tablespoon', 'tablespoons', 'tbsp', 'teaspoon', 'teaspoons', 'tsp',
-      'ounce', 'ounces', 'oz', 'pound', 'pounds', 'lb', 'lbs', 'gram', 'grams', 'g',
-      'kilogram', 'kilograms', 'kg', 'milliliter', 'milliliters', 'ml', 'liter', 'liters', 'l',
-      'pinch', 'dash', 'clove', 'cloves', 'can', 'cans', 'package', 'packages', 'pkg'
+      'cup',
+      'cups',
+      'tablespoon',
+      'tablespoons',
+      'tbsp',
+      'teaspoon',
+      'teaspoons',
+      'tsp',
+      'ounce',
+      'ounces',
+      'oz',
+      'pound',
+      'pounds',
+      'lb',
+      'lbs',
+      'gram',
+      'grams',
+      'g',
+      'kilogram',
+      'kilograms',
+      'kg',
+      'milliliter',
+      'milliliters',
+      'ml',
+      'liter',
+      'liters',
+      'l',
+      'pinch',
+      'dash',
+      'clove',
+      'cloves',
+      'can',
+      'cans',
+      'package',
+      'packages',
+      'pkg',
     ];
 
     const quantityPattern = '(\\d+\\s+\\d+/\\d+|\\d+/\\d+|\\d+\\.\\d+|\\d+)?';
@@ -766,7 +720,7 @@ export class ScraperService {
           const fractionParts = parts[1].split('/');
           const numerator = parseFloat(fractionParts[0]);
           const denominator = parseFloat(fractionParts[1]);
-          quantity = whole + (numerator / denominator);
+          quantity = whole + numerator / denominator;
         } else if (quantityStr.includes('/')) {
           const fractionParts = quantityStr.split('/');
           const numerator = parseFloat(fractionParts[0]);
@@ -808,21 +762,45 @@ export class ScraperService {
 
     if (category) {
       if (Array.isArray(category)) {
-        categories.push(...category.flatMap((c: string) => c.split(',').map((s: string) => s.trim()).filter(Boolean)));
+        categories.push(
+          ...category.flatMap((c: string) =>
+            c
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter(Boolean)
+          )
+        );
       } else if (typeof category === 'string') {
-        categories.push(...category.split(',').map((s: string) => s.trim()).filter(Boolean));
+        categories.push(
+          ...category
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        );
       }
     }
 
     if (cuisine) {
       if (Array.isArray(cuisine)) {
-        categories.push(...cuisine.flatMap((c: string) => c.split(',').map((s: string) => s.trim()).filter(Boolean)));
+        categories.push(
+          ...cuisine.flatMap((c: string) =>
+            c
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter(Boolean)
+          )
+        );
       } else if (typeof cuisine === 'string') {
-        categories.push(...cuisine.split(',').map((s: string) => s.trim()).filter(Boolean));
+        categories.push(
+          ...cuisine
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        );
       }
     }
 
-    return categories.length > 0 ? categories : undefined as any;
+    return categories.length > 0 ? categories : (undefined as any);
   }
 
   private parseTags(keywords: any, suitableForDiet: any): string[] {
@@ -849,6 +827,6 @@ export class ScraperService {
       });
     }
 
-    return tags.length > 0 ? tags : undefined as any;
+    return tags.length > 0 ? tags : (undefined as any);
   }
 }

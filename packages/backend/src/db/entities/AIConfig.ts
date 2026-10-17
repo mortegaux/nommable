@@ -22,7 +22,7 @@ export class AIConfig {
   provider!: string;
 
   @Column('varchar', { name: 'api_key', nullable: true })
-  apiKey?: string; // Should be encrypted
+  apiKey?: string; // Encrypted at rest (AES-256-GCM, see utils/crypto.ts)
 
   @Column('varchar', { nullable: true })
   model?: string;
