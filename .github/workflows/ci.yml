@@ -66,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build workspaces (shared, backend, frontend)
+        run: npm run build
+
       - name: Apply migrations to a fresh DB and verify the schema
         run: node scripts/ci/verify-migrations.mjs
 
