@@ -82,18 +82,46 @@ normal text) in both themes:
 | primary solid | 5.33 | 17.06 |
 | destructive solid | 4.80 | 9.58 |
 | foreground on background | 11.53 | 19.12 |
+| **secondary solid** (fixed #6: `--secondary` light 45% → 34%) | **5.01** | 13.95 |
+| **muted-foreground on background** (fixed #6: light 45% → 38%) | **5.70** | 7.80 |
+| **muted-foreground on muted** (fixed #6) | **4.89** | 5.70 |
+| **muted-foreground on card** (fixed #6) | **6.05** | 7.80 |
 
-**Known contrast gaps — for #6 (dark-mode / contrast audit), NOT fixed here:**
-- `muted-foreground` on `background` (light): **4.36:1** — just under AA.
-  Value intentionally unchanged; #6 owns the fix.
-- `secondary-foreground` (white) on `secondary` (light): **3.07:1** —
-  secondary buttons with white text fail AA for normal text. #6 owns it.
-- `text-destructive` directly on card/background in dark mode: **2.00:1**.
-  Do not use it for body text; use `Callout` (`destructive-soft`) for
-  error panels. The remaining direct `text-destructive` usages are #6's
-  to resolve.
-- Favorites heart (`text-red-500`) in dark mode is below 3:1. Decorative
-  (the label carries the meaning) — #6 to resolve.
+**Fixed in #6 (were known gaps in #27):**
+- `muted-foreground` on `background` (light): 4.36 → **5.70** (token
+  value `--muted-foreground` light 45% → 38%).
+- `secondary-foreground` (white) on `secondary` (light): 3.07 → **5.01**
+  (token value `--secondary` light 45% → 34%).
+- Direct `text-destructive` on card/background in dark mode: 2.00 → **9.14**
+  via a dark-mode remap in `index.css`: `.dark .text-destructive` (and
+  `/80` + hover variants) resolves to `--destructive-soft-foreground`.
+  Rationale: no single `--destructive` dark value can satisfy both
+  white-text-on-destructive-button (needs the red dark) and
+  destructive-text-on-background (needs the red light) at AA — the two
+  constraints have no overlapping lightness. Buttons keep
+  `bg-destructive` + `text-destructive-foreground` (9.56:1); error text
+  uses the remap. Error *panels* use `Callout tone="error"`.
+- Favorites heart (`text-red-500`): re-measured in #6 — it passes 3:1
+  for graphics in both themes (3.76 light, 5.31 dark). No change needed;
+  the #27 note was incorrect.
+- Input borders now meet WCAG 1.4.11 (3:1): `--input` light 85% → 50%
+  (3.70 vs card, 3.48 vs background), dark 17.5% → 45% (3.64 vs
+  background). Card/divider `--border` was darkened for visibility
+  (light 85% → 72%, dark 17.5% → 28%) but is decorative — content, not
+  the boundary, identifies a card — so 3:1 is not claimed for it.
+- `color-scheme: light` on `:root` / `dark` on `.dark` so native
+  controls (date-picker calendar icon, scrollbars) render in the active
+  theme. This fixes the pantry "calendar control not visible" issue:
+  the expiry date input's picker icon was invisible in dark mode.
+
+**Remaining notes for future audits:**
+- Badge/chip maps (`bg-X-100 text-X-800` light /
+  `bg-X-900/40 text-X-200` dark) all pass AA (computed in #6).
+- Category dots (shopping lists) moved `-500` → `-600` (Snacks
+  `-700`, Other `-500` gray) so all dots pass 3:1 on white and dark
+  card. Star ratings: filled stars `text-amber-600 dark:text-amber-400`
+  (3:1 graphics), unfilled star outlines full `text-muted-foreground`
+  (was 40% opacity).
 
 ### Spacing / layout
 
@@ -151,9 +179,12 @@ here; this is the seam it will use.
 - **#5 (mobile responsiveness):** verify 390px / 768px / 1280px + long-content
   stress for every primary workflow. PageHeader stacks actions on narrow
   screens, but no systematic verification was done here.
-- **#6 (dark-mode / contrast audit):** the known gaps listed above, plus a
-  full screen-by-screen audit. Token values here must not make contrast
-  worse; the audit itself is #6's job.
+- **#6 (dark-mode / contrast audit):** DONE — token values fixed, remap
+  rule, component fixes, contrast-guard tests. Remaining for a future
+  pass: full keyboard-flow audit (focus *order*, landmarks, status
+  announcements beyond `role="alert"`, 44px touch targets — focus
+  *visibility* was fixed in #6), Kitchen Today (not in the #6 base;
+  audit it once branched from current main).
 - **Keyboard / a11y audit:** focus order, landmarks, status announcements
   beyond `role="alert"` on error callouts, 44px touch targets. Fold into
   #5 / #6.

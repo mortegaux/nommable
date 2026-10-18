@@ -106,7 +106,7 @@ export function MealPlanShoppingListIntegration({
         <div className="bg-accent/10 rounded-lg p-4 space-y-4">
           {missingIngredients.length === 0 ? (
             <div className="text-center py-4">
-              <p className="text-green-600 dark:text-green-400 font-medium">
+              <p className="text-green-700 dark:text-green-400 font-medium">
                 ✓ You have all ingredients in your pantry!
               </p>
             </div>

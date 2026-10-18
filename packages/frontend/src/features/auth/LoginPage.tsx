@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
+import { Callout } from '@/components/Callout';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -47,13 +48,9 @@ export default function LoginPage() {
         <h2 className="mb-6 text-2xl font-semibold text-card-foreground">Sign In</h2>
 
         {error && (
-          <div
-            className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-destructive"
-            role="alert"
-            aria-live="polite"
-          >
+          <Callout tone="error" role="alert" className="mb-4">
             {error}
-          </div>
+          </Callout>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">

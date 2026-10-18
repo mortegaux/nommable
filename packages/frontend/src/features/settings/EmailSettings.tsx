@@ -247,12 +247,12 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
         <div className="flex items-center gap-2">
           {isConfigured ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               SMTP Configured ({source === 'env' ? 'Environment' : 'Database'})
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 dark:text-amber-400 border border-amber-500/20">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               SMTP Not Configured
             </span>
           )}
@@ -269,7 +269,7 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
           }`}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
           ) : (
             <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
           )}

@@ -584,7 +584,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                 type="button"
                 onClick={handleTestConnection}
                 disabled={testing}
-                className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-white font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 rounded-lg bg-green-700 px-4 py-2 text-white font-medium hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {testing ? 'Testing...' : 'Test Connection'}
               </button>

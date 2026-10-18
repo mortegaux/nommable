@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
 import { invitationApi } from '@/services/api';
+import { Callout } from '@/components/Callout';
 
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
@@ -114,13 +115,9 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div
-            className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-destructive"
-            role="alert"
-            aria-live="polite"
-          >
+          <Callout tone="error" role="alert" className="mb-4">
             {error}
-          </div>
+          </Callout>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">

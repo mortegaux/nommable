@@ -326,7 +326,7 @@ export default function FeedbackInboxPage() {
                             type="button"
                             disabled={updating}
                             onClick={() => handleStatusChange(report, 'resolved')}
-                            className="px-3 py-1.5 text-sm rounded-lg bg-emerald-600 text-white hover:opacity-90 disabled:opacity-50"
+                            className="px-3 py-1.5 text-sm rounded-lg bg-emerald-700 text-white hover:opacity-90 disabled:opacity-50"
                           >
                             {updating ? 'Updating…' : 'Mark resolved'}
                           </button>
