@@ -164,8 +164,8 @@ export function CookingMode({ recipe, servingMultiplier, onExit }: CookingModePr
         )}
 
         {/* Current Step */}
-        <div className="bg-card rounded-2xl border-2 border-primary p-8 mb-6 shadow-lg">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-card rounded-2xl border-2 border-primary p-5 sm:p-8 mb-6 shadow-lg">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => toggleStep(currentStep)}
@@ -178,7 +178,7 @@ export function CookingMode({ recipe, servingMultiplier, onExit }: CookingModePr
               >
                 {completedSteps.has(currentStep) ? '✓' : currentStep + 1}
               </button>
-              <h2 className="text-2xl font-bold text-foreground">Step {currentStep + 1}</h2>
+              <h2 className="text-2xl font-bold text-foreground whitespace-nowrap">Step {currentStep + 1}</h2>
             </div>
 
             {/* Quick Timer Buttons */}
