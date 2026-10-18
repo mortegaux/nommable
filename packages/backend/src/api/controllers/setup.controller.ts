@@ -11,6 +11,51 @@ import { AIService } from '../../services/ai/ai.service';
 import { encrypt } from '../../utils/crypto';
 import { AppError } from '../middleware/error-handler';
 
+/**
+ * Better Auth validation error codes that are safe to surface to the client:
+ * they describe the user's own input (username/email/password shape), never
+ * server internals. Anything else keeps the generic 500 treatment.
+ */
+const AUTH_VALIDATION_CODES = new Set([
+  'INVALID_USERNAME',
+  'USERNAME_TOO_SHORT',
+  'USERNAME_TOO_LONG',
+  'USERNAME_IS_ALREADY_TAKEN',
+  'INVALID_DISPLAY_USERNAME',
+  'INVALID_EMAIL',
+  'INVALID_PASSWORD',
+]);
+
+/**
+ * Convert a Better Auth APIError for invalid user input into an AppError
+ * carrying its real status/message (e.g. 400 "Username is invalid"), instead
+ * of letting the error handler collapse it into a generic 500. Returns null
+ * for anything that is not a recognized auth validation error.
+ *
+ * Exported for unit testing — the route tests use a Better Auth mock whose
+ * signUpEmail performs no username validation, so the conversion is
+ * covered here with error objects shaped like the real APIError.
+ */
+export function toAuthValidationError(error: unknown): AppError | null {
+  if (typeof error !== 'object' || error === null) return null;
+  const e = error as { statusCode?: unknown; body?: unknown };
+  const statusCode = typeof e.statusCode === 'number' ? e.statusCode : undefined;
+  const body = e.body as { message?: unknown; code?: unknown } | undefined;
+  const message = typeof body?.message === 'string' ? body.message : undefined;
+  const code = typeof body?.code === 'string' ? body.code : undefined;
+  if (
+    statusCode !== undefined &&
+    statusCode >= 400 &&
+    statusCode < 500 &&
+    message &&
+    code &&
+    AUTH_VALIDATION_CODES.has(code)
+  ) {
+    return new AppError(statusCode, message);
+  }
+  return null;
+}
+
 export class SetupController {
   /**
    * GET /api/setup/status
@@ -73,15 +118,25 @@ export class SetupController {
         throw new AppError(409, 'Username or email already exists');
       }
 
-      const signUp = await auth.api.signUpEmail({
-        body: {
-          email,
-          password,
-          name: username,
-          username,
-        },
-        headers: toAuthHeaders(req),
-      });
+      // Surface auth-layer validation errors (e.g. a username the auth
+      // plugin rejects) with their real status/message instead of a
+      // generic 500 from the error handler.
+      let signUp;
+      try {
+        signUp = await auth.api.signUpEmail({
+          body: {
+            email,
+            password,
+            name: username,
+            username,
+          },
+          headers: toAuthHeaders(req),
+        });
+      } catch (error) {
+        const validationError = toAuthValidationError(error);
+        if (validationError) throw validationError;
+        throw error;
+      }
 
       authDb
         .prepare('UPDATE "user" SET role = ? WHERE id = ?')

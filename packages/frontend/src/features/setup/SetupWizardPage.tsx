@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { setupApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
+import { SETUP_USERNAME_HINT, validateSetupUsername } from './username-validation';
 
 type WizardStep = 1 | 2 | 3 | 4 | 5;
 
@@ -24,6 +25,7 @@ export default function SetupWizardPage() {
 
   // Step 1: Admin Account
   const [username, setUsername] = useState('admin');
+  const [usernameError, setUsernameError] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -68,10 +70,14 @@ export default function SetupWizardPage() {
   const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters.');
+    // Same rules the auth layer enforces (Better Auth username() defaults) —
+    // catch a bad username here instead of at the final setup step.
+    const nameError = validateSetupUsername(username);
+    if (nameError) {
+      setUsernameError(nameError);
       return;
     }
+    setUsernameError('');
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
@@ -241,10 +247,20 @@ export default function SetupWizardPage() {
                   required
                   minLength={3}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setUsernameError('');
+                  }}
                   placeholder="admin"
                   className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+                {usernameError ? (
+                  <p className="mt-1 text-sm text-destructive">{usernameError}</p>
+                ) : (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {SETUP_USERNAME_HINT}
+                  </p>
+                )}
               </div>
 
               <div>
