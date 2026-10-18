@@ -102,3 +102,28 @@ export const EMPTY_BACKUP_META: BackupMeta = {
   lastRestoreAt: null,
   restoredFrom: null,
 };
+
+/**
+ * One on-disk server backup (issue #74) — a safety backup written before a
+ * restore, or an export archive placed on the server. `name` is a basename
+ * only; absolute paths are never exposed.
+ */
+export interface ServerBackupEntry {
+  /** File name (basename only, e.g. `safety-2026-10-18T12-00-00-000Z.zip`). */
+  name: string;
+  /** File size in bytes. */
+  sizeBytes: number;
+  /** File mtime (ISO string). */
+  createdAt: string;
+  /** `safety` = written by the server before a restore; `export` = anything else. */
+  kind: 'safety' | 'export';
+  /** `ok` = listable file; `unreadable` = shown with a reason, no actions. */
+  status: 'ok' | 'unreadable';
+  /** Reason when `status` is `unreadable`. */
+  error?: string;
+}
+
+/** Response for `GET /api/settings/backup/list`. */
+export interface ServerBackupList {
+  backups: ServerBackupEntry[];
+}

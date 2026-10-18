@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { settingsApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
-import type { BackupPreview, EntityCounts } from '@nommable/shared';
+import type { BackupPreview, EntityCounts, ServerBackupEntry } from '@nommable/shared';
 import { Callout } from '@/components/Callout';
-import { Download, Upload, Database, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Download, Upload, Database, AlertTriangle, CheckCircle2, RefreshCw, History } from 'lucide-react';
 
 /**
- * Backup & Restore section (issue #71) — the UI for the #16 backup API.
+ * Backup & Restore section (issue #71, server list in #74) — the UI for the
+ * #16 backup API.
  *
  * Rendered inside DataManagement (Settings → Data Management), which
  * SettingsPage only shows to admins — but this component also refuses
@@ -15,14 +16,14 @@ import { Download, Upload, Database, AlertTriangle, CheckCircle2 } from 'lucide-
  * Flow:
  * - Export: GET /settings/backup/export → blob download (filename from
  *   Content-Disposition, e.g. nommable-backup-<ts>.zip).
+ * - Server backups: GET /settings/backup/list → per-entry Download
+ *   (GET /settings/backup/download/:name) and Restore (POST
+ *   /settings/backup/restore/preview-server → the same preview → confirm
+ *   flow below). Safety backups are written by the server before a restore.
  * - Restore: upload a .zip → POST /settings/backup/restore/preview →
  *   preview (manifest + counts + validation) → explicit checkbox +
  *   confirm → POST /settings/backup/restore/confirm { token, confirmed: true }.
  *   The server takes a safety backup of the current data before swapping.
- *
- * There is intentionally NO backup list here: the API has no list
- * endpoint (safety backups live on disk under <dataDir>/backups/).
- * Listing them needs a backend GET /backup/list endpoint — follow-up.
  */
 
 const COUNT_LABELS: Array<[keyof EntityCounts, string]> = [
@@ -58,6 +59,12 @@ export function BackupRestoreSection() {
   const [exportError, setExportError] = useState('');
   const [exportSuccess, setExportSuccess] = useState('');
 
+  const [serverBackups, setServerBackups] = useState<ServerBackupEntry[]>([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState('');
+  const [downloadingName, setDownloadingName] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState('');
+
   const [restoreFile, setRestoreFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<BackupPreview | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -78,6 +85,24 @@ export function BackupRestoreSection() {
         setLastRestoreAt(res.data.lastBackup.lastRestoreAt);
       })
       .catch(() => {});
+  }, []);
+
+  const refreshServerBackups = async () => {
+    setListError('');
+    setListLoading(true);
+    try {
+      const res = await settingsApi.listServerBackups();
+      setServerBackups(res.data.backups ?? []);
+    } catch {
+      // A failed list degrades gracefully: the export/upload paths still work.
+      setListError('Could not load server backups. Export and upload-restore still work.');
+    } finally {
+      setListLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshServerBackups();
   }, []);
 
   if (!isAdmin) {
@@ -108,6 +133,54 @@ export function BackupRestoreSection() {
       setExportError(message);
     } finally {
       setExporting(false);
+    }
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadServerBackup = async (name: string) => {
+    setDownloadError('');
+    setDownloadingName(name);
+    try {
+      const res = await settingsApi.downloadServerBackup(name);
+      downloadBlob(res.data as unknown as Blob, name);
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        'Failed to download backup.';
+      setDownloadError(message);
+    } finally {
+      setDownloadingName(null);
+    }
+  };
+
+  /** Preview a restore from a server-side backup — same preview → confirm flow as uploads. */
+  const handlePreviewServerBackup = async (name: string) => {
+    setPreviewError('');
+    setPreview(null);
+    setConfirmChecked(false);
+    setConfirmError('');
+    setRestoreDone(false);
+    setPreviewing(true);
+    try {
+      const res = await settingsApi.previewServerRestore(name);
+      setPreview(res.data);
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        'Failed to preview backup.';
+      setPreviewError(message);
+    } finally {
+      setPreviewing(false);
     }
   };
 
@@ -210,11 +283,107 @@ export function BackupRestoreSection() {
         )}
       </div>
 
+      {/* Server backups (issue #74) */}
+      <div className="border-t border-border pt-4 mb-5">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
+            <History className="w-4 h-4 text-primary" />
+            Backups on this server
+          </h4>
+          <button
+            type="button"
+            onClick={() => void refreshServerBackups()}
+            disabled={listLoading}
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-all disabled:opacity-50"
+          >
+            <RefreshCw className="w-3 h-3" />
+            {listLoading ? 'Loading…' : 'Refresh'}
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Safety backups are written by the server before a restore. Download or
+          restore any backup from here — restoring goes through the same preview
+          and confirmation as an upload.
+        </p>
+        {listError && (
+          <div className="mb-3">
+            <Callout tone="warning">{listError}</Callout>
+          </div>
+        )}
+        {downloadError && (
+          <div className="mb-3">
+            <Callout tone="error" role="alert">
+              {downloadError}
+            </Callout>
+          </div>
+        )}
+        {!listLoading && !listError && serverBackups.length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            No backups on this server yet. Download one above, or restore from an
+            uploaded archive below.
+          </p>
+        )}
+        {serverBackups.length > 0 && (
+          <ul className="space-y-2">
+            {serverBackups.map((entry) => (
+              <li
+                key={entry.name}
+                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border rounded-xl px-3 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground truncate" title={entry.name}>
+                    {entry.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {entry.status === 'ok'
+                      ? `${formatBytes(entry.sizeBytes)} · ${new Date(entry.createdAt).toLocaleString()}`
+                      : `Unreadable · ${entry.error ?? 'Unknown error'}`}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 self-start sm:self-center text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    entry.kind === 'safety'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {entry.kind === 'safety' ? 'Safety' : 'Export'}
+                </span>
+                {entry.status === 'ok' ? (
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => void handleDownloadServerBackup(entry.name)}
+                      disabled={downloadingName === entry.name}
+                      className="px-3 py-1.5 text-xs font-semibold border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-all disabled:opacity-50"
+                    >
+                      {downloadingName === entry.name ? 'Downloading…' : 'Download'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handlePreviewServerBackup(entry.name)}
+                      disabled={previewing}
+                      className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50"
+                    >
+                      {previewing ? 'Previewing…' : 'Restore'}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="shrink-0 text-xs font-semibold text-destructive">
+                    Unreadable
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       {/* Restore */}
       <div className="border-t border-border pt-4">
         <h4 className="text-xs font-bold text-foreground flex items-center gap-2 mb-2">
           <Upload className="w-4 h-4 text-primary" />
-          Restore from a backup
+          Restore from an uploaded backup
         </h4>
         <p className="text-xs text-muted-foreground mb-3">
           Upload a backup archive (.zip). Nothing is changed until you preview it and
@@ -389,8 +558,9 @@ export function BackupRestoreSection() {
       <p className="text-xs text-muted-foreground mt-4 flex items-start gap-1.5">
         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
         <span>
-          Safety backups taken before a restore are kept on the server. Listing and
-          downloading them from the UI needs a backup-list API endpoint (follow-up).
+          Safety backups taken before a restore are kept on the server and listed
+          above. They accumulate over time — delete unneeded ones from the
+          server&apos;s backups directory if disk space matters.
         </span>
       </p>
     </div>

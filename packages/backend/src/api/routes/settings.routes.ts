@@ -51,6 +51,14 @@ router.delete('/data/clear', requireAdmin, SettingsController.clearData);
 // Backup & restore (issue #16) — admin-only. Restore is two-step:
 // preview validates + stages, confirm applies (safety backup → swap → restart).
 router.get('/backup/export', requireAdmin, BackupController.exportBackup);
+// Server backups on disk (issue #74) — list / download / preview-from-server.
+router.get('/backup/list', requireAdmin, BackupController.listServerBackups);
+router.get('/backup/download/:name', requireAdmin, BackupController.downloadServerBackup);
+router.post(
+  '/backup/restore/preview-server',
+  requireAdmin,
+  BackupController.previewServerRestore
+);
 router.post(
   '/backup/restore/preview',
   requireAdmin,
