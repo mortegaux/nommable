@@ -1,12 +1,19 @@
 import { Router } from 'express';
 import { SettingsController } from '../controllers/settings.controller';
+import { BrandingController } from '../controllers/branding.controller';
 import { BackupController } from '../controllers/backup.controller';
 import { authMiddleware, requireAdmin } from '../middleware';
 import { restoreArchiveUpload } from '../middleware/backup-upload';
+import { brandingUpload, validateImageContent } from '../middleware/branding-upload';
 
 const router = Router();
 
-// All routes require authentication
+// Public instance branding (issue #55) — must be BEFORE router.use(authMiddleware):
+// the login page and header need branding without a session. Read-only;
+// every mutation below is admin-only.
+router.get('/branding', BrandingController.getBranding);
+
+// All routes below require authentication
 router.use(authMiddleware);
 
 // General system settings (shared recipe catalog mode, etc.)
@@ -15,6 +22,28 @@ router.put('/general', requireAdmin, SettingsController.updateGeneralSettings);
 
 // System status (issue #23) — read-only admin diagnostics, no auto-update.
 router.get('/system', requireAdmin, SettingsController.getSystemStatus);
+
+// Instance branding (issue #55) — admin-only mutations. Logo/favicon uploads
+// use the same validation as the other image uploads: strict MIME allowlist,
+// MIME-derived extension, 5MB cap, plus a magic-byte content check.
+router.put('/branding', requireAdmin, BrandingController.updateBranding);
+router.post(
+  '/branding/logo',
+  requireAdmin,
+  brandingUpload.single('logo'),
+  validateImageContent,
+  BrandingController.uploadLogo
+);
+router.delete('/branding/logo', requireAdmin, BrandingController.removeLogo);
+router.post(
+  '/branding/favicon',
+  requireAdmin,
+  brandingUpload.single('favicon'),
+  validateImageContent,
+  BrandingController.uploadFavicon
+);
+router.delete('/branding/favicon', requireAdmin, BrandingController.removeFavicon);
+router.post('/branding/reset', requireAdmin, BrandingController.resetBranding);
 
 // Data management endpoints
 router.delete('/data/clear', requireAdmin, SettingsController.clearData);

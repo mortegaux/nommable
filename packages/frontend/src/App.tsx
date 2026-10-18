@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastHost } from '@/components/ToastHost';
 import { ConfirmHost } from '@/components/ConfirmHost';
 import { useAuthStore } from '@/store/auth.store';
+import { useBrandingStore } from '@/store/branding.store';
 
 // Features
 import LoginPage from '@/features/auth/LoginPage';
@@ -17,6 +18,7 @@ import MealPlanBuilder from '@/features/meal-plans/MealPlanBuilder';
 import MealPlanDashboard from '@/features/meal-plans/MealPlanDashboard';
 import ShoppingListsPage from '@/features/shopping-lists/ShoppingListsPage';
 import SettingsPage from '@/features/settings/SettingsPage';
+import BrandingSettingsPage from '@/features/settings/BrandingSettingsPage';
 import TaxonomyManagement from '@/features/settings/TaxonomyManagement';
 import PantryPage from '@/features/pantry/PantryPage';
 import AnalyticsPage from '@/features/analytics/AnalyticsPage';
@@ -81,10 +83,14 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
+  const loadBranding = useBrandingStore((state) => state.loadBranding);
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    // Instance branding is server-side and public: load once for every
+    // visitor (header, login page, tab title) regardless of auth state.
+    loadBranding();
+  }, [checkAuth, loadBranding]);
 
   return (
     <BrowserRouter>
@@ -134,6 +140,14 @@ function App() {
           <Route path="achievements" element={<GamificationPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="settings/taxonomies" element={<TaxonomyManagement />} />
+          <Route
+            path="settings/branding"
+            element={
+              <AdminRoute>
+                <BrandingSettingsPage />
+              </AdminRoute>
+            }
+          />
           <Route
             path="admin/feedback"
             element={
