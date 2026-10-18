@@ -4,6 +4,8 @@ import { collectionApi } from '@/services/api';
 import type { RecipeCollection, CreateCollectionDto } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
+import { PageHeader, PageShell } from '@/components/PageHeader';
+import { EmptyState } from '@/components/EmptyState';
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<RecipeCollection[]>([]);
@@ -91,20 +93,20 @@ export default function CollectionsPage() {
   }
 
   return (
-    <div>
+    <PageShell>
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Collections</h1>
-          <p className="text-muted-foreground mt-1">{collections.length} collection{collections.length !== 1 ? 's' : ''}</p>
-        </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-        >
-          Create Collection
-        </button>
-      </div>
+      <PageHeader
+        title="Collections"
+        subtitle={`${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
+        primaryAction={
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            Create Collection
+          </button>
+        }
+      />
 
       {/* Create Collection Modal */}
       {showCreateForm && (
@@ -168,16 +170,19 @@ export default function CollectionsPage() {
 
       {/* Collections Grid */}
       {sorted.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
-          <p className="text-muted-foreground">No collections yet. Create your first collection!</p>
-          <button
-            type="button"
-            onClick={() => setShowCreateForm(true)}
-            className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            Create Collection
-          </button>
-        </div>
+        <EmptyState
+          title="No collections yet"
+          description="Create your first collection!"
+          action={
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(true)}
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              Create Collection
+            </button>
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((collection) => (
@@ -235,6 +240,6 @@ export default function CollectionsPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

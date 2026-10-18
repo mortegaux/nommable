@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { feedbackApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
+import { PageHeader } from '@/components/PageHeader';
 
 /**
  * Local minimal types for the feedback inbox.
@@ -165,10 +166,10 @@ export default function FeedbackInboxPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-semibold text-card-foreground">Feedback inbox</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Bug reports and feature requests submitted by users. Click a report to see details.
-      </p>
+      <PageHeader
+        title="Feedback inbox"
+        subtitle="Bug reports and feature requests submitted by users. Click a report to see details."
+      />
 
       <div className="mt-4 flex flex-col gap-3">
         {renderFilters(

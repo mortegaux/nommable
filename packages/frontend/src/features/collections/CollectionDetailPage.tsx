@@ -6,6 +6,8 @@ import { RestaurantIcon } from '@/components/icons/MaterialIcon';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { AddRecipesDialog } from './AddRecipesDialog';
+import { PageHeader } from '@/components/PageHeader';
+import { EmptyState } from '@/components/EmptyState';
 
 interface CollectionWithItems extends RecipeCollection {
   items?: RecipeCollectionItem[];
@@ -198,65 +200,72 @@ export default function CollectionDetailPage() {
             </div>
           </form>
         ) : (
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                {collection.isFavorites && (
-                  <span className="text-red-500 text-2xl" aria-label="Favorites">
-                    &#10084;
-                  </span>
-                )}
-                <h1 className="text-3xl font-bold text-foreground">{collection.name}</h1>
-              </div>
-              {collection.description && (
-                <p className="text-muted-foreground mt-1">{collection.description}</p>
-              )}
-              <p className="text-sm text-muted-foreground mt-1">
-                {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-
-            <div className="flex gap-2 flex-shrink-0">
-              <button
-                onClick={() => setShowAddRecipes(true)}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all"
-              >
-                Add Recipes
-              </button>
-              {/* Edit/Delete hidden for the Favorites collection */}
-              {!collection.isFavorites && (
-                <>
+          <>
+            <PageHeader
+            title={collection.name}
+            subtitle={
+              <>
+                {collection.description && <p>{collection.description}</p>}
+                <p className="mt-1 text-sm">
+                  {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+                </p>
+              </>
+            }
+            secondaryActions={
+              <>
+                {!collection.isFavorites && (
                   <button
                     onClick={handleStartEdit}
                     className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-all"
                   >
                     Edit
                   </button>
+                )}
+                {!collection.isFavorites && (
                   <button
                     onClick={handleDelete}
                     className="rounded-lg border border-destructive/30 bg-background px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
                   >
                     Delete Collection
                   </button>
-                </>
-              )}
-            </div>
-          </div>
+                )}
+              </>
+            }
+            primaryAction={
+              <button
+                onClick={() => setShowAddRecipes(true)}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all"
+              >
+                Add Recipes
+              </button>
+            }
+          />
+          {collection.isFavorites && (
+            <p className="mb-4 text-sm text-muted-foreground">
+              <span className="text-red-500 text-base" aria-hidden="true">
+                &#10084;{' '}
+              </span>
+              Favorites collection
+            </p>
+          )}
+          </>
         )}
       </div>
 
       {/* Recipe Grid */}
       {recipes.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
-          <p className="text-muted-foreground">This collection is empty.</p>
-          <button
-            type="button"
-            onClick={() => setShowAddRecipes(true)}
-            className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            Add recipes
-          </button>
-        </div>
+        <EmptyState
+          title="This collection is empty."
+          action={
+            <button
+              type="button"
+              onClick={() => setShowAddRecipes(true)}
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              Add recipes
+            </button>
+          }
+        />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {(collection.items ?? []).map((item) => {

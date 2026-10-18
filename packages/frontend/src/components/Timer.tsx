@@ -145,7 +145,7 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
             isComplete
               ? 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
               : isRunning
-              ? 'bg-amber-600 text-white hover:bg-amber-700'
+              ? 'bg-warning text-warning-foreground hover:bg-warning/90'
               : 'bg-primary text-primary-foreground hover:bg-primary/90'
           }`}
         >
@@ -164,7 +164,7 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
       </div>
 
       {isComplete && (
-        <div className="mt-3 text-center text-sm font-medium text-secondary animate-pulse">
+        <div className="mt-3 text-center text-sm font-medium text-success animate-pulse">
           ✓ Timer Complete!
         </div>
       )}

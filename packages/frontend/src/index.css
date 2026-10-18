@@ -42,6 +42,48 @@
     /* Focus ring: Primary color */
     --ring: 14 78% 42%;
     --radius: 0.5rem;
+
+    /* Semantic state tokens (issue #27). Each state has a solid color +
+       foreground (text on the solid), and a soft tint + foreground (text
+       on the tint) for callouts/badges. All four text pairings per state
+       meet WCAG AA (4.5:1) in both themes — verified by computation;
+       see docs/design-tokens.md. */
+    --success: 142 72% 29%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 138 76% 97%;
+    --success-soft-foreground: 144 61% 20%;
+
+    --warning: 23 82% 31%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 48 100% 96%;
+    --warning-soft-foreground: 22 78% 26%;
+
+    --info: 224 76% 48%;
+    --info-foreground: 0 0% 100%;
+    --info-soft: 214 100% 97%;
+    --info-soft-foreground: 224 64% 33%;
+
+    /* Soft error pair (text on the tint) — the existing --destructive is
+       the solid error color; this is its callout counterpart. */
+    --destructive-soft: 0 86% 97%;
+    --destructive-soft-foreground: 0 63% 31%;
+
+    /* Layout / spacing tokens */
+    --page-max-width: 80rem; /* wide list pages (max-w-7xl) */
+    --page-max-width-medium: 64rem; /* medium pages (max-w-5xl) */
+    --page-max-width-narrow: 56rem; /* detail / form pages (max-w-4xl) */
+    --page-padding-x: 1rem;
+    --section-gap: 1.5rem;
+
+    /* Radius scale (Tailwind sm/md/lg derive from --radius) */
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+
+    /* Shadow tokens */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-popover: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --shadow-lift: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --shadow-selection: 0 -4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .dark {
@@ -64,6 +106,31 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* Semantic state tokens — dark values, same AA-verified pairings */
+    --success: 142 69% 58%;
+    --success-foreground: 145 80% 10%;
+    --success-soft: 145 80% 10%;
+    --success-soft-foreground: 141 79% 85%;
+
+    --warning: 43 96% 56%;
+    --warning-foreground: 21 92% 14%;
+    --warning-soft: 21 92% 14%;
+    --warning-soft-foreground: 48 97% 77%;
+
+    --info: 213 94% 68%;
+    --info-foreground: 226 57% 21%;
+    --info-soft: 226 57% 21%;
+    --info-soft-foreground: 213 97% 87%;
+
+    --destructive-soft: 0 63% 19%;
+    --destructive-soft-foreground: 0 86% 86%;
+
+    /* Shadows are stronger on dark backgrounds */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-popover: 0 10px 20px rgba(0, 0, 0, 0.5);
+    --shadow-lift: 0 10px 20px rgba(0, 0, 0, 0.5);
+    --shadow-selection: 0 -4px 12px rgba(0, 0, 0, 0.4);
   }
 }
 

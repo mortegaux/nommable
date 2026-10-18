@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { gamificationApi } from '@/services/api';
 import { LocalFireDepartmentIcon, RestaurantIcon, DescriptionIcon, EmojiEventsIcon } from '@/components/icons/MaterialIcon';
 import { InfoTooltip, InfoBanner } from '@/components/InfoTooltip';
+import { PageHeader } from '@/components/PageHeader';
 import { Link } from 'react-router-dom';
 
 interface UserStats {
@@ -105,13 +106,13 @@ export default function GamificationPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <div className="flex items-start gap-3 mb-3">
-          <h1 className="text-3xl font-bold text-foreground">Achievements & Progress</h1>
+      <PageHeader
+        title="Achievements & Progress"
+        titleAdornment={
           <InfoTooltip content="Earn points and level up by completing achievements. Each achievement rewards you with points that count toward your level." />
-        </div>
-        <p className="text-muted-foreground mt-1">Track your cooking journey and earn rewards</p>
-      </div>
+        }
+        subtitle="Track your cooking journey and earn rewards"
+      />
 
       {/* Info Banner */}
       <InfoBanner

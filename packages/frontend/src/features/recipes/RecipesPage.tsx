@@ -11,6 +11,7 @@ import { useConfirmStore } from '@/store/confirm.store';
 import { AddToCollectionDialog } from './AddToCollectionDialog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
+import { PageHeader } from '@/components/PageHeader';
 
 function MultiSelectDropdown({
   label,
@@ -386,36 +387,38 @@ export default function RecipesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Recipes</h1>
-          <p className="text-muted-foreground mt-1">{total}{' '}delicious recipes</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() =>
-              bulkSelectMode ? exitBulkSelectMode() : setBulkSelectMode(true)
-            }
-            className={`rounded-lg border px-4 py-2 font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${
-              bulkSelectMode
-                ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
-                : 'border-border bg-background text-foreground hover:bg-accent'
-            }`}
-            aria-label={bulkSelectMode ? 'Exit bulk select mode' : 'Select recipes for bulk actions'}
-            aria-pressed={bulkSelectMode}
-          >
-            {bulkSelectMode ? 'Done' : 'Select'}
-          </button>
-          <button
-            onClick={() => void openAIGenerate()}
-            className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
-            aria-label="Generate recipe with AI"
-            title={!aiReady && !aiLoading ? 'Set up AI to unlock this feature' : undefined}
-          >
-            <AutoAwesomeIcon size={18} />
-            Generate with AI
-            {!aiReady && !aiLoading && <AISetupBadge />}
-          </button>
+      <PageHeader
+        title="Recipes"
+        subtitle={`${total} delicious recipes`}
+        secondaryActions={
+          <>
+            <button
+              onClick={() =>
+                bulkSelectMode ? exitBulkSelectMode() : setBulkSelectMode(true)
+              }
+              className={`rounded-lg border px-4 py-2 font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${
+                bulkSelectMode
+                  ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
+                  : 'border-border bg-background text-foreground hover:bg-accent'
+              }`}
+              aria-label={bulkSelectMode ? 'Exit bulk select mode' : 'Select recipes for bulk actions'}
+              aria-pressed={bulkSelectMode}
+            >
+              {bulkSelectMode ? 'Done' : 'Select'}
+            </button>
+            <button
+              onClick={() => void openAIGenerate()}
+              className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
+              aria-label="Generate recipe with AI"
+              title={!aiReady && !aiLoading ? 'Set up AI to unlock this feature' : undefined}
+            >
+              <AutoAwesomeIcon size={18} />
+              Generate with AI
+              {!aiReady && !aiLoading && <AISetupBadge />}
+            </button>
+          </>
+        }
+        primaryAction={
           <Link
             to="/recipes/new"
             className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
@@ -423,8 +426,8 @@ export default function RecipesPage() {
           >
             Create Recipe
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* Bulk Edit Modal */}
       {showBulkEdit && (
@@ -1189,7 +1192,7 @@ export default function RecipesPage() {
 
       {/* Floating Bulk Action Bar — only while doing bulk actions */}
       {bulkSelectMode && selectedRecipes.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-primary/30 bg-card/95 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-primary/30 bg-card/95 backdrop-blur-sm shadow-selection">
           <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-foreground">

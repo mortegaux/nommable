@@ -7,6 +7,7 @@ import { SaveAsTemplateModal } from './SaveAsTemplateModal';
 import type { MealPlan, MealPlanRecipe } from '@nommable/shared';
 import { compareEntries, decodeEntryNotes, formatTimeForDisplay, resolveMealType } from './mealPlanEntry';
 import { useToastStore } from '@/store/toast.store';
+import { PageHeader, PageShell } from '@/components/PageHeader';
 
 const MEAL_TYPE_CONFIG = {
   breakfast: { color: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', label: 'Breakfast' },
@@ -166,28 +167,28 @@ export default function MealPlanDashboard() {
   const leftovers = findLeftovers();
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Link to="/meal-plans" className="hover:text-foreground transition-colors">
-            Meal Plans
-          </Link>
-          <span>/</span>
-          <span>{mealPlan.name}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{mealPlan.name}</h1>
-            {mealPlan.description && (
-              <p className="text-muted-foreground mt-1">{mealPlan.description}</p>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">
+    <PageShell>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+        <Link to="/meal-plans" className="hover:text-foreground transition-colors">
+          Meal Plans
+        </Link>
+        <span>/</span>
+        <span>{mealPlan.name}</span>
+      </div>
+      <PageHeader
+        title={mealPlan.name}
+        subtitle={
+          <>
+            {mealPlan.description && <p>{mealPlan.description}</p>}
+            <p className="mt-2 text-sm">
               {new Date(mealPlan.startDate).toLocaleDateString()} -{' '}
               {new Date(mealPlan.endDate).toLocaleDateString()}
             </p>
-          </div>
-          <div className="flex gap-2">
+          </>
+        }
+        secondaryActions={
+          <>
             <button
               onClick={() => setShowSaveAsTemplate(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-background text-foreground font-medium hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -218,9 +219,9 @@ export default function MealPlanDashboard() {
               </svg>
               Export
             </button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
@@ -425,6 +426,6 @@ export default function MealPlanDashboard() {
           onSuccess={handleTemplateSaved}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

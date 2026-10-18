@@ -10,6 +10,7 @@ import { AIConfigAlert } from '@/components/AIConfigAlert';
 import { checkAIConfiguration, aiUnavailableMessage } from '@/utils/aiValidation';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
 import { Pagination } from '@/components/Pagination';
+import { PageHeader, PageShell } from '@/components/PageHeader';
 import { useToastStore } from '@/store/toast.store';
 import { useConfirmStore } from '@/store/confirm.store';
 import type { MealPlan, MealPlanPreview, MealPlanSearchQuery, Recipe } from '@nommable/shared';
@@ -205,38 +206,40 @@ export default function MealPlansPage() {
 
   return (
     <>
-      <div>
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Meal Plans</h1>
-            <p className="text-muted-foreground mt-1">{total}{' '}meal plan{total === 1 ? '' : 's'}</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowTemplates(true)}
-              className="rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
-              aria-label="View templates"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-              Templates
-            </button>
-            <button
-              onClick={handleSmartGenerateClick}
-              className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${aiNeedsSetup ? aiNotConfiguredClass : ''}`}
-              aria-label="Generate intelligent meal plan"
-              title={aiNeedsSetup ? 'Set up AI to unlock smart meal planning' : undefined}
-            >
-              <AutoAwesomeIcon size={18} />
-              Smart Generate
-              {aiNeedsSetup && <AISetupBadge />}
-            </button>
+      <PageShell>
+        <PageHeader
+          title="Meal Plans"
+          subtitle={`${total} meal plan${total === 1 ? '' : 's'}`}
+          secondaryActions={
+            <>
+              <button
+                onClick={() => setShowTemplates(true)}
+                className="rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
+                aria-label="View templates"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
+                </svg>
+                Templates
+              </button>
+              <button
+                onClick={handleSmartGenerateClick}
+                className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${aiNeedsSetup ? aiNotConfiguredClass : ''}`}
+                aria-label="Generate intelligent meal plan"
+                title={aiNeedsSetup ? 'Set up AI to unlock smart meal planning' : undefined}
+              >
+                <AutoAwesomeIcon size={18} />
+                Smart Generate
+                {aiNeedsSetup && <AISetupBadge />}
+              </button>
+            </>
+          }
+          primaryAction={
             <Link
               to="/meal-plans/new"
               className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
@@ -244,8 +247,8 @@ export default function MealPlansPage() {
             >
               Create Meal Plan
             </Link>
-          </div>
-        </div>
+          }
+        />
 
         {/* Selection toolbar */}
         {selectedMealPlans.size > 0 && (
@@ -349,7 +352,7 @@ export default function MealPlansPage() {
           onLoadMore={() => loadMealPlans(page + 1, true)}
           isLoading={loading}
         />
-      </div>
+      </PageShell>
 
       {/* AI Config Alert */}
       {showAIConfigAlert && (

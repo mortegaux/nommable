@@ -27,8 +27,8 @@ export function AIConfigAlert({ onClose, message }: AIConfigAlertProps) {
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-amber-500/15 p-2">
-              <AutoAwesomeIcon size={24} className="text-amber-500" />
+            <div className="rounded-full bg-warning/15 p-2">
+              <AutoAwesomeIcon size={24} className="text-warning" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-foreground">Unlock AI Features</h2>
