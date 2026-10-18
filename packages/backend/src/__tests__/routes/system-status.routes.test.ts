@@ -97,8 +97,20 @@ describe('GET /api/settings/system', () => {
     expect(res.body.database.sizeBytes === null || typeof res.body.database.sizeBytes === 'number').toBe(true);
     expect(typeof res.body.uploads.path).toBe('string');
     expect(res.body.uploads.sizeBytes === null || typeof res.body.uploads.sizeBytes === 'number').toBe(true);
-    // Backup/restore is issue #16 — honest empty state until then.
-    expect(res.body.lastBackup).toEqual({ status: 'not-configured', at: null });
+    // Backup/restore is issue #16: lastBackup comes from the sidecar file,
+    // which is shared across test files in os.tmpdir() — so it may hold
+    // real values written by the backup tests, or be absent. Assert shape
+    // and internal consistency, not the empty state.
+    expect(['ok', 'not-configured']).toContain(res.body.lastBackup.status);
+    if (res.body.lastBackup.status === 'ok') {
+      expect(typeof res.body.lastBackup.at).toBe('string');
+    } else {
+      expect(res.body.lastBackup.at).toBeNull();
+    }
+    expect(
+      res.body.lastBackup.lastRestoreAt === null ||
+        typeof res.body.lastBackup.lastRestoreAt === 'string'
+    ).toBe(true);
     expect(res.body.migrations.status).toBe('up-to-date');
     expect(res.body.migrations.pending).toBe(0);
   });

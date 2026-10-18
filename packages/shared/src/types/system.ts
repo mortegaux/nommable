@@ -47,12 +47,14 @@ export interface SystemStatus {
     sizeBytes: number | null;
   };
   /**
-   * Last backup. Backup/restore is issue #16 (not built yet), so this is
-   * always "not-configured" until then — an honest empty state, not a guess.
+   * Last backup. Read from the backup sidecar file (issue #16): 'ok' when
+   * at least one backup export has been recorded, 'not-configured' before
+   * that. lastRestoreAt is when the most recent restore was applied.
    */
   lastBackup: {
-    status: 'not-configured';
+    status: 'ok' | 'not-configured';
     at: string | null;
+    lastRestoreAt: string | null;
   };
   /** Applied vs. known migrations from the TypeORM migration table. */
   migrations: {

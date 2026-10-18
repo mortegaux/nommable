@@ -169,9 +169,19 @@ export function SystemStatusPage() {
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Last backup</dt>
             <dd className="font-semibold text-foreground">
-              No backups yet — backup &amp; restore is coming soon.
+              {status.lastBackup.status === 'ok' && status.lastBackup.at
+                ? new Date(status.lastBackup.at).toLocaleString()
+                : 'No backups yet — export one from Data Management.'}
             </dd>
           </div>
+          {status.lastBackup.lastRestoreAt && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Last restore</dt>
+              <dd className="font-semibold text-foreground">
+                {new Date(status.lastBackup.lastRestoreAt).toLocaleString()}
+              </dd>
+            </div>
+          )}
         </dl>
         {status.migrations.pendingNames.length > 0 && (
           <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
