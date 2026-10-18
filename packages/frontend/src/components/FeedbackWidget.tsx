@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Bug, Lightbulb, ShieldCheck } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { feedbackApi, settingsApi, type CreateFeedbackDto, type FeedbackType } from '@/services/api';
 import { useToastStore } from '@/store/toast.store';
 import { version as appVersion } from '../../package.json';
@@ -79,6 +80,7 @@ export function FeedbackWidget() {
 
   return (
     <>
+      <UpdateBanner />
       <button
         type="button"
         onClick={() => setOpen(true)}
