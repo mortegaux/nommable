@@ -574,9 +574,9 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="mb-6 border-b border-border">
-        <div className="flex gap-2">
+      {/* Tabs — horizontally scrollable on narrow viewports so every tab stays reachable */}
+      <div className="mb-6 border-b border-border overflow-x-auto">
+        <div className="flex gap-2 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}

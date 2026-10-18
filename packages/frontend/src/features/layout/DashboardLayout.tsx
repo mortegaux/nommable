@@ -76,7 +76,7 @@ export default function DashboardLayout() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex space-x-6" role="navigation" aria-label="Main navigation">
+          <nav className="hidden lg:flex lg:space-x-2 xl:space-x-6" role="navigation" aria-label="Main navigation">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -97,7 +97,7 @@ export default function DashboardLayout() {
 
             {/* Hamburger button */}
             <button
-              className="md:hidden p-2.5 -mr-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="lg:hidden p-2.5 -mr-1 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
@@ -126,7 +126,7 @@ export default function DashboardLayout() {
         {/* Mobile nav dropdown */}
         {mobileMenuOpen && (
           <nav
-            className="md:hidden border-t border-border bg-card px-4 py-2"
+            className="lg:hidden border-t border-border bg-card px-4 py-2"
             role="navigation"
             aria-label="Mobile navigation"
           >

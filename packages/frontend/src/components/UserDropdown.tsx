@@ -66,7 +66,7 @@ export function UserDropdown() {
             {(user.firstName?.[0] || user.username.charAt(0)).toUpperCase()}
           </div>
         )}
-        <span className="hidden sm:inline">{user.username}</span>
+        <span className="hidden xl:inline">{user.username}</span>
         <svg
           className={`hidden sm:block w-4 h-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
           fill="none"
