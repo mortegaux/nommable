@@ -9,6 +9,7 @@ import { BatchCookingAnalytics } from './BatchCookingAnalytics';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { parseLocalDate } from './batchCookingDates';
+import { PageHeader } from '@/components/PageHeader';
 
 interface Recipe {
   id: string;
@@ -235,14 +236,10 @@ export default function BatchCookingPage() {
   return (
     <div>
       {/* Header — matches Recipes / Meal Plans / Shopping Lists */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Batch Cooking & Meal Prep</h1>
-          <p className="text-muted-foreground mt-1">
-            {plans.length} batch cook{plans.length === 1 ? '' : 's'} — Cook once, eat multiple times
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Batch Cooking & Meal Prep"
+        subtitle={`${plans.length} batch cook${plans.length === 1 ? '' : 's'} — Cook once, eat multiple times`}
+        primaryAction={
           <button
             onClick={() => setShowSessionModal(true)}
             className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -250,8 +247,8 @@ export default function BatchCookingPage() {
           >
             Create a Batch Cook
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Tabs */}
       <div className="mb-6 border-b border-border">

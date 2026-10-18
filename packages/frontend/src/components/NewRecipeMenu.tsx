@@ -116,7 +116,7 @@ export function NewRecipeMenu() {
               onClick={onSelect}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent focus:bg-accent focus:outline-none ${needsSetup ? 'opacity-70' : ''}`}
             >
-              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${needsSetup ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 dark:text-amber-400' : 'bg-primary/10 text-primary'}`}>
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${needsSetup ? 'bg-warning/15 text-warning' : 'bg-primary/10 text-primary'}`}>
                 <Icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <span>

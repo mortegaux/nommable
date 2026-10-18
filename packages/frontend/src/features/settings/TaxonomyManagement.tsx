@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { taxonomyApi } from '@/services/api';
 import type { Taxonomy, TaxonomyType } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
+import { PageHeader } from '@/components/PageHeader';
+import { Callout } from '@/components/Callout';
 
 export default function TaxonomyManagement() {
   const [taxonomies, setTaxonomies] = useState<Taxonomy[]>([]);
@@ -106,17 +108,15 @@ export default function TaxonomyManagement() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Categories & Tags</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage the categories and tags available for recipes.
-        </p>
-      </div>
+      <PageHeader
+        title="Categories & Tags"
+        subtitle="Manage the categories and tags available for recipes."
+      />
 
       {error && (
-        <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-destructive text-sm">
+        <Callout tone="error" className="mb-4 text-sm">
           {error}
-        </div>
+        </Callout>
       )}
 
       {/* Tabs */}

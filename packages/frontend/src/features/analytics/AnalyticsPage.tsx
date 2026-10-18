@@ -3,6 +3,8 @@ import { analyticsApi } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { WbSunnyIcon, NightsStayIcon, AppleIcon, AutoAwesomeIcon, RestaurantIcon } from '@/components/icons/MaterialIcon';
 import { InfoTooltip, InfoBanner } from '@/components/InfoTooltip';
+import { PageHeader } from '@/components/PageHeader';
+import { Callout } from '@/components/Callout';
 
 interface RecipeFrequency {
   recipeId: string;
@@ -147,23 +149,24 @@ export default function AnalyticsPage() {
   if (loadError) {
     return (
       <div>
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Meal Analytics</h1>
-          <p className="text-muted-foreground mt-1">Insights into your cooking patterns and preferences</p>
-        </div>
-        <div
-          className="max-w-2xl mx-auto rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center"
+        <PageHeader
+          title="Meal Analytics"
+          subtitle="Insights into your cooking patterns and preferences"
+        />
+        <Callout
+          tone="error"
           role="alert"
+          title="Couldn't load analytics"
+          className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-lg font-semibold text-foreground mb-2">Couldn't load analytics</p>
-          <p className="text-muted-foreground mb-6">{loadError}</p>
+          <p className="mb-6">{loadError}</p>
           <button
             onClick={loadAnalytics}
             className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             Retry
           </button>
-        </div>
+        </Callout>
       </div>
     );
   }
@@ -171,10 +174,10 @@ export default function AnalyticsPage() {
   if (!analytics || analytics.totalMealPlans === 0) {
     return (
       <div>
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Meal Analytics</h1>
-          <p className="text-muted-foreground mt-1">Insights into your cooking patterns and preferences</p>
-        </div>
+        <PageHeader
+          title="Meal Analytics"
+          subtitle="Insights into your cooking patterns and preferences"
+        />
         <InfoBanner
           type="tip"
           title="Get Started with Analytics"
@@ -209,13 +212,13 @@ export default function AnalyticsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-start gap-3 mb-3">
-          <h1 className="text-3xl font-bold text-foreground">Meal Analytics</h1>
+      <PageHeader
+        title="Meal Analytics"
+        titleAdornment={
           <InfoTooltip content="Analytics track your meal planning history, cooking patterns, and nutritional trends. All data is calculated in real-time from your meal plans." />
-        </div>
-        <p className="text-muted-foreground mt-1">Insights into your cooking patterns and preferences</p>
-      </div>
+        }
+        subtitle="Insights into your cooking patterns and preferences"
+      />
 
       {/* Info Banner */}
       <InfoBanner

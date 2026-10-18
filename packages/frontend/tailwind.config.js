@@ -33,6 +33,28 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+          soft: 'hsl(var(--destructive-soft))',
+          'soft-foreground': 'hsl(var(--destructive-soft-foreground))',
+        },
+        // Semantic state tokens (issue #27). Error uses `destructive`.
+        // Each state: solid + foreground, soft tint + soft foreground.
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+          soft: 'hsl(var(--success-soft))',
+          'soft-foreground': 'hsl(var(--success-soft-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+          soft: 'hsl(var(--warning-soft))',
+          'soft-foreground': 'hsl(var(--warning-soft-foreground))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+          soft: 'hsl(var(--info-soft))',
+          'soft-foreground': 'hsl(var(--info-soft-foreground))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -81,6 +103,14 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
+      },
+      boxShadow: {
+        card: 'var(--shadow-card)',
+        popover: 'var(--shadow-popover)',
+        lift: 'var(--shadow-lift)',
+        selection: 'var(--shadow-selection)',
       },
     },
   },

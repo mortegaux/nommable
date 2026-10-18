@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Callout } from './Callout';
 
 interface InfoTooltipProps {
   content: string | React.ReactNode;
@@ -64,11 +65,7 @@ interface InfoBannerProps {
 }
 
 export function InfoBanner({ title, description, type = 'info', className = '' }: InfoBannerProps) {
-  const colors = {
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-900',
-    tip: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-900',
-    warning: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-900',
-  };
+  const tone = type === 'tip' ? 'success' : type;
 
   const icons = {
     info: (
@@ -89,16 +86,8 @@ export function InfoBanner({ title, description, type = 'info', className = '' }
   };
 
   return (
-    <div className={`rounded-lg border-2 p-4 ${colors[type]} ${className}`}>
-      <div className="flex gap-3">
-        <div className="flex-shrink-0">{icons[type]}</div>
-        <div className="flex-1">
-          <h3 className="font-semibold mb-1">{title}</h3>
-          <div className="text-sm opacity-90">
-            {typeof description === 'string' ? <p>{description}</p> : description}
-          </div>
-        </div>
-      </div>
-    </div>
+    <Callout tone={tone} title={title} icon={icons[type]} className={className}>
+      {typeof description === 'string' ? <p>{description}</p> : description}
+    </Callout>
   );
 }
