@@ -5,11 +5,12 @@ import { AccountSettings } from './AccountSettings';
 import { UserManagement } from './UserManagement';
 import { EmailSettings } from './EmailSettings';
 import { DataManagement } from './DataManagement';
+import { SystemStatusPage } from './SystemStatus';
 import PreferencesPage from '@/features/preferences/PreferencesPage';
 import AISettingsPage from '@/features/ai/AISettingsPage';
 import UserAIKeySettings from './UserAIKeySettings';
 
-type Tab = 'account' | 'preferences' | 'ai' | 'users' | 'email' | 'data';
+type Tab = 'account' | 'preferences' | 'ai' | 'users' | 'email' | 'data' | 'system';
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -29,6 +30,7 @@ export default function SettingsPage() {
     { id: 'users' as Tab, label: 'User Management', visible: isAdmin },
     { id: 'email' as Tab, label: 'Email / SMTP', visible: isAdmin },
     { id: 'data' as Tab, label: 'Data Management', visible: isAdmin },
+    { id: 'system' as Tab, label: 'System', visible: isAdmin },
   ];
 
   return (
@@ -82,6 +84,7 @@ export default function SettingsPage() {
           {activeTab === 'users' && isAdmin && <UserManagement />}
           {activeTab === 'email' && isAdmin && <EmailSettings />}
           {activeTab === 'data' && isAdmin && <DataManagement />}
+          {activeTab === 'system' && isAdmin && <SystemStatusPage />}
         </div>
       </div>
     </div>
