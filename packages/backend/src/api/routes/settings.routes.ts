@@ -11,6 +11,9 @@ router.use(authMiddleware);
 router.get('/general', SettingsController.getGeneralSettings);
 router.put('/general', requireAdmin, SettingsController.updateGeneralSettings);
 
+// System status (issue #23) — read-only admin diagnostics, no auto-update.
+router.get('/system', requireAdmin, SettingsController.getSystemStatus);
+
 // Data management endpoints
 router.delete('/data/clear', requireAdmin, SettingsController.clearData);
 

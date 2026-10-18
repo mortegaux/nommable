@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware';
 import { SeederService } from '../../services/seeder/seeder.service';
 import { EmailService } from '../../services/email/email.service';
 import { SystemSettingsService } from '../../services/settings/system-settings.service';
+import { getSystemStatus } from '../../services/system/system-status.service';
 
 export class SettingsController {
   static async clearData(req: AuthRequest, res: Response, next: NextFunction) {
@@ -57,6 +58,16 @@ export class SettingsController {
     try {
       const result = await EmailService.sendTestEmail(req.body || {});
       res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /** Read-only system status for the admin System tab (issue #23). Never 500s: the service degrades per-section. */
+  static async getSystemStatus(_req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const status = await getSystemStatus();
+      res.json(status);
     } catch (error) {
       next(error);
     }

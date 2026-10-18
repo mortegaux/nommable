@@ -29,6 +29,7 @@ import type {
   Taxonomy,
   TaxonomyCreateDto,
   TaxonomyUpdateDto,
+  SystemStatus,
   TaxonomyType,
   PaginatedResponse,
   RecipeSearchQuery,
@@ -379,6 +380,8 @@ export const settingsApi = {
   saveSmtpSettings: (data: SmtpSettingsUpdateDto) => api.put<SmtpSettings>('/settings/smtp', data),
   testSmtpSettings: (data: Partial<SmtpSettingsUpdateDto> & { toEmail: string }) =>
     api.post<{ success: boolean; message: string }>('/settings/smtp/test', data),
+  // System status (issue #23) — read-only admin diagnostics.
+  getSystemStatus: () => api.get<SystemStatus>('/settings/system'),
 };
 
 // Pantry API
