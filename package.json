@@ -1,6 +1,6 @@
 {
   "name": "nommable",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Self-hosted recipe management system with AI features",
   "private": true,
   "workspaces": [
