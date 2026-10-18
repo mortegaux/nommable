@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
+import { useBrandingStore } from '@/store/branding.store';
 import { Callout } from '@/components/Callout';
 
 export default function LoginPage() {
+  const branding = useBrandingStore((s) => s.branding);
+  const appName = branding?.appName ?? 'Nommable';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +44,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md rounded-lg bg-card p-8 shadow-lg border border-border">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-primary mb-2">Nommable</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">{appName}</h1>
           <p className="text-muted-foreground">Recipe Management System</p>
         </div>
 

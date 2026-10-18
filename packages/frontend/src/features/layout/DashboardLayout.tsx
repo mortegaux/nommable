@@ -7,6 +7,7 @@ import { RecipeImportExport } from '@/features/recipes/RecipeImportExport';
 import { AIGenerateRecipeModal } from '@/features/recipes/AIGenerateRecipeModal';
 import { AIConfigAlert } from '@/components/AIConfigAlert';
 import { useThemeStore } from '@/store/theme.store';
+import { useBrandingStore } from '@/store/branding.store';
 import { useRecipeCreateStore } from '@/store/recipeCreate.store';
 import { Sun, Moon, Monitor } from 'lucide-react';
 
@@ -30,6 +31,9 @@ const ThemeToggle = () => {
 };
 
 export default function DashboardLayout() {
+  const branding = useBrandingStore((s) => s.branding);
+  const appName = branding?.appName ?? 'Nommable';
+  const logoSrc = branding?.logoUrl ?? '/logo.png';
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { modal, aiAlertMessage, closeModal, dismissAiAlert } = useRecipeCreateStore();
@@ -65,14 +69,23 @@ export default function DashboardLayout() {
           <Link
             to="/kitchen-today"
             className="flex min-w-0 items-center gap-2 text-xl font-bold text-primary md:gap-2.5 md:text-2xl"
-            aria-label="Nommable home"
+            aria-label={`${appName} home`}
           >
             <img
-              src="/logo.png"
-              alt="Nommable logo"
+              src={logoSrc}
+              alt={`${appName} logo`}
               className="h-7 w-7 shrink-0 rounded-lg object-contain md:h-8 md:w-8"
+              onError={(e) => {
+                // A broken/missing custom logo falls back to the stock logo,
+                // never a broken image.
+                const img = e.currentTarget;
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = '1';
+                  img.src = '/logo.png';
+                }
+              }}
             />
-            <span className="truncate">Nommable</span>
+            <span className="truncate">{appName}</span>
           </Link>
 
           {/* Desktop nav */}
