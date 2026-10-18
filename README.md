@@ -29,7 +29,28 @@ A self-hosted recipe management system with optional AI features powered by mult
 - **Multi-Provider AI & BYOK (Bring Your Own Key)**: Choose your preferred AI provider (OpenAI, Anthropic, Google AI, Ollama, or none) with dynamic model listing, 1-hour caching, live model refresh, independent text vs image models, custom model overrides, and admin-selectable **Shared Instance Key** vs. **Per-User BYOK** modes
 - **Granular Shared Library, Creator Attribution & Per-User Taxonomies**: Choose which elements are shared across all household/team users in Admin Settings — **Recipes & Tags** (with optional **"Show who added or created each recipe"** attribution badges), **Collections & Favorites**, **Meal Plans & Templates**, **Shopping Lists**, **Pantry Inventory**, and **Batch Cooking Plans** — or switch to **Per-User Private Library** mode at any time, with per-user category/tag taxonomy scoping
 - **In-App Feedback Widget & Admin Inbox**: Built-in floating feedback widget for reporting bugs or requesting features (automatically capturing route, viewport, and browser metadata) paired with an admin-only `/admin/feedback` triage inbox
-- **Built-in Email / SMTP Configuration**: Configure and test SMTP email delivery for user invitations directly from Admin Settings (with 1-click presets for Gmail, Outlook, Fastmail, iCloud, and transactional relays) or via `SMTP_*` environment variables
+- **System Status & Updates**: Admin-only **Settings → System** tab shows installed vs. available version, release notes, uptime, database and uploads size, last backup/restore, and migration status — updates are applied manually via your deployment (see [Updating](https://github.com/mortegaux/nommable/wiki/Updating))
+- **Backup & Restore**: Full backup export (database + uploads + versioned manifest) with validated, previewed restore — see [Backup & Restore](https://github.com/mortegaux/nommable/wiki/Backup-and-Restore)
+- **Kitchen Today**: A `/kitchen-today` home screen with your next action, expiring items, tonight's plan, prep due, leftovers, and low stock
+
+## User Guide
+
+Step-by-step instructions for using Nommable live in the [wiki](https://github.com/mortegaux/nommable/wiki):
+
+- [Getting Started](https://github.com/mortegaux/nommable/wiki/Getting-Started) — install, first-run setup, creating your admin account
+- [Updating](https://github.com/mortegaux/nommable/wiki/Updating) — checking for updates and applying them
+- [Filing Bugs & Requesting Features](https://github.com/mortegaux/nommable/wiki/Filing-Bugs-and-Requesting-Features) — using the in-app feedback widget
+- [Importing Recipes](https://github.com/mortegaux/nommable/wiki/Importing-Recipes) — URL import and pasted-text import
+- [AI Setup](https://github.com/mortegaux/nommable/wiki/AI-Setup) — adding AI provider keys (shared key vs. per-user BYOK), models, image generation
+- [Recipes](https://github.com/mortegaux/nommable/wiki/Recipes) — creating, organizing, generating, and photographing recipes
+- [Pantry](https://github.com/mortegaux/nommable/wiki/Pantry) — tracking stock, expiry, low stock, and AI pantry scan
+- [Meal Planning](https://github.com/mortegaux/nommable/wiki/Meal-Planning) — plans, templates, and Kitchen Today
+- [Shopping Lists](https://github.com/mortegaux/nommable/wiki/Shopping-Lists) — generating lists from plans, quick-add, categories
+- [Batch Cooking](https://github.com/mortegaux/nommable/wiki/Batch-Cooking) — the batch session wizard and freezer-friendly tags
+- [Backup & Restore](https://github.com/mortegaux/nommable/wiki/Backup-and-Restore) — exporting backups and restoring them
+- [Users & Sharing](https://github.com/mortegaux/nommable/wiki/Users-and-Sharing) — invitations, roles, shared vs. private library
+- [Email Setup](https://github.com/mortegaux/nommable/wiki/Email-Setup) — SMTP configuration for invitations
+- [Home Assistant](https://github.com/mortegaux/nommable/wiki/Home-Assistant) — read-only summary endpoints for automation
 
 ## Tech Stack
 
@@ -66,7 +87,7 @@ A self-hosted recipe management system with optional AI features powered by mult
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/mortegaux/nommable.git
    cd nommable
    ```
 
@@ -326,4 +347,4 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-For issues and questions, please open an issue on GitHub.
+For step-by-step instructions, see the [User Guide wiki](https://github.com/mortegaux/nommable/wiki). To report a bug or request a feature, use the in-app feedback widget (floating button, bottom-right) or [open an issue on GitHub](https://github.com/mortegaux/nommable/issues) — see [Filing Bugs & Requesting Features](https://github.com/mortegaux/nommable/wiki/Filing-Bugs-and-Requesting-Features) for what to include.
