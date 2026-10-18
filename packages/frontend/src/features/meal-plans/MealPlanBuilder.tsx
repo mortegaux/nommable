@@ -4,6 +4,7 @@ import { Plus, X, Clock } from 'lucide-react';
 import { mealPlanApi, recipeApi } from '@/services/api';
 import type { Recipe, MealPlanRecipeCreateDto } from '@nommable/shared';
 import { MEAL_TYPES, compareEntries, encodeEntryNotes, type MealType } from './mealPlanEntry';
+import { Callout } from '@/components/Callout';
 
 /**
  * A single recipe placement on a day. Local to the builder — the backend
@@ -191,12 +192,9 @@ export default function MealPlanBuilder() {
       </div>
 
       {error && (
-        <div
-          className="mb-6 rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive"
-          role="alert"
-        >
+        <Callout tone="error" role="alert" className="mb-6">
           {error}
-        </div>
+        </Callout>
       )}
 
       {/* Meal Plan Info Form */}

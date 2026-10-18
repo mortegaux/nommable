@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { mealPlanApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
+import { Callout } from '@/components/Callout';
 import type { AIMealPlanRequest } from '@nommable/shared';
 
 interface AIMealPlanGenerateModalProps {
@@ -109,9 +110,9 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive">
+            <Callout tone="error" role="alert">
               {error}
-            </div>
+            </Callout>
           )}
 
           {/* Days and Servings */}

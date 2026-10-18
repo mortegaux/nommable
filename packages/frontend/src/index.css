@@ -6,6 +6,7 @@
   :root {
     /* Warm cream background - kitchen/recipe friendly */
     --background: 40 25% 97%;
+    color-scheme: light; /* native controls (date picker calendar icon, scrollbars) render in light scheme — issue #6 */
     --foreground: 25 45% 20%;
 
     /* White cards with warm foreground */
@@ -19,13 +20,17 @@
     --primary: 14 78% 42%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Herb green - fresh and natural */
-    --secondary: 140 45% 45%;
+    /* Secondary: Herb green - fresh and natural.
+       Lightness 34% (was 45%): white secondary-foreground text now
+       meets WCAG AA (5.01:1) — issue #6. */
+    --secondary: 140 45% 34%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted: Light tan/beige */
+    /* Muted: Light tan/beige.
+       Muted-foreground lightness 38% (was 45%): meets WCAG AA on
+       background (5.70), card (6.05), and muted (4.89) — issue #6. */
     --muted: 35 20% 90%;
-    --muted-foreground: 25 25% 45%;
+    --muted-foreground: 25 25% 38%;
 
     /* Accent: Warm amber/honey */
     --accent: 38 85% 60%;
@@ -35,9 +40,14 @@
     --destructive: 358 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders: Warm tan */
-    --border: 35 15% 85%;
-    --input: 35 15% 85%;
+    /* Borders: Warm tan.
+       Light: border 72% (was 85%), input 50% (was 85%). Input borders
+       meet WCAG 1.4.11 (3:1) vs card (3.70) and background (3.48).
+       Card/divider borders are decorative (content, not the boundary,
+       identifies the component) — darkened for visibility (1.82/1.93)
+       without claiming 3:1. Issue #6. */
+    --border: 35 15% 72%;
+    --input: 35 15% 50%;
 
     /* Focus ring: Primary color */
     --ring: 14 78% 42%;
@@ -88,6 +98,7 @@
 
   .dark {
     --background: 222.2 84% 4.9%;
+    color-scheme: dark; /* native controls render in dark scheme — issue #6 */
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -103,8 +114,8 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 28%;
+    --input: 217.2 32.6% 45%; /* input borders meet 1.4.11 in dark (3.64) — issue #6 */
     --ring: 212.7 26.8% 83.9%;
 
     /* Semantic state tokens — dark values, same AA-verified pairings */
@@ -155,6 +166,28 @@
   textarea:focus-visible {
     @apply ring-2 ring-primary ring-offset-2;
   }
+}
+
+/* Dark mode: the solid --destructive red fails WCAG AA as body text on
+   dark surfaces (2.00:1), and no single token value can satisfy both
+   white-text-on-destructive-button and destructive-text-on-background
+   at AA (the two constraints have no overlapping lightness — see
+   docs/design-tokens.md). Buttons keep bg-destructive +
+   text-destructive-foreground (9.56:1). Error *text* (text-destructive,
+   including /80 and hover variants) is remapped to the AA-safe soft
+   foreground in dark mode only (9.14:1 on card/background). Un-layered
+   so it wins over Tailwind's layered utilities. Issue #6. */
+.dark .text-destructive {
+  color: hsl(var(--destructive-soft-foreground));
+}
+.dark .text-destructive\/80 {
+  color: hsl(var(--destructive-soft-foreground) / 0.8);
+}
+.dark .hover\:text-destructive:hover {
+  color: hsl(var(--destructive-soft-foreground));
+}
+.dark .hover\:text-destructive\/80:hover {
+  color: hsl(var(--destructive-soft-foreground) / 0.8);
 }
 
 /* Respect users who prefer reduced motion - WCAG 2.3.3 */

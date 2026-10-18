@@ -348,7 +348,7 @@ export function UserManagement() {
         >
           <div className="flex items-center gap-2.5">
             {toastMessage.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             ) : (
               <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
             )}
@@ -411,7 +411,7 @@ export function UserManagement() {
             <span>SMTP Settings</span>
             <span
               className={`w-2 h-2 rounded-full ${
-                smtpSettings?.isConfigured ? 'bg-emerald-500' : 'bg-amber-500'
+                smtpSettings?.isConfigured ? 'bg-emerald-600' : 'bg-amber-600'
               }`}
             />
           </button>
@@ -431,7 +431,7 @@ export function UserManagement() {
             <span>{sharedRecipes ? 'Shared Recipes: ON' : 'Shared Recipes: OFF'}</span>
             <span
               className={`w-2 h-2 rounded-full ${
-                sharedRecipes ? 'bg-emerald-500' : 'bg-amber-500'
+                sharedRecipes ? 'bg-emerald-600' : 'bg-amber-600'
               }`}
             />
           </button>
@@ -452,7 +452,7 @@ export function UserManagement() {
               <span>{showRecipeAuthor ? 'Show Author: ON' : 'Show Author: OFF'}</span>
               <span
                 className={`w-2 h-2 rounded-full ${
-                  showRecipeAuthor ? 'bg-emerald-500' : 'bg-muted-foreground/40'
+                  showRecipeAuthor ? 'bg-emerald-600' : 'bg-muted-foreground/40'
                 }`}
               />
             </button>
@@ -489,7 +489,7 @@ export function UserManagement() {
         <div className="p-3.5 rounded-xl border border-border bg-card/60">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-medium">Pending Invites</span>
-            <Mail className="w-4 h-4 text-amber-500" />
+            <Mail className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 dark:text-amber-400">{invitations.length}</div>
         </div>
@@ -624,7 +624,7 @@ export function UserManagement() {
                                     title="System Administrator (Permanent root account)"
                                     className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 dark:text-amber-400 border border-amber-500/20"
                                   >
-                                    <ShieldCheck className="w-3 h-3 text-amber-500" />
+                                    <ShieldCheck className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                     System Admin
                                   </span>
                                 )}
@@ -847,7 +847,7 @@ export function UserManagement() {
                             >
                               {copiedKey === `inv-${inv.id}` ? (
                                 <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                   <span className="text-emerald-600 dark:text-emerald-400 dark:text-emerald-400">Copied</span>
                                 </>
                               ) : (
@@ -916,9 +916,9 @@ export function UserManagement() {
                 >
                   <div className="flex items-start gap-2">
                     {createdInviteResult.emailSent ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                     ) : (
-                      <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1">
                       <div className="font-bold">
@@ -1048,9 +1048,9 @@ export function UserManagement() {
                 >
                   <div className="flex items-start gap-2">
                     {smtpSettings?.isConfigured ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                     ) : (
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                     )}
                     <span>
                       {smtpSettings?.isConfigured
@@ -1111,7 +1111,7 @@ export function UserManagement() {
               <div className="space-y-4 pt-1">
                 <div className="p-3.5 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 text-xs">
                   <div className="flex items-center gap-2 font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Account Created Successfully!
                   </div>
                   <div className="mt-1 text-[11px]">
@@ -1296,7 +1296,7 @@ export function UserManagement() {
               <div className="space-y-4 pt-1">
                 <div className="p-3.5 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 text-xs">
                   <div className="flex items-center gap-2 font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Password Successfully Reset
                   </div>
                   <div className="mt-1 text-[11px]">

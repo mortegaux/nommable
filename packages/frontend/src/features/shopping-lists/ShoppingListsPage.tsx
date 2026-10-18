@@ -9,16 +9,16 @@ import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 
 const AISLE_CATEGORIES = [
-  { name: 'Produce', dot: 'bg-green-500' },
-  { name: 'Dairy', dot: 'bg-blue-500' },
-  { name: 'Meat', dot: 'bg-red-500' },
-  { name: 'Seafood', dot: 'bg-cyan-500' },
-  { name: 'Bakery', dot: 'bg-amber-500' },
-  { name: 'Pantry', dot: 'bg-orange-500' },
-  { name: 'Frozen', dot: 'bg-indigo-500' },
-  { name: 'Beverages', dot: 'bg-purple-500' },
-  { name: 'Snacks', dot: 'bg-yellow-500' },
-  { name: 'Other', dot: 'bg-gray-400' },
+  { name: 'Produce', dot: 'bg-green-600' },
+  { name: 'Dairy', dot: 'bg-blue-600' },
+  { name: 'Meat', dot: 'bg-red-600' },
+  { name: 'Seafood', dot: 'bg-cyan-600' },
+  { name: 'Bakery', dot: 'bg-amber-600' },
+  { name: 'Pantry', dot: 'bg-orange-600' },
+  { name: 'Frozen', dot: 'bg-indigo-600' },
+  { name: 'Beverages', dot: 'bg-purple-600' },
+  { name: 'Snacks', dot: 'bg-yellow-700' },
+  { name: 'Other', dot: 'bg-gray-500' },
 ];
 
 // Fixed aisle order so categories always scan in store-flow order.

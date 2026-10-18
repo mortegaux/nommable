@@ -851,11 +851,11 @@ export default function RecipesPage() {
         <section aria-label="Suggested from your pantry" className="mb-8 rounded-xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-600 text-white shadow-sm" aria-hidden="true">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-700 text-white shadow-sm" aria-hidden="true">
                 <AutoAwesomeIcon size={20} />
               </span>
               <div>
-                <h2 className="text-lg font-semibold text-emerald-950">Suggested from your pantry</h2>
+                <h2 className="text-lg font-semibold text-emerald-950 dark:text-emerald-100">Suggested from your pantry</h2>
                 <p className="text-xs text-emerald-800 dark:text-emerald-200">Recipes you can cook with what's on hand</p>
               </div>
             </div>
@@ -883,13 +883,13 @@ export default function RecipesPage() {
                         className="w-full h-36 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-36 bg-emerald-100 dark:bg-emerald-900/40/60 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-3xl">
+                      <div className="w-full h-36 bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-3xl">
                         🍳
                       </div>
                     )}
                     <div className="p-3">
                       {pantryMatch ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-xs font-semibold mb-1.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-700 text-white px-2.5 py-0.5 text-xs font-semibold mb-1.5">
                           <span aria-hidden="true">🧺</span> Uses {pantryMatch.matched} of {pantryMatch.total} pantry ingredients
                         </span>
                       ) : (

@@ -307,7 +307,7 @@ export function MealPlanPreviewModal({ preview, onClose, onReplaceMeal, onManual
                                 <span>⏱️ {meal.suggestion.recipe.cookTime} min</span>
                               )}
                               {meal.suggestion.matchScore !== undefined && meal.suggestion.matchScore > 0 && (
-                                <span className="text-green-600 dark:text-green-400 font-medium">
+                                <span className="text-green-700 dark:text-green-400 font-medium">
                                   ✓ {Math.round(meal.suggestion.matchScore * 100)}% ingredients available
                                 </span>
                               )}

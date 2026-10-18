@@ -19,10 +19,10 @@
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export const MEAL_TYPES: { type: MealType; label: string; badge: string }[] = [
-  { type: 'breakfast', label: 'Breakfast', badge: 'bg-amber-100 text-amber-900 border-amber-300' },
-  { type: 'lunch', label: 'Lunch', badge: 'bg-green-100 text-green-900 border-green-300' },
-  { type: 'dinner', label: 'Dinner', badge: 'bg-blue-100 text-blue-900 border-blue-300' },
-  { type: 'snack', label: 'Snack', badge: 'bg-purple-100 text-purple-900 border-purple-300' },
+  { type: 'breakfast', label: 'Breakfast', badge: 'bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700' },
+  { type: 'lunch', label: 'Lunch', badge: 'bg-green-100 dark:bg-green-900/40 text-green-900 dark:text-green-200 border-green-300 dark:border-green-700' },
+  { type: 'dinner', label: 'Dinner', badge: 'bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-700' },
+  { type: 'snack', label: 'Snack', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-700' },
 ];
 
 export const MEAL_TYPE_ORDER: Record<MealType, number> = {

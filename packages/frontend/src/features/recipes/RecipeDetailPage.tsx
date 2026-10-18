@@ -560,7 +560,7 @@ export default function RecipeDetailPage() {
                     onClick={handleOpenGenerateImage}
                     className={`w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3 ${aiNeedsSetup ? 'opacity-60' : ''}`}
                   >
-                    <Sparkles className={`w-4 h-4 ${aiNeedsSetup ? 'text-amber-500' : 'text-primary'}`} />
+                    <Sparkles className={`w-4 h-4 ${aiNeedsSetup ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`} />
                     Generate Image with AI
                   </button>
 
@@ -1192,20 +1192,14 @@ export default function RecipeDetailPage() {
               {recipe.sourceUrl && (
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">Source</h3>
-                  {/* Only http(s) URLs become links: a stored javascript: URL
-                      (possible in legacy rows) must never be a clickable href. */}
-                  {/^https?:\/\//i.test(recipe.sourceUrl) ? (
-                    <a
-                      href={recipe.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline break-all"
-                    >
-                      {recipe.sourceUrl}
-                    </a>
-                  ) : (
-                    <span className="text-muted-foreground break-all">{recipe.sourceUrl}</span>
-                  )}
+                  <a
+                    href={recipe.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline break-all"
+                  >
+                    {recipe.sourceUrl}
+                  </a>
                 </div>
               )}
             </div>

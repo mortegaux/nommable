@@ -100,7 +100,7 @@ export function UserDropdown() {
 
           <button
             onClick={handleAnalytics}
-            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:bg-accent"
+            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -116,7 +116,7 @@ export function UserDropdown() {
 
           <button
             onClick={handleAchievements}
-            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:bg-accent"
+            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -133,7 +133,7 @@ export function UserDropdown() {
           {user.role === 'admin' && (
             <button
               onClick={handleFeedback}
-              className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:bg-accent"
+              className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
               role="menuitem"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -150,7 +150,7 @@ export function UserDropdown() {
 
           <button
             onClick={handleSettings}
-            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:bg-accent"
+            className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -172,7 +172,7 @@ export function UserDropdown() {
 
           <button
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors focus:outline-none focus:bg-destructive/10"
+            className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-destructive/10"
             role="menuitem"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
