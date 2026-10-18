@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { shoppingListApi } from '@/services/api';
 import { CelebrationIcon } from '@/components/icons/MaterialIcon';
@@ -242,6 +242,12 @@ function ItemRow({
 
 export default function ShoppingListsPageEnhanced() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { id: listIdParam } = useParams();
+  // The list addressed by the URL wins; navigation state (e.g. from the
+  // meal-plan "Add to Shopping List" flow) is the fallback for plain
+  // /shopping-lists links that carry a selectedListId.
+  const targetListId = listIdParam ?? (location.state as any)?.selectedListId;
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
   const confirm = useConfirmStore((s) => s.confirm);
   const toast = useToastStore();
@@ -292,17 +298,29 @@ export default function ShoppingListsPageEnhanced() {
   }, [loadShoppingLists]);
 
   useEffect(() => {
-    if (shoppingLists.length > 0 && !selectedList) {
-      // Check if we have a specific list ID to select from navigation state
-      const selectedListId = (location.state as any)?.selectedListId;
-      if (selectedListId) {
-        const listToSelect = shoppingLists.find(list => list.id === selectedListId);
-        setSelectedList(listToSelect || shoppingLists[0]);
-      } else {
+    if (shoppingLists.length === 0) return;
+    if (targetListId) {
+      const addressed = shoppingLists.find((list) => list.id === targetListId);
+      if (addressed) {
+        // Honor the addressed list even if another list is already selected
+        // (covers back/forward navigation and direct links).
+        if (selectedList?.id !== addressed.id) setSelectedList(addressed);
+      } else if (!selectedList) {
+        // Unknown id (e.g. stale bookmark): show the first list rather
+        // than a blank page. Never 404s on this route.
         setSelectedList(shoppingLists[0]);
       }
+    } else if (!selectedList) {
+      setSelectedList(shoppingLists[0]);
     }
-  }, [shoppingLists, selectedList, location.state]);
+  }, [shoppingLists, selectedList, targetListId]);
+
+  // Keep the URL in sync with the selected list so refresh / share /
+  // back-button all land on the list actually being viewed.
+  const handleSelectList = (list: ShoppingList) => {
+    setSelectedList(list);
+    navigate(`/shopping-lists/${list.id}`, { replace: true });
+  };
 
   // Reset section collapse state when switching lists.
   useEffect(() => {
@@ -700,7 +718,7 @@ export default function ShoppingListsPageEnhanced() {
                 }`}
               >
                 <button
-                  onClick={() => setSelectedList(list)}
+                  onClick={() => handleSelectList(list)}
                   className="w-full text-left"
                   aria-label={`Select ${list.name}`}
                   aria-current={selectedList?.id === list.id}
