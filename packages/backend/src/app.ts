@@ -15,6 +15,12 @@ import { ALLOWED_MIMES as ALLOWED_UPLOAD_MIMES } from './utils/image-validation'
 export function createApp(): express.Express {
   const app = express();
 
+  // Trust the first reverse-proxy hop (Portainer/Nginx). The proxy sets
+  // X-Forwarded-For; without this, express-rate-limit sees every client
+  // as one IP and logs ERR_ERL_UNEXPECTED_X_FORWARDED_FOR. `1` (not `true`)
+  // so only the single front proxy is trusted, never arbitrary clients.
+  app.set('trust proxy', 1);
+
   // Middleware
   app.use(
     helmet({
