@@ -6,6 +6,7 @@ import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { formatQuantity } from '@/utils/fractions';
 import { CookingMode } from './CookingMode';
+import { ServingScaler } from './ServingScaler';
 import { AIEnhanceRecipeModal } from './AIEnhanceRecipeModal';
 import { AIGenerateImageModal } from './AIGenerateImageModal';
 import { AIConfigAlert } from '@/components/AIConfigAlert';
@@ -431,9 +432,11 @@ export default function RecipeDetailPage() {
         </Link>
 
         <div className="flex gap-2">
+          {/* Primary action (PageHeader contract, issue #27): Cook is the
+              one primary action on a recipe page; Share + kebab are quiet. */}
           <button
             onClick={() => setCookingMode(true)}
-            className="px-4 py-2 rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2"
             aria-label="Enter cooking mode"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1074,33 +1077,18 @@ export default function RecipeDetailPage() {
         {/* Ingredients Section */}
         <div className="lg:col-span-1">
           <div className="recipe-ingredients bg-card rounded-2xl border border-border p-6 shadow-sm sticky top-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <RestaurantIcon size={24} />
-                Ingredients
-              </h2>
-              {recipe.servings && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Servings:</span>
-                  <select
-                    value={servingMultiplier}
-                    onChange={(e) => setServingMultiplier(parseFloat(e.target.value))}
-                    className="px-2 py-1 rounded border bg-background text-sm"
-                  >
-                    <option value={0.5}>0.5x ({Math.round((recipe.servings || 1) * 0.5)})</option>
-                    <option value={1}>1x ({recipe.servings || 1})</option>
-                    <option value={1.5}>1.5x ({Math.round((recipe.servings || 1) * 1.5)})</option>
-                    <option value={2}>2x ({(recipe.servings || 1) * 2})</option>
-                    <option value={3}>3x ({(recipe.servings || 1) * 3})</option>
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {adjustedServings !== recipe.servings && (
-              <p className="text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
-                Adjusted for <span className="font-semibold text-foreground">{adjustedServings}</span> servings
-              </p>
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-4">
+              <RestaurantIcon size={24} />
+              Ingredients
+            </h2>
+            {/* Scaler is its own block inside the ingredients section
+                (heading → scaler → list), not wedged beside the heading. */}
+            {recipe.servings && (
+              <ServingScaler
+                servings={recipe.servings}
+                multiplier={servingMultiplier}
+                onMultiplierChange={setServingMultiplier}
+              />
             )}
 
             <ul className="space-y-3">
