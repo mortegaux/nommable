@@ -30,6 +30,7 @@ import type {
   TaxonomyCreateDto,
   TaxonomyUpdateDto,
   SystemStatus,
+  BackupPreview,
   TaxonomyType,
   PaginatedResponse,
   RecipeSearchQuery,
@@ -382,6 +383,19 @@ export const settingsApi = {
     api.post<{ success: boolean; message: string }>('/settings/smtp/test', data),
   // System status (issue #23) — read-only admin diagnostics.
   getSystemStatus: () => api.get<SystemStatus>('/settings/system'),
+  // Backup & restore (issue #16) — admin-only.
+  exportBackup: () =>
+    api.get('/settings/backup/export', { responseType: 'blob', timeout: 300_000 }),
+  previewRestore: (formData: FormData) =>
+    api.post<BackupPreview>('/settings/backup/restore/preview', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 300_000,
+    }),
+  confirmRestore: (token: string) =>
+    api.post<{ message: string; restarting: boolean }>('/settings/backup/restore/confirm', {
+      token,
+      confirmed: true,
+    }),
 };
 
 // Pantry API

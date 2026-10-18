@@ -12,3 +12,4 @@ export * from './types/rating';
 export * from './types/collection';
 export * from './types/feedback';
 export * from './types/system';
+export * from './types/backup';

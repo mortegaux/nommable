@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { SettingsController } from '../controllers/settings.controller';
+import { BackupController } from '../controllers/backup.controller';
 import { authMiddleware, requireAdmin } from '../middleware';
+import { restoreArchiveUpload } from '../middleware/backup-upload';
 
 const router = Router();
 
@@ -16,6 +18,17 @@ router.get('/system', requireAdmin, SettingsController.getSystemStatus);
 
 // Data management endpoints
 router.delete('/data/clear', requireAdmin, SettingsController.clearData);
+
+// Backup & restore (issue #16) — admin-only. Restore is two-step:
+// preview validates + stages, confirm applies (safety backup → swap → restart).
+router.get('/backup/export', requireAdmin, BackupController.exportBackup);
+router.post(
+  '/backup/restore/preview',
+  requireAdmin,
+  restoreArchiveUpload.single('archive'),
+  BackupController.previewRestore
+);
+router.post('/backup/restore/confirm', requireAdmin, BackupController.confirmRestore);
 
 // Email / SMTP configuration endpoints
 router.get('/smtp', requireAdmin, SettingsController.getSmtpSettings);

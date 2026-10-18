@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { settingsApi, GeneralSystemSettings } from '@/services/api';
-import { BookOpen, Users, Lock, UserCheck, CheckCircle2, AlertCircle, Trash2, MessageSquareShare } from 'lucide-react';
+import type { BackupPreview } from '@nommable/shared';
+import { BookOpen, Users, Lock, UserCheck, CheckCircle2, AlertCircle, Trash2, MessageSquareShare, Download, Upload, HardDriveDownload, RefreshCw } from 'lucide-react';
 
 const DEFAULT_GENERAL_SETTINGS: GeneralSystemSettings = {
   sharedRecipes: true,
@@ -22,6 +23,17 @@ export function DataManagement() {
   const [settings, setSettings] = useState<GeneralSystemSettings>(DEFAULT_GENERAL_SETTINGS);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSharingMode, setSavingSharingMode] = useState(false);
+
+  // Backup & restore (issue #16)
+  const [exporting, setExporting] = useState(false);
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<BackupPreview | null>(null);
+  const [confirmRestoreChecked, setConfirmRestoreChecked] = useState(false);
+  const [confirmingRestore, setConfirmingRestore] = useState(false);
+  const [restoreRestarting, setRestoreRestarting] = useState(false);
+  const [restoreDone, setRestoreDone] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     settingsApi
@@ -131,6 +143,95 @@ export function DataManagement() {
       setError(err.response?.data?.error || 'Failed to empty database');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- Backup & restore (issue #16) ---
+
+  const handleExportBackup = async () => {
+    try {
+      setExporting(true);
+      setError('');
+      setSuccess('');
+      const res = await settingsApi.exportBackup();
+      const blob = res.data as unknown as Blob;
+      const disposition = res.headers?.['content-disposition'] as string | undefined;
+      const match = disposition?.match(/filename="([^"]+)"/);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = match?.[1] ?? `nommable-backup-${new Date().toISOString()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setSuccess('Backup downloaded — store it somewhere safe.');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to export backup');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handlePreviewRestore = async () => {
+    if (!restoreFile) return;
+    try {
+      setPreviewing(true);
+      setError('');
+      setSuccess('');
+      setPreview(null);
+      setConfirmRestoreChecked(false);
+      const formData = new FormData();
+      formData.append('archive', restoreFile);
+      const res = await settingsApi.previewRestore(formData);
+      setPreview(res.data);
+      if (!res.data.validation.valid) {
+        setError(
+          `Backup validation failed: ${res.data.validation.errors.join('; ')}`
+        );
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to preview backup');
+    } finally {
+      setPreviewing(false);
+    }
+  };
+
+  const handleConfirmRestore = async () => {
+    if (!preview || !confirmRestoreChecked) return;
+    try {
+      setConfirmingRestore(true);
+      setError('');
+      setSuccess('');
+      await settingsApi.confirmRestore(preview.token);
+      // The server safety-backs-up, swaps, and exits; the container
+      // restarts on the restored data. Poll /health until it answers.
+      setRestoreRestarting(true);
+      const deadline = Date.now() + 120_000;
+      const poll = async () => {
+        while (Date.now() < deadline) {
+          try {
+            const r = await fetch('/health', { cache: 'no-store' });
+            if (r.ok) {
+              setRestoreRestarting(false);
+              setRestoreDone(true);
+              return;
+            }
+          } catch {
+            // Still down — keep polling.
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+        setRestoreRestarting(false);
+        setError(
+          'The server has not come back yet. Check the container status in Portainer — the restore may still be applying.'
+        );
+      };
+      void poll();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to apply restore');
+    } finally {
+      setConfirmingRestore(false);
     }
   };
 
@@ -461,6 +562,137 @@ export function DataManagement() {
                 }`}
               />
             </button>
+          </div>
+        </div>
+
+        {/* Backup & Restore (issue #16) */}
+        <div className="border border-border bg-card rounded-2xl p-5 mb-6 space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <HardDriveDownload className="w-4 h-4 text-primary" />
+              Backup &amp; Restore
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Export a full backup (database + uploads, with a versioned manifest), or
+              restore one. Restore validates the backup and shows a preview before
+              anything is replaced — and safety-backs-up the current data first.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleExportBackup}
+              disabled={exporting}
+              className="px-4 py-2 text-xs font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              {exporting ? 'Exporting…' : 'Download backup'}
+            </button>
+          </div>
+
+          <div className="pt-3 border-t border-border space-y-3">
+            <p className="text-xs font-semibold text-foreground">Restore from a backup file</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".zip"
+                className="hidden"
+                onChange={(e) => {
+                  setRestoreFile(e.target.files?.[0] ?? null);
+                  setPreview(null);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 text-xs font-semibold border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-all flex items-center gap-1.5"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                {restoreFile ? restoreFile.name : 'Choose backup file…'}
+              </button>
+              <button
+                onClick={handlePreviewRestore}
+                disabled={!restoreFile || previewing}
+                className="px-4 py-2 text-xs font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50"
+              >
+                {previewing ? 'Validating…' : 'Upload & preview'}
+              </button>
+            </div>
+
+            {preview && preview.validation.valid && (
+              <div className="rounded-xl border border-border bg-background p-4 space-y-3">
+                <p className="text-xs font-semibold text-foreground">
+                  Backup from {new Date(preview.manifest.createdAt).toLocaleString()} (app
+                  v{preview.manifest.appVersion}) — this is what will be restored:
+                </p>
+                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  {(
+                    [
+                      ['Recipes', preview.counts.recipes],
+                      ['Images', preview.counts.images],
+                      ['Users', preview.counts.users],
+                      ['Meal plans', preview.counts.mealPlans],
+                      ['Shopping lists', preview.counts.shoppingLists],
+                      ['Pantry items', preview.counts.pantryItems],
+                      ['Batch plans', preview.counts.batchPlans],
+                      ['Upload files', preview.manifest.uploadFileCount],
+                    ] as Array<[string, number]>
+                  ).map(([label, value]) => (
+                    <div key={label} className="rounded-lg bg-muted/40 px-3 py-2">
+                      <dt className="text-muted-foreground">{label}</dt>
+                      <dd className="font-bold text-foreground text-sm">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <label className="flex items-start gap-2 text-xs text-foreground select-none cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={confirmRestoreChecked}
+                    onChange={(e) => setConfirmRestoreChecked(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    I understand this replaces <strong>all</strong> current data (recipes,
+                    pantry, plans, lists, users) with the backup. A safety backup of the
+                    current data is written first.
+                  </span>
+                </label>
+                <button
+                  onClick={handleConfirmRestore}
+                  disabled={!confirmRestoreChecked || confirmingRestore || restoreRestarting}
+                  className="px-4 py-2 text-xs font-semibold bg-destructive text-destructive-foreground rounded-xl hover:bg-destructive/90 transition-all disabled:opacity-50"
+                >
+                  {confirmingRestore
+                    ? 'Applying…'
+                    : restoreRestarting
+                      ? 'Restarting server…'
+                      : 'Confirm restore'}
+                </button>
+              </div>
+            )}
+
+            {restoreRestarting && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                Restore applied — waiting for the server to restart on the restored data…
+              </p>
+            )}
+            {restoreDone && (
+              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>
+                  Restore complete — the server is back on the restored data.{' '}
+                  <button
+                    type="button"
+                    className="underline font-semibold"
+                    onClick={() => window.location.reload()}
+                  >
+                    Reload the page
+                  </button>
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

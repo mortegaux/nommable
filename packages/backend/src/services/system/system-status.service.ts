@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { config } from '../../config';
 import { AppDataSource } from '../../db/data-source';
+import { readBackupMeta } from '../backup/backup.service';
 import {
   AvailableReleaseInfo,
   SystemStatus,
@@ -289,11 +290,16 @@ export async function getSystemStatus(): Promise<SystemStatus> {
       path: config.upload.dir,
       sizeBytes: getDirectorySizeBytes(config.upload.dir),
     },
-    // Backup/restore is issue #16 (not built yet) — honest empty state.
-    lastBackup: {
-      status: 'not-configured',
-      at: null,
-    },
+    // Backup metadata (issue #16) — read from the sidecar file next to the
+    // DB, so a restore swap cannot clobber it. Missing sidecar = never backed up.
+    lastBackup: (() => {
+      const meta = readBackupMeta();
+      return {
+        status: (meta.lastBackupAt ? 'ok' : 'not-configured') as 'ok' | 'not-configured',
+        at: meta.lastBackupAt,
+        lastRestoreAt: meta.lastRestoreAt,
+      };
+    })(),
     migrations,
   };
 }

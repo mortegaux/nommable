@@ -287,6 +287,19 @@ All persistent data lives on the `/data` volume:
 
 Back up the volume to back up everything.
 
+## Backup & Restore
+
+Admins can export a full backup from **Settings → Data Management → Backup & Restore**.
+The download is a single `.zip` containing:
+
+- `manifest.json` — format version, app version, created-at time, entity counts, schema version
+- `database.db` — a consistent snapshot taken with better-sqlite3's `.backup()` (never a raw copy of the live file)
+- `uploads/` — the full uploads tree
+
+Restore is a two-step flow: upload the archive to get a **preview** (entity counts from the backup, validated before anything is touched), then confirm with the checkbox. On confirm the server writes a safety backup of the current data to `/data/backups/safety-<timestamp>.zip`, swaps in the restored database + uploads, and restarts. The System tab shows the last backup and last restore times.
+
+Backups are validated before applying: manifest version/shape, schema compatibility (a backup from a newer app version is rejected), manifest counts vs. the backup database, and zip-slip defenses (only `manifest.json`, `database.db`, and `uploads/*` entries are allowed). Restore uploads are capped at 1 GiB and are admin-only.
+
 ## Security
 
 Nommable is built for self-hosting with defense-in-depth:
