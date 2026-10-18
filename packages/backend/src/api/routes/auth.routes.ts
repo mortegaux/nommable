@@ -15,7 +15,11 @@ const authLimiter = rateLimit({
   message: { error: 'Too many login attempts, please try again later' },
 });
 
-router.use(authLimiter);
+// Brute-force protection applies ONLY to credential-bearing routes.
+// GET /me is called on every page load by the SPA (checkAuth) and POST
+// /logout carries a valid session — rate-limiting either one turns a
+// transient 429 into a logout (issue #70). Do NOT re-add a blanket
+// router.use(authLimiter) here.
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username or email is required'),
@@ -28,8 +32,8 @@ const registerWithInviteSchema = z.object({
   password: z.string().min(6),
 });
 
-router.post('/register/invite', validateBody(registerWithInviteSchema), AuthController.registerWithInvitation);
-router.post('/login', validateBody(loginSchema), AuthController.login);
+router.post('/register/invite', authLimiter, validateBody(registerWithInviteSchema), AuthController.registerWithInvitation);
+router.post('/login', authLimiter, validateBody(loginSchema), AuthController.login);
 router.post('/logout', AuthController.logout);
 router.get('/me', authMiddleware, AuthController.me);
 
