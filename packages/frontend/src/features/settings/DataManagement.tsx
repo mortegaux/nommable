@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { settingsApi, GeneralSystemSettings } from '@/services/api';
 import { BookOpen, Users, Lock, UserCheck, CheckCircle2, AlertCircle, Trash2, MessageSquareShare } from 'lucide-react';
+import { BackupRestoreSection } from './BackupRestoreSection';
 
 const DEFAULT_GENERAL_SETTINGS: GeneralSystemSettings = {
   sharedRecipes: true,
@@ -463,6 +464,9 @@ export function DataManagement() {
             </button>
           </div>
         </div>
+
+        {/* Backup & Restore (issue #71) */}
+        <BackupRestoreSection />
 
         {/* Danger Zone: Empty Database */}
         <div className="border border-destructive/30 bg-destructive/5 rounded-2xl p-5">

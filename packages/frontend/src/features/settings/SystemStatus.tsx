@@ -171,7 +171,18 @@ export function SystemStatusPage() {
             <dd className="font-semibold text-foreground">
               {status.lastBackup.status === 'ok' && status.lastBackup.at
                 ? new Date(status.lastBackup.at).toLocaleString()
-                : 'No backups yet — export one from Data Management.'}
+                : (
+                  <>
+                    No backups yet —{' '}
+                    {/* Plain anchor (not a router Link): SettingsPage reads the
+                        tab param only on mount, so this full navigation is what
+                        lands on the Data tab's Backup & Restore section. */}
+                    <a href="/settings?tab=data#backup" className="text-primary hover:underline">
+                      export one from Data Management
+                    </a>
+                    .
+                  </>
+                )}
             </dd>
           </div>
           {status.lastBackup.lastRestoreAt && (
