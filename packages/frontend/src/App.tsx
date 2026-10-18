@@ -31,8 +31,30 @@ import NotFoundPage from '@/features/errors/NotFoundPage';
 import FeedbackInboxPage from '@/features/feedback/FeedbackInboxPage';
 import SetupWizardPage from '@/features/setup/SetupWizardPage';
 
+function TransientAuthError() {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  return (
+    <div className="flex h-screen items-center justify-center px-4">
+      <div className="max-w-sm text-center">
+        <h1 className="text-lg font-semibold">Connection issue</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Couldn&apos;t reach the server to verify your session. Your session is safe —
+          this is a temporary connection problem, not a logout.
+        </p>
+        <button
+          type="button"
+          onClick={() => checkAuth()}
+          className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, needsSetup } = useAuthStore();
+  const { user, isLoading, needsSetup, authError } = useAuthStore();
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
@@ -40,6 +62,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (needsSetup) {
     return <Navigate to="/setup" replace />;
+  }
+
+  // Transient /me failure (429 / 5xx / network): keep the session, show a
+  // retry screen instead of bouncing to /login (issue #70).
+  if (authError === 'transient') {
+    return <TransientAuthError />;
   }
 
   if (!user) {
@@ -64,7 +92,7 @@ function PublicAuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, needsSetup } = useAuthStore();
+  const { user, isLoading, needsSetup, authError } = useAuthStore();
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
@@ -72,6 +100,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (needsSetup) {
     return <Navigate to="/setup" replace />;
+  }
+
+  // Same transient guard as ProtectedRoute (issue #70).
+  if (authError === 'transient') {
+    return <TransientAuthError />;
   }
 
   if (!user || user.role !== 'admin') {
