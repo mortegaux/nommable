@@ -127,6 +127,7 @@ function App() {
           <Route path="meal-plans/new" element={<MealPlanBuilder />} />
           <Route path="meal-plans/:id" element={<MealPlanDashboard />} />
           <Route path="shopping-lists" element={<ShoppingListsPage />} />
+          <Route path="shopping-lists/:id" element={<ShoppingListsPage />} />
           <Route path="pantry" element={<PantryPage />} />
           <Route path="batch-cooking" element={<BatchCookingPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
