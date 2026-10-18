@@ -103,5 +103,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build workspaces (shared, backend, frontend)
+        run: npm run build
+
       - name: Upgrade tests — prior-version fixtures
         run: npm run test -w packages/backend -- src/__tests__/db-upgrade
