@@ -45,10 +45,15 @@ services:
       - nommable_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
+      # 127.0.0.1, not localhost: inside the container, localhost resolves to
+      # IPv6 [::1] first, but the app binds IPv4 only (0.0.0.0) — with
+      # --tries=1 wget gave up on the ::1 refusal and never tried IPv4,
+      # so the check failed forever while the app served fine.
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:3001/health']
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 60s
 
 volumes:
   nommable_data:
