@@ -1,5 +1,5 @@
 import { config } from './config';
-import { AppDataSource } from './db/data-source';
+import { initializeDatabase } from './db/startup';
 import { AdminInitService } from './services/admin/admin-init.service';
 import { TaxonomyService } from './services/taxonomy/taxonomy.service';
 import { ImageStorageService } from './services/image-storage.service';
@@ -16,28 +16,12 @@ process.on('uncaughtException', (error) => {
 });
 
 async function bootstrap() {
-  // Initialize database with retry logic
-  const maxRetries = 5;
-  let retries = 0;
-
-  while (retries < maxRetries) {
-    try {
-      await AppDataSource.initialize();
-      console.log('✓ Database connected');
-      break;
-    } catch (error) {
-      retries++;
-      console.error(`Failed to connect to database (attempt ${retries}/${maxRetries}):`, error);
-
-      if (retries === maxRetries) {
-        console.error('Max retries reached. Exiting...');
-        process.exit(1);
-      }
-
-      console.log(`Retrying in 3 seconds...`);
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-  }
+  // Initialize the database. Migration / corruption / downgrade failures
+  // are fail-fast with an actionable error (see db/startup.ts); only
+  // transient connection failures are retried. Never serves traffic
+  // without a healthy, current-schema database.
+  await initializeDatabase();
+  console.log('✓ Database connected');
 
   // Initialize unified image storage (sync disk <-> PostgreSQL)
   await ImageStorageService.initialize();
@@ -73,4 +57,11 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  // Any startup failure (database, image storage, settings, ...) must
+  // exit non-zero. Previously a failure here only hit the
+  // `unhandledRejection` logger above and left the process hanging
+  // without serving traffic — or worse, half-started.
+  console.error('Fatal startup error:', error);
+  process.exit(1);
+});
