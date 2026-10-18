@@ -44,9 +44,9 @@ Express.js + TypeORM + SQLite (`better-sqlite3`, WAL mode) + Better Auth. Layere
 **AI service pattern:** `IAIProvider` interface in `src/services/ai/types.ts` with provider implementations in `src/services/ai/providers/`. `AIService.createProvider()` is a factory that caches provider instances per user. Per-user AI config stored in `AIConfig` entity.
 
 **Key details:**
-- Single SQLite database (`DATABASE_PATH`, defaults to `/data/nommable.db` in Docker or `./data/nommable.db` locally) with WAL mode and `foreign_keys = ON`
-- TypeORM `synchronize: true` in dev, `InitialSchema1788000000000` migration in production (`migrationsRun: true`)
-- Admin account is created via the first-run onboarding wizard (`GET /api/setup/status`, `POST /api/setup/complete`) — there is no auto-seeded admin
+- Single SQLite database (`DB_PATH`, defaults to `/data/nommable.db` in Docker when `/data` exists, else `./nommable.db`) with WAL mode and `foreign_keys = ON`
+- TypeORM `synchronize: false` (schema is built/upgraded by the `InitialSchema1788000000000` migration on startup, `migrationsRun: true`)
+- Admin account is created via the first-run onboarding wizard (`GET /api/setup/status`, `POST /api/setup/complete`) — there is no auto-seeded admin unless `SEED_ADMIN_ON_BOOT=true`, in which case the admin is seeded from `ADMIN_USERNAME` / `ADMIN_PASSWORD`
 - Swagger docs at `/api/docs`
 - All queries enforce user ownership via `userId` field (or respect shared library toggles in `SystemSettingsService`)
 

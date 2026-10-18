@@ -373,7 +373,7 @@ Achievement sections with visual organization:
 - Private calculation methods for each metric
 
 **Performance:**
-- Uses PostgreSQL aggregation functions
+- Uses SQLite aggregation functions
 - Efficient queries with JOINs
 - Parallel data fetching with `Promise.all()`
 

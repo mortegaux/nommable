@@ -52,6 +52,12 @@ Step-by-step instructions for using Nommable live in the [wiki](https://github.c
 - [Email Setup](https://github.com/mortegaux/nommable/wiki/Email-Setup) — SMTP configuration for invitations
 - [Home Assistant](https://github.com/mortegaux/nommable/wiki/Home-Assistant) — read-only summary endpoints for automation
 
+## Pricing
+
+**Current versions:** all features are accessible with no subscription required.
+
+**Future direction (intent, not a promise):** the plan is to introduce a paid tier / subscription that will be required to use the AI features. No prices, dates, or tier names are decided. This does not change BYOK — you will still bring your own AI provider key; the tier concerns access to the AI features themselves.
+
 ## Tech Stack
 
 **Backend:**
@@ -75,12 +81,11 @@ Step-by-step instructions for using Nommable live in the [wiki](https://github.c
 - Docker + Docker Compose (single container)
 - npm workspaces (monorepo)
 
-## Quick Start
+## Quick Start (local development)
 
 ### Prerequisites
 
 - Node.js 20+ and npm 9+
-- Docker and Docker Compose (for containerized deployment)
 
 ### Development Setup
 
@@ -120,27 +125,9 @@ Step-by-step instructions for using Nommable live in the [wiki](https://github.c
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
 
-### Docker Deployment (single container)
+On first run, open the app and complete the onboarding wizard at `/setup` to create the admin account.
 
-```bash
-cp .env.example .env
-# Edit .env — set BETTER_AUTH_SECRET, ENCRYPTION_KEY
-docker compose up -d
-```
-
-One container, one volume (`/data` holds the SQLite database + uploads), one port.
-
-- App: http://localhost:8992 (API at `/api`, first-run onboarding wizard at `/setup`)
-
-Secrets are never committed — `docker-compose.yml` reads them from a gitignored `.env` file
-(or from Portainer stack environment variables).
-
-### One-Click Cloud Deployment
-
-Deploy a single-container instance with persistent `/data` storage on Railway or Render:
-
-- **Railway**: Uses [`railway.json`](./railway.json) — attach a volume mounted at `/data` and set `BETTER_AUTH_SECRET` and `ENCRYPTION_KEY`.
-- **Render**: Uses [`render.yaml`](./render.yaml) — automatically provisions a 5 GB persistent disk at `/data` and generates `BETTER_AUTH_SECRET` and `ENCRYPTION_KEY`.
+> **Installing for real use?** The authoritative guide for production install (Docker Compose, Portainer, Railway, Render), upgrading, backup, and recovery is **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Start there — the sections below are not a second install guide.
 
 ## AI Configuration
 
@@ -153,6 +140,8 @@ After creating an account, navigate to **AI Settings** to configure your preferr
 5. Enable AI features
 
 **Note:** AI features are completely optional. The app works fully without any AI configuration.
+
+**Monetization direction:** in current versions, all features — including AI — are accessible with no subscription required. The plan is to introduce a paid tier / subscription in a future version that will be required to use the AI features (no prices, dates, or tier names decided). See [Pricing](#pricing).
 
 ## Project Structure
 
@@ -292,7 +281,7 @@ Key variables:
 - `BETTER_AUTH_SECRET`: Secret for Better Auth session signing (min 32 chars; `JWT_SECRET` accepted as legacy alias)
 - `ENCRYPTION_KEY`: 32-byte hex key for AES-256-GCM encryption of stored AI API keys and SMTP credentials at rest
 - `DB_PATH`: SQLite database file path (default: `/data/nommable.db` in Docker, `./nommable.db` locally)
-- `ADMIN_USERNAME` / `ADMIN_PASSWORD`: Initial admin account (created on first run)
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD`: Only used when `SEED_ADMIN_ON_BOOT=true` — the admin is then seeded from the environment on boot. Otherwise (the default), the admin account is created through the first-run onboarding wizard at `/setup`, and these variables are ignored.
 - `SMTP_*`: Optional fallback SMTP host, port, user, pass, and from address for sending invitation emails (can also be configured directly in Admin Settings → Email / SMTP)
 - `OPENAI_API_KEY`: OpenAI API key (optional)
 - `ANTHROPIC_API_KEY`: Anthropic API key (optional)
@@ -305,8 +294,9 @@ All persistent data lives on the `/data` volume:
 
 - `/data/nommable.db` — SQLite database (WAL mode)
 - `/data/uploads` — uploaded images and files
+- `/data/backups` — automatic safety backups written before a restore
 
-Back up the volume to back up everything.
+Use the Backup & Restore feature (next section) to back up — do not raw-copy the live database file while the app is running (WAL mode makes a live copy potentially inconsistent; the in-app backup takes a consistent snapshot instead).
 
 ## Backup & Restore
 
