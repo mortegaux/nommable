@@ -12,12 +12,16 @@
  */
 import { Response, NextFunction } from 'express';
 import fs from 'fs';
+import path from 'path';
 import { AuthRequest } from '../middleware';
 import { AppError } from '../middleware/error-handler';
 import {
   confirmRestore,
   createBackupArchive,
+  listServerBackups,
   previewRestore,
+  previewServerBackup,
+  resolveServerBackupPath,
 } from '../../services/backup/backup.service';
 
 export class BackupController {
@@ -93,6 +97,53 @@ export class BackupController {
         message: 'Restore applied. The server is restarting on the restored data.',
         restarting: true,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /** List the on-disk server backups (issue #74) — basenames only, never paths. */
+  static async listServerBackups(_req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      res.json(listServerBackups());
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /** Stream one server-side backup by name. The name is validated (basename, .zip, inside the backups dir) — traversal is rejected. */
+  static async downloadServerBackup(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const filePath = resolveServerBackupPath(req.params.name);
+      let stat: fs.Stats;
+      try {
+        stat = fs.statSync(filePath);
+        if (!stat.isFile()) throw new Error('not a file');
+      } catch {
+        throw new AppError(404, 'Backup not found');
+      }
+      // The name is a validated basename, but still strip header-breaking chars.
+      const safeName = path.basename(filePath).replace(/["\r\n]/g, '_');
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+      res.setHeader('Content-Length', String(stat.size));
+      const stream = fs.createReadStream(filePath);
+      stream.on('error', (err) => next(err));
+      stream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /** Preview a restore from a server-side backup (same preview shape as an upload). */
+  static async previewServerRestore(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { name } = req.body || {};
+      if (typeof name !== 'string' || !name) {
+        throw new AppError(400, 'Backup name is required');
+      }
+      const preview = await previewServerBackup(name);
+      res.json(preview);
     } catch (error) {
       next(error);
     }
