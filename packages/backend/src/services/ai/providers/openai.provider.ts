@@ -12,11 +12,20 @@ import {
 
 export class OpenAIProvider implements IAIProvider {
   private client: OpenAI;
-  private model: string;
+  protected model: string;
 
-  constructor(apiKey: string, model?: string) {
-    this.client = new OpenAI({ apiKey });
-    this.model = (model && model.trim()) || 'gpt-4o';
+  constructor(apiKey: string, model?: string, opts?: { baseURL?: string; defaultModel?: string }) {
+    this.client = new OpenAI({ apiKey, ...(opts?.baseURL ? { baseURL: opts.baseURL } : {}) });
+    this.model = (model && model.trim()) || opts?.defaultModel || 'gpt-4o';
+  }
+
+  /**
+   * Which model to use for image-input (vision) calls. The base heuristic fits
+   * OpenAI's namespace; subclasses with a different model namespace (e.g.
+   * OpenRouter's `vendor/slug` ids) override this.
+   */
+  protected resolveVisionModel(): string {
+    return this.model.includes('vision') || this.model.includes('4o') ? this.model : 'gpt-4o';
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
@@ -192,10 +201,7 @@ If the recipe spans multiple images, combine all information into one complete r
       });
     }
 
-    // Use vision model (gpt-4-vision-preview or gpt-4o)
-    const visionModel = this.model.includes('vision') || this.model.includes('4o')
-      ? this.model
-      : 'gpt-4o';
+    const visionModel = this.resolveVisionModel();
 
     const response = await this.client.chat.completions.create({
       model: visionModel,
@@ -263,10 +269,7 @@ ${rawText}`;
       ? image.data.toString('base64')
       : image.data;
 
-    // Use vision model (gpt-4-vision-preview or gpt-4o)
-    const visionModel = this.model.includes('vision') || this.model.includes('4o')
-      ? this.model
-      : 'gpt-4o';
+    const visionModel = this.resolveVisionModel();
 
     const response = await this.client.chat.completions.create({
       model: visionModel,
@@ -311,9 +314,7 @@ Only include edible food/drink items — ignore shelves, containers, equipment, 
 
 Return a JSON object with an "items" array.`;
 
-    const visionModel = this.model.includes('vision') || this.model.includes('4o')
-      ? this.model
-      : 'gpt-4o';
+    const visionModel = this.resolveVisionModel();
 
     const imageParts = images.map((image) => {
       const base64Data = image.data instanceof Buffer ? image.data.toString('base64') : image.data;

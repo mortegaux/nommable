@@ -31,6 +31,9 @@ interface Config {
     google: {
       apiKey: string | undefined;
     };
+    openrouter: {
+      apiKey: string | undefined;
+    };
     ollama: {
       baseUrl: string;
     };
@@ -154,6 +157,9 @@ export const config: Config = {
     },
     google: {
       apiKey: process.env.GOOGLE_AI_API_KEY,
+    },
+    openrouter: {
+      apiKey: process.env.OPENROUTER_API_KEY,
     },
     ollama: {
       baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',

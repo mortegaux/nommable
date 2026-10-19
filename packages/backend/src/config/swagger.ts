@@ -98,7 +98,7 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           properties: {
             id: { type: 'string', format: 'uuid' },
-            provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama'] },
+            provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama', 'openrouter'] },
             model: { type: 'string', nullable: true },
             baseUrl: { type: 'string', nullable: true },
             enabled: { type: 'boolean' },
@@ -657,7 +657,7 @@ const options: swaggerJsdoc.Options = {
                   type: 'object',
                   required: ['provider', 'apiKey'],
                   properties: {
-                    provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama'] },
+                    provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama', 'openrouter'] },
                     apiKey: { type: 'string' },
                     model: { type: 'string' },
                     baseUrl: { type: 'string' },
@@ -689,7 +689,7 @@ const options: swaggerJsdoc.Options = {
                 schema: {
                   type: 'object',
                   properties: {
-                    provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama'] },
+                    provider: { type: 'string', enum: ['openai', 'anthropic', 'google', 'ollama', 'openrouter'] },
                     apiKey: { type: 'string' },
                     model: { type: 'string' },
                     baseUrl: { type: 'string' },

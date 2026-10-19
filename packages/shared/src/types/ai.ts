@@ -1,4 +1,4 @@
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'ollama' | 'none';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'ollama' | 'openrouter' | 'none';
 
 /**
  * Instance-wide AI key distribution mode (stored on the global ai_configs row).

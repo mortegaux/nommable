@@ -14,6 +14,12 @@ import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { GoogleProvider } from './providers/google.provider';
 import { OllamaProvider } from './providers/ollama.provider';
+import {
+  OpenRouterProvider,
+  OPENROUTER_BASE_URL,
+  OPENROUTER_DEFAULT_TEXT_MODEL,
+  OPENROUTER_DEFAULT_IMAGE_MODEL,
+} from './providers/openrouter.provider';
 import { IAIProvider } from './types';
 
 /**
@@ -175,6 +181,12 @@ export class AIService {
         return new OllamaProvider(ollamaUrl, model || undefined);
       }
 
+      case 'openrouter': {
+        const openrouterKey = apiKey || config.ai.openrouter.apiKey;
+        if (!openrouterKey) return null;
+        return new OpenRouterProvider(openrouterKey, model || undefined);
+      }
+
       default:
         return null;
     }
@@ -224,6 +236,8 @@ export class AIService {
             ? config.ai.anthropic.apiKey
             : options.provider === 'google'
             ? config.ai.google.apiKey
+            : options.provider === 'openrouter'
+            ? config.ai.openrouter.apiKey
             : undefined);
 
         const resolvedBaseUrl =
@@ -375,6 +389,9 @@ export class AIService {
           },
         ];
       }
+      if (provider === 'openrouter') {
+        return this.fetchOpenRouterImageModels(options?.apiKey, options?.refresh);
+      }
       return [];
     }
 
@@ -393,6 +410,8 @@ export class AIService {
         ? config.ai.anthropic.apiKey
         : provider === 'google'
         ? config.ai.google.apiKey
+        : provider === 'openrouter'
+        ? config.ai.openrouter.apiKey
         : undefined);
 
     const baseUrl =
@@ -424,6 +443,9 @@ export class AIService {
         break;
       case 'ollama':
         models = await this.fetchOllamaModels(baseUrl);
+        break;
+      case 'openrouter':
+        models = await this.fetchOpenRouterModels(apiKey);
         break;
     }
 
@@ -600,6 +622,163 @@ export class AIService {
     return defaultModels;
   }
 
+  private static openRouterHeaders(apiKey: string): Record<string, string> {
+    return {
+      Authorization: `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://github.com/mortegaux/nommable',
+      'X-Title': 'Nommable',
+    };
+  }
+
+  /**
+   * Discover OpenRouter text/chat models via GET /api/v1/models.
+   *
+   * Per issue #61 we do not hardcode the catalog: models are discovered live
+   * and vision-capable ones (image input) are annotated so the UI can steer
+   * users toward a model that also serves pantry scan / recipe-from-photo.
+   * Without a key (or when discovery fails) we return a small documented
+   * defaults list instead of an empty picker.
+   */
+  private static async fetchOpenRouterModels(apiKey?: string): Promise<AIModelInfo[]> {
+    const defaultModels: AIModelInfo[] = [
+      {
+        id: OPENROUTER_DEFAULT_TEXT_MODEL,
+        name: 'GPT-4o Mini (via OpenRouter)',
+        description: 'Fast, affordable, vision-capable — recommended default',
+        isDefault: true,
+      },
+      {
+        id: 'openai/gpt-4o',
+        name: 'GPT-4o (via OpenRouter)',
+        description: 'Flagship omni model, vision-capable',
+      },
+      {
+        id: 'google/gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash (via OpenRouter)',
+        description: 'Fast multimodal model, vision-capable',
+      },
+      {
+        id: 'anthropic/claude-sonnet-4',
+        name: 'Claude Sonnet 4 (via OpenRouter)',
+        description: 'Strong reasoning, vision-capable',
+      },
+    ];
+
+    if (!apiKey) return defaultModels;
+
+    try {
+      const response = await axios.get(`${OPENROUTER_BASE_URL}/models`, {
+        headers: this.openRouterHeaders(apiKey),
+        timeout: 10000,
+      });
+
+      const rawList: any[] = Array.isArray(response.data?.data) ? response.data.data : [];
+      const models: AIModelInfo[] = rawList
+        .filter((m: any) => {
+          const out = m?.architecture?.output_modalities;
+          // Keep text-output models; entries without architecture info are kept
+          // (older catalog entries) rather than dropped.
+          return !Array.isArray(out) || out.includes('text');
+        })
+        .map((m: any) => {
+          const id = String(m?.id || '');
+          const input = m?.architecture?.input_modalities;
+          const vision = Array.isArray(input) && input.includes('image');
+          const desc = typeof m?.description === 'string' ? m.description.slice(0, 140) : '';
+          return {
+            id,
+            name: (typeof m?.name === 'string' && m.name) || id,
+            description: `${vision ? '[Vision] ' : ''}${desc}`.trim(),
+            isDefault: id === OPENROUTER_DEFAULT_TEXT_MODEL,
+          };
+        })
+        .filter((m: AIModelInfo) => m.id);
+
+      if (models.length > 0) {
+        // Default first, then vision-capable, then alphabetical.
+        models.sort((a, b) => {
+          if (a.isDefault && !b.isDefault) return -1;
+          if (b.isDefault && !a.isDefault) return 1;
+          const aVision = a.description?.startsWith('[Vision]') ? 0 : 1;
+          const bVision = b.description?.startsWith('[Vision]') ? 0 : 1;
+          if (aVision !== bVision) return aVision - bVision;
+          return a.id.localeCompare(b.id);
+        });
+        return models;
+      }
+    } catch (err) {
+      console.warn('Failed to fetch live OpenRouter models, returning defaults:', (err as any)?.message);
+    }
+    return defaultModels;
+  }
+
+  /**
+   * Discover OpenRouter image models via GET /api/v1/images/models — the
+   * dedicated Images API catalog (not the OpenAI-compatible /models list).
+   * Cached for an hour like the text catalog.
+   */
+  private static async fetchOpenRouterImageModels(
+    apiKey?: string,
+    refresh = false
+  ): Promise<AIModelInfo[]> {
+    const defaultModels: AIModelInfo[] = [
+      {
+        id: OPENROUTER_DEFAULT_IMAGE_MODEL,
+        name: 'Gemini 2.5 Flash Image (via OpenRouter)',
+        description: 'Fast, affordable image generation — recommended default',
+        isDefault: true,
+      },
+    ];
+
+    if (!apiKey) return defaultModels;
+
+    const cacheKey = `openrouter:image:${apiKey.slice(-6)}`;
+    if (!refresh && this.modelCache.has(cacheKey)) {
+      const cached = this.modelCache.get(cacheKey)!;
+      if (Date.now() - cached.timestamp < this.MODEL_CACHE_TTL) {
+        return cached.models;
+      }
+    }
+
+    try {
+      const response = await axios.get(`${OPENROUTER_BASE_URL}/images/models`, {
+        headers: this.openRouterHeaders(apiKey),
+        timeout: 10000,
+      });
+
+      const rawList: any[] = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data)
+        ? response.data
+        : [];
+      const models: AIModelInfo[] = rawList
+        .map((m: any) => {
+          const id = String(m?.id || '');
+          const desc = typeof m?.description === 'string' ? m.description.slice(0, 140) : '';
+          return {
+            id,
+            name: (typeof m?.name === 'string' && m.name) || id,
+            description: desc,
+            isDefault: id === OPENROUTER_DEFAULT_IMAGE_MODEL,
+          };
+        })
+        .filter((m: AIModelInfo) => m.id);
+
+      if (models.length > 0) {
+        models.sort((a, b) => {
+          if (a.isDefault && !b.isDefault) return -1;
+          if (b.isDefault && !a.isDefault) return 1;
+          return a.id.localeCompare(b.id);
+        });
+        this.modelCache.set(cacheKey, { timestamp: Date.now(), models });
+        return models;
+      }
+    } catch (err) {
+      console.warn('Failed to fetch live OpenRouter image models, returning defaults:', (err as any)?.message);
+    }
+    return defaultModels;
+  }
+
   static async generateImage(
     prompt: string,
     modelOverride?: string,
@@ -624,18 +803,24 @@ export class AIService {
     const isExplicitGoogle =
       effectiveImageModel?.toLowerCase().startsWith('imagen') ||
       effectiveImageModel?.toLowerCase().startsWith('gemini');
+    // OpenRouter model ids look like `vendor/slug` (e.g. `google/gemini-2.5-flash-image`).
+    const isExplicitOpenRouter =
+      !!effectiveImageModel && effectiveImageModel.includes('/');
 
     const provider = await this.getProvider(userId);
 
     // 1. If active provider supports image generation and doesn't conflict with explicit model
     if (provider && typeof provider.generateImage === 'function') {
-      const isProviderOpenAI = provider instanceof OpenAIProvider;
+      // NB: OpenRouterProvider extends OpenAIProvider — check it first.
+      const isProviderOpenRouter = provider instanceof OpenRouterProvider;
+      const isProviderOpenAI = provider instanceof OpenAIProvider && !isProviderOpenRouter;
       const isProviderGoogle = provider instanceof GoogleProvider;
 
       if (
-        (!isExplicitOpenAI && !isExplicitGoogle) ||
+        (!isExplicitOpenAI && !isExplicitGoogle && !isExplicitOpenRouter) ||
         (isExplicitOpenAI && isProviderOpenAI) ||
-        (isExplicitGoogle && isProviderGoogle)
+        (isExplicitGoogle && isProviderGoogle) ||
+        (isExplicitOpenRouter && isProviderOpenRouter)
       ) {
         return await provider.generateImage(prompt, effectiveImageModel);
       }
@@ -648,7 +833,7 @@ export class AIService {
     // In per-user mode only the user's own key may be used — never instance env keys.
     const instanceKeysAllowed = mode === 'shared';
 
-    if (isExplicitOpenAI || (!isExplicitGoogle && savedConfig?.provider === 'openai')) {
+    if (isExplicitOpenAI || (!isExplicitGoogle && !isExplicitOpenRouter && savedConfig?.provider === 'openai')) {
       const openaiKey =
         imageKey ||
         (savedConfig?.provider === 'openai' ? savedKey : undefined) ||
@@ -659,11 +844,23 @@ export class AIService {
       }
     }
 
+    // OpenRouter: explicit `vendor/slug` image model, or OpenRouter is the configured provider.
+    if (isExplicitOpenRouter || savedConfig?.provider === 'openrouter') {
+      const openrouterKey =
+        imageKey ||
+        (savedConfig?.provider === 'openrouter' ? savedKey : undefined) ||
+        (instanceKeysAllowed ? config.ai.openrouter.apiKey : undefined);
+      if (openrouterKey) {
+        const openrouterProvider = new OpenRouterProvider(openrouterKey);
+        return await openrouterProvider.generateImage(prompt, effectiveImageModel);
+      }
+    }
+
     const googleKey =
       (savedConfig?.provider === 'google' ? savedKey : undefined) ||
       imageKey ||
       (instanceKeysAllowed ? config.ai.google.apiKey : undefined);
-    if (googleKey) {
+    if (googleKey && !isExplicitOpenRouter) {
       const googleProvider = new GoogleProvider(googleKey);
       return await googleProvider.generateImage(prompt, effectiveImageModel);
     }
@@ -672,13 +869,13 @@ export class AIService {
       imageKey ||
       (savedConfig?.provider === 'openai' ? savedKey : undefined) ||
       (instanceKeysAllowed ? config.ai.openai.apiKey : undefined);
-    if (openaiKeyFallback) {
+    if (openaiKeyFallback && !isExplicitOpenRouter) {
       const openaiProvider = new OpenAIProvider(openaiKeyFallback);
       return await openaiProvider.generateImage(prompt, effectiveImageModel);
     }
 
     throw new Error(
-      'Image generation requires Google AI (Gemini/Imagen) or OpenAI (DALL-E). Please configure Google AI or OpenAI in AI Settings.'
+      'Image generation requires Google AI (Gemini/Imagen), OpenAI (DALL-E/GPT-Image), or OpenRouter. Please configure one of them in AI Settings.'
     );
   }
 
