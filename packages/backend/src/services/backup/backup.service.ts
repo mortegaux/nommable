@@ -41,6 +41,8 @@ import {
   EMPTY_BACKUP_META,
   EMPTY_COUNTS,
   EntityCounts,
+  ServerBackupEntry,
+  ServerBackupList,
 } from '@nommable/shared';
 import { getInstalledVersion } from '../system/system-status.service';
 
@@ -135,6 +137,170 @@ export function getDataDir(): string {
 
 export function getMetaPath(): string {
   return path.join(getDataDir(), BACKUP_META_FILENAME);
+}
+
+/** Directory holding server-side backups (safety backups from restores). */
+export function getBackupsDir(): string {
+  return path.join(getDataDir(), SAFETY_BACKUP_DIRNAME);
+}
+
+/** Cap on list responses so a huge backups dir can't produce a huge payload. */
+export const MAX_LISTED_BACKUPS = 500;
+
+/**
+ * List the on-disk server backups (issue #74). Never throws for a bad
+ * directory or a bad entry: a missing dir is an empty list, and an
+ * unreadable entry is listed with `status: 'unreadable'` + a reason, so
+ * one corrupt file can never break the whole list (or the page).
+ *
+ * Classification is by file name only: the server writes safety backups
+ * as `safety-<timestamp>.zip` (see confirmRestore); anything else ending
+ * in `.zip` is an export archive placed on the server.
+ */
+export function listServerBackups(
+  backupsDir: string = getBackupsDir()
+): ServerBackupList {
+  let names: string[];
+  try {
+    names = fs.readdirSync(backupsDir);
+  } catch {
+    return { backups: [] };
+  }
+  const entries: ServerBackupEntry[] = [];
+  for (const name of names) {
+    const full = path.join(backupsDir, name);
+    const kind: ServerBackupEntry['kind'] = name.startsWith('safety-')
+      ? 'safety'
+      : 'export';
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(full);
+    } catch {
+      entries.push({
+        name,
+        sizeBytes: 0,
+        createdAt: new Date(0).toISOString(),
+        kind,
+        status: 'unreadable',
+        error: 'Could not read file',
+      });
+      continue;
+    }
+    if (!stat.isFile()) {
+      entries.push({
+        name,
+        sizeBytes: 0,
+        createdAt: stat.mtime.toISOString(),
+        kind,
+        status: 'unreadable',
+        error: 'Not a file',
+      });
+      continue;
+    }
+    if (!name.toLowerCase().endsWith('.zip')) {
+      entries.push({
+        name,
+        sizeBytes: stat.size,
+        createdAt: stat.mtime.toISOString(),
+        kind,
+        status: 'unreadable',
+        error: 'Not a .zip archive',
+      });
+      continue;
+    }
+    if (stat.size === 0) {
+      entries.push({
+        name,
+        sizeBytes: 0,
+        createdAt: stat.mtime.toISOString(),
+        kind,
+        status: 'unreadable',
+        error: 'File is empty',
+      });
+      continue;
+    }
+    entries.push({
+      name,
+      sizeBytes: stat.size,
+      createdAt: stat.mtime.toISOString(),
+      kind,
+      status: 'ok',
+    });
+  }
+  // Newest first; name breaks mtime ties so the order is deterministic.
+  entries.sort(
+    (a, b) => b.createdAt.localeCompare(a.createdAt) || b.name.localeCompare(a.name)
+  );
+  return { backups: entries.slice(0, MAX_LISTED_BACKUPS) };
+}
+
+/**
+ * Resolve a client-supplied backup name to its on-disk path. The name must
+ * be a plain basename ending in `.zip` — anything else (traversal, absolute
+ * paths, separators, wrong extension) is rejected, and the resolved path
+ * must stay inside the backups dir.
+ */
+export function resolveServerBackupPath(
+  name: string,
+  backupsDir: string = getBackupsDir()
+): string {
+  if (
+    typeof name !== 'string' ||
+    !name ||
+    name !== path.basename(name) ||
+    name.includes('/') ||
+    name.includes('\\') ||
+    name === '.' ||
+    name === '..' ||
+    !name.toLowerCase().endsWith('.zip')
+  ) {
+    throw new AppError(400, 'Invalid backup name');
+  }
+  const dir = path.resolve(backupsDir);
+  const resolved = path.resolve(dir, name);
+  if (resolved !== dir && !resolved.startsWith(dir + path.sep)) {
+    throw new AppError(400, 'Invalid backup name');
+  }
+  return resolved;
+}
+
+/**
+ * Preview a restore from a server-side backup (issue #74). Copies the
+ * server file to a temp staging path first, so confirm's cleanup deletes
+ * only the copy — never the server backup itself.
+ */
+export async function previewServerBackup(
+  name: string,
+  backupsDir: string = getBackupsDir()
+): Promise<BackupPreview> {
+  const src = resolveServerBackupPath(name, backupsDir);
+  let stat: fs.Stats;
+  try {
+    stat = fs.statSync(src);
+    if (!stat.isFile()) throw new Error('not a file');
+  } catch {
+    throw new AppError(404, 'Backup not found');
+  }
+  const stagingPath = path.join(
+    os.tmpdir(),
+    `nommable-preview-${crypto.randomBytes(8).toString('hex')}.zip`
+  );
+  try {
+    fs.copyFileSync(src, stagingPath);
+  } catch {
+    throw new AppError(500, 'Could not stage backup for preview');
+  }
+  try {
+    return await previewRestore(stagingPath, stat.size);
+  } catch (err) {
+    // previewRestore throws for invalid archives; remove the orphaned copy.
+    try {
+      fs.unlinkSync(stagingPath);
+    } catch {
+      // Already gone.
+    }
+    throw err;
+  }
 }
 
 /** Read the backup sidecar file; returns empty meta when missing/corrupt. */

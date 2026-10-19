@@ -31,6 +31,7 @@ import type {
   TaxonomyUpdateDto,
   SystemStatus,
   BackupPreview,
+  ServerBackupList,
   TaxonomyType,
   PaginatedResponse,
   RecipeSearchQuery,
@@ -396,6 +397,15 @@ export const settingsApi = {
       token,
       confirmed: true,
     }),
+  // Server-side backups on disk (issue #74) — admin-only.
+  listServerBackups: () => api.get<ServerBackupList>('/settings/backup/list'),
+  downloadServerBackup: (name: string) =>
+    api.get(`/settings/backup/download/${encodeURIComponent(name)}`, {
+      responseType: 'blob',
+      timeout: 300_000,
+    }),
+  previewServerRestore: (name: string) =>
+    api.post<BackupPreview>('/settings/backup/restore/preview-server', { name }, { timeout: 300_000 }),
 };
 
 // Pantry API
