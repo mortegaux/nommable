@@ -37,7 +37,7 @@ function renderLayout() {
     <MemoryRouter initialEntries={['/recipes']}>
       <Routes>
         <Route path="/recipes" element={<DashboardLayout />} />
-        <Route path="/kitchen-today" element={<div>Kitchen Today</div>} />
+        <Route path="/dashboard" element={<div>Dashboard</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -67,12 +67,12 @@ describe('Mobile responsiveness (issue #5)', () => {
     const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
     expect(mobileNav.className).toContain('lg:hidden');
     expect(mobileNav.className).not.toContain('md:hidden');
-    // 7 links including Kitchen Today (remote main added it after the #13 base)
+    // 7 links: 5 top-level + 2 nested children (Collections, Batch Cooking)
     expect(mobileNav.querySelectorAll('a')).toHaveLength(7);
-    // Desktop nav (hidden below lg) also has a Kitchen Today link — scope to the mobile menu
-    fireEvent.click(within(mobileNav).getByRole('link', { name: 'Kitchen Today' }));
+    // Desktop nav (hidden below lg) also has a Dashboard link — scope to the mobile menu
+    fireEvent.click(within(mobileNav).getByRole('link', { name: 'Dashboard' }));
     expect(screen.queryByRole('navigation', { name: 'Mobile navigation' })).toBeNull();
-    expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });
 
   it('hides the username text below xl (avatar-only user menu on tablets)', () => {

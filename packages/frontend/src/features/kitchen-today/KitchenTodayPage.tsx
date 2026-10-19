@@ -135,7 +135,7 @@ export default function KitchenTodayPage() {
 
       setSummary(summarizeKitchenToday({ pantryItems, mealPlans, batchPlans, shoppingLists }));
     } catch (error) {
-      console.error('Failed to load Kitchen Today:', error);
+      console.error('Failed to load Dashboard:', error);
       setLoadError('Could not load today’s kitchen. Check your connection and try again.');
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export default function KitchenTodayPage() {
   if (loadError || !summary) {
     return (
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground">Kitchen Today</h1>
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
         <div className="mt-6 bg-card rounded-lg border border-border p-6 shadow-sm">
           <p className="text-muted-foreground">{loadError ?? 'Nothing to show yet.'}</p>
           <button
@@ -179,7 +179,7 @@ export default function KitchenTodayPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Kitchen Today</h1>
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground mt-1">{todayLabel}</p>
       </div>
 

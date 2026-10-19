@@ -1,5 +1,5 @@
 /**
- * Deterministic derivation rules for the Kitchen Today home screen.
+ * Deterministic derivation rules for the Dashboard home screen.
  *
  * Pure functions only — no API calls, no AI, no mutations. The page fetches
  * data with the existing read-only API clients and runs it through these
