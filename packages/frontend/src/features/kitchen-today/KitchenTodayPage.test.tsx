@@ -81,7 +81,7 @@ describe('KitchenTodayPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
     // Expiring today outranks dinner in the next-action priority.
     expect(screen.getByText(/Use up the expiring item/)).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe('KitchenTodayPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
     expect(screen.getByText('Plan this week’s meals')).toBeInTheDocument();
     expect(screen.getByText(/Nothing expiring in the next 7 days/)).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe('KitchenTodayPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
     // Issue #37: the link used to render only when an active shopping list
     // existed, so the click-test found no restock link on an empty board.
@@ -137,7 +137,7 @@ describe('KitchenTodayPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
     // Issue #38: "Cook a batch" implied starting a new batch cook but landed
     // on the list page — batch creation is a modal on that page, not a route.
@@ -158,7 +158,7 @@ describe('KitchenTodayPage', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Kitchen Today')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
     // Code-verified after the click-test could not reach these links
     // (session expired before they were clicked).

@@ -154,8 +154,10 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/kitchen-today" replace />} />
-          <Route path="kitchen-today" element={<KitchenTodayPage />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<KitchenTodayPage />} />
+          {/* Former Kitchen Today URL — renamed to /dashboard. */}
+          <Route path="kitchen-today" element={<Navigate to="/dashboard" replace />} />
           <Route path="recipes" element={<RecipesPage />} />
           <Route path="recipes/new" element={<RecipeForm />} />
           <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
