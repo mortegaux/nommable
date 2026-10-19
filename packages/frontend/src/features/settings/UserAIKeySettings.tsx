@@ -7,10 +7,11 @@ const PROVIDER_LABELS: Record<string, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
   google: 'Google AI (Gemini)',
+  openrouter: 'OpenRouter (one key, many models)',
   ollama: 'Ollama (Local)',
 };
 
-const PROVIDER_OPTIONS: AIProvider[] = ['openai', 'anthropic', 'google', 'ollama'];
+const PROVIDER_OPTIONS: AIProvider[] = ['openai', 'anthropic', 'google', 'openrouter', 'ollama'];
 
 const inputClassName =
   'w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary';

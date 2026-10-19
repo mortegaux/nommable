@@ -8,7 +8,7 @@ import { encrypt, safeDecrypt } from '../../utils/crypto';
 import { AIMode } from '@nommable/shared';
 
 const AI_MODES: AIMode[] = ['shared', 'per-user'];
-const USER_PROVIDERS = ['openai', 'anthropic', 'google', 'ollama'];
+const USER_PROVIDERS = ['openai', 'anthropic', 'google', 'ollama', 'openrouter'];
 
 function maskKey(encrypted?: string | null): string | null {
   const key = safeDecrypt(encrypted);

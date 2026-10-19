@@ -58,12 +58,12 @@ export function AIConfigAlert({ onClose, message }: AIConfigAlertProps) {
 
           {/* Pricing tiers slot in here later. For now, Nommable is BYOK-only:
               users bring their own API key from OpenAI, Anthropic, Google AI,
-              or run Ollama locally. When paid plans land, render <PricingTiers />
+              or OpenRouter, or run Ollama locally. When paid plans land, render <PricingTiers />
               here and gate the "Set Up AI" button behind plan selection. */}
           {false && <div data-testid="pricing-tiers" />}
 
           <p className="text-xs text-muted-foreground">
-            Bring your own API key from OpenAI, Anthropic, or Google AI — or use
+            Bring your own API key from OpenAI, Anthropic, Google AI, or OpenRouter — or use
             Ollama for free local AI. Your key stays on your server.
           </p>
         </div>

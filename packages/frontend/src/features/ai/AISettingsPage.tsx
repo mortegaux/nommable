@@ -3,6 +3,15 @@ import { aiApi } from '@/services/api';
 import { invalidateAIStatus } from '@/hooks/useAIStatus';
 import type { AIProvider, AIModelInfo, AIMode } from '@nommable/shared';
 
+/** What a single key from each provider actually unlocks in Nommable. */
+const PROVIDER_COVERAGE: Record<string, string> = {
+  openai: 'This key covers: recipe text, photo features (vision), and image generation.',
+  anthropic: 'This key covers: recipe text and photo features (vision). Image generation is not supported — choose an image model below with a separate key if you need it.',
+  google: 'This key covers: recipe text, photo features (vision), and image generation.',
+  openrouter: 'This key covers: recipe text, photo features (vision), and image generation — all from this one key. Billing stays on your OpenRouter account.',
+  ollama: 'This key covers: recipe text only. Image generation is not supported, and photo features depend on the local model.',
+};
+
 export default function AISettingsPage({ hideHeader = false }: { hideHeader?: boolean }) {
   const [provider, setProvider] = useState<AIProvider>('openai');
   const [apiKey, setApiKey] = useState('');
@@ -27,6 +36,8 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
   const [isCustomImageModel, setIsCustomImageModel] = useState(false);
   const [imageApiKey, setImageApiKey] = useState('');
   const [hasImageApiKey, setHasImageApiKey] = useState(false);
+  // Live-discovered OpenRouter image models (dedicated Images API catalog)
+  const [availableImageModels, setAvailableImageModels] = useState<AIModelInfo[]>([]);
 
   useEffect(() => {
     loadConfig();
@@ -60,6 +71,24 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
         const exists = models.some((m) => m.id === modelToCheck);
         setIsCustomModel(!exists);
       }
+
+      // OpenRouter image models come from the dedicated Images API catalog
+      if (targetProvider === 'openrouter') {
+        try {
+          const imgRes = await aiApi.getModels({
+            provider: 'openrouter',
+            apiKey: apiKey || undefined,
+            refresh: forceRefresh,
+            type: 'image',
+          });
+          setAvailableImageModels(imgRes.data.models || []);
+        } catch (imgErr) {
+          console.warn('Failed to load OpenRouter image models:', imgErr);
+          setAvailableImageModels([]);
+        }
+      } else {
+        setAvailableImageModels([]);
+      }
     } catch (err) {
       console.warn('Failed to load models:', err);
     } finally {
@@ -90,6 +119,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
           'gpt-image-1',
           'dall-e-3',
           'dall-e-2',
+          'google/gemini-2.5-flash-image',
         ];
         setIsCustomImageModel(!known.includes(loadedImageModel));
       } else {
@@ -221,6 +251,17 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
 
   const defaultModel = availableModels.find((m) => m.isDefault);
 
+  // Cross-provider image key: needed when the chosen image model belongs to a
+  // different provider than the primary text key (e.g. OpenAI image model with
+  // a Google text key, or an OpenRouter `vendor/slug` image model with any
+  // other text provider).
+  const needsOpenAIImageKey =
+    provider !== 'openai' &&
+    (imageModel.startsWith('dall-e') ||
+      imageModel.startsWith('gpt-image') ||
+      (isCustomImageModel && !imageModel.includes('/')));
+  const needsOpenRouterImageKey = provider !== 'openrouter' && imageModel.includes('/');
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -328,6 +369,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               <option value="openai">OpenAI (GPT-4o, o1, GPT-4)</option>
               <option value="anthropic">Anthropic (Claude)</option>
               <option value="google">Google AI (Gemini)</option>
+              <option value="openrouter">OpenRouter (one key, many models)</option>
               <option value="ollama">Ollama (Local)</option>
               <option value="none">None (Disable AI)</option>
             </select>
@@ -449,7 +491,9 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                             ? 'e.g. claude-3-5-sonnet-20241022'
                             : provider === 'google'
                               ? 'e.g. gemini-1.5-flash'
-                              : 'e.g. llama3.2'
+                              : provider === 'openrouter'
+                                ? 'e.g. openai/gpt-4o-mini, anthropic/claude-sonnet-4'
+                                : 'e.g. llama3.2'
                       }
                       className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       autoFocus
@@ -489,6 +533,8 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                       ? 'Default (Google Gemini 2.0 Flash / Imagen 3)'
                       : provider === 'openai'
                       ? 'Default (OpenAI GPT-Image 1.5)'
+                      : provider === 'openrouter'
+                      ? 'Default (OpenRouter recommended image model)'
                       : 'Default (Provider standard)'}
                   </option>
                   <optgroup label="OpenAI Image Models">
@@ -509,6 +555,15 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                       Imagen 3 Fast (Requires Google Cloud billing)
                     </option>
                   </optgroup>
+                  {provider === 'openrouter' && availableImageModels.length > 0 && (
+                    <optgroup label="OpenRouter Image Models (live catalog)">
+                      {availableImageModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}{m.description ? ` — ${m.description}` : ''}{m.isDefault ? ' (Default)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                   <option value="__custom__">Custom model (enter manually)...</option>
                 </select>
 
@@ -519,32 +574,36 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                       type="text"
                       value={imageModel}
                       onChange={(e) => setImageModel(e.target.value)}
-                      placeholder="e.g. gpt-image-1.5, gemini-2.0-flash, imagen-3.0-generate-002"
+                      placeholder="e.g. gpt-image-1.5, gemini-2.0-flash, google/gemini-2.5-flash-image"
                       className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       autoFocus
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Enter any image generation model identifier supported by Google AI or OpenAI
+                      Enter any image generation model identifier — Google AI, OpenAI, or an OpenRouter <code>vendor/slug</code> model
                     </p>
                   </div>
                 )}
 
-                {/* Optional Image API key if using cross-provider model (e.g. OpenAI GPT-Image with Google text) */}
-                {provider !== 'openai' && (imageModel.startsWith('dall-e') || imageModel.startsWith('gpt-image') || isCustomImageModel) && (
+                {/* Optional Image API key for cross-provider image models (e.g. OpenAI
+                    image model with a Google text key, or an OpenRouter image model
+                    with any other text provider) */}
+                {(needsOpenAIImageKey || needsOpenRouterImageKey) && (
                   <div className="mt-3 p-3 rounded-lg border border-border bg-muted/30">
                     <label htmlFor="image-api-key" className="block text-xs font-semibold text-foreground mb-1">
-                      OpenAI API Key for Images (Optional)
+                      {needsOpenRouterImageKey ? 'OpenRouter API Key for Images (Optional)' : 'OpenAI API Key for Images (Optional)'}
                     </label>
                     <input
                       id="image-api-key"
                       type="password"
                       value={imageApiKey}
                       onChange={(e) => setImageApiKey(e.target.value)}
-                      placeholder={hasImageApiKey ? '•••••••••••••••• (API key saved)' : 'sk-... (Enter OpenAI key for DALL-E)'}
+                      placeholder={hasImageApiKey ? '•••••••••••••••• (API key saved)' : needsOpenRouterImageKey ? 'sk-or-... (Enter OpenRouter key)' : 'sk-... (Enter OpenAI key for DALL-E)'}
                       className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Enter your OpenAI API key if your primary text provider is Google, Anthropic, or Ollama, but you want to generate images using DALL-E.
+                      {needsOpenRouterImageKey
+                        ? 'Enter your OpenRouter API key to generate images with an OpenRouter image model while using a different text provider.'
+                        : 'Enter your OpenAI API key if your primary text provider is Google, Anthropic, or Ollama, but you want to generate images using DALL-E.'}
                     </p>
                   </div>
                 )}
@@ -599,9 +658,13 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               {provider === 'openai' && 'OpenAI Setup'}
               {provider === 'anthropic' && 'Anthropic Setup'}
               {provider === 'google' && 'Google AI Setup'}
+              {provider === 'openrouter' && 'OpenRouter Setup'}
               {provider === 'ollama' && 'Ollama Setup'}
             </h3>
             <div className="text-xs text-muted-foreground space-y-1">
+              {PROVIDER_COVERAGE[provider] && (
+                <p className="font-medium text-foreground/80">{PROVIDER_COVERAGE[provider]}</p>
+              )}
               {provider === 'openai' && (
                 <>
                   <p>Get your API key from: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">platform.openai.com/api-keys</a></p>
@@ -618,6 +681,12 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                 <>
                   <p>Get your API key from: <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">makersuite.google.com/app/apikey</a></p>
                   <p>Available models are dynamically retrieved from Google AI Studio.</p>
+                </>
+              )}
+              {provider === 'openrouter' && (
+                <>
+                  <p>Get your API key from: <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">openrouter.ai/keys</a> (starts with <code className="bg-background px-1 py-0.5 rounded">sk-or-</code>)</p>
+                  <p>One key reaches hundreds of text, vision, and image models. Text models are discovered live — entries marked [Vision] support photo features like pantry scan. Image models come from OpenRouter&apos;s dedicated image catalog.</p>
                 </>
               )}
               {provider === 'ollama' && (
