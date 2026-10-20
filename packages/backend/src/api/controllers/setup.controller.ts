@@ -230,7 +230,7 @@ export class SetupController {
             model: 'gemini-2.0-flash',
             imageModel,
             imageApiKey: imageKey ? encrypt(imageKey) : undefined,
-            enabled: Boolean(geminiKey),
+            enabled: Boolean(ai.enabled),
           });
         } else {
           globalConfig.userId = adminUser.id;
@@ -239,7 +239,7 @@ export class SetupController {
           globalConfig.model = 'gemini-2.0-flash';
           globalConfig.imageModel = imageModel;
           globalConfig.imageApiKey = imageKey ? encrypt(imageKey) : globalConfig.imageApiKey;
-          globalConfig.enabled = Boolean(geminiKey);
+          globalConfig.enabled = Boolean(ai.enabled);
         }
 
         await aiConfigRepo.save(globalConfig);
