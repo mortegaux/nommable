@@ -1,11 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sun, Moon, Monitor } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useThemeStore } from '@/store/theme.store';
 
-export function UserDropdown() {
+const themeOptions = [
+  { value: 'light', label: 'Light', Icon: Sun },
+  { value: 'dark', label: 'Dark', Icon: Moon },
+  { value: 'system', label: 'System', Icon: Monitor },
+] as const;
+
+export function UserDropdown({
+  variant = 'header',
+  iconOnly = false,
+}: {
+  /** 'header': panel opens downward right-aligned. 'footer' (sidebar footer): panel opens upward left-aligned. */
+  variant?: 'header' | 'footer';
+  /** Avatar-only trigger (sidebar rail mode). */
+  iconOnly?: boolean;
+} = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,7 +70,12 @@ export function UserDropdown() {
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label="User menu"
-        className="flex items-center gap-2 px-2 py-2 sm:px-3 text-sm font-medium text-card-foreground bg-card border border-border rounded-lg hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+        title={iconOnly ? user.username : undefined}
+        className={
+          iconOnly && variant === 'footer'
+            ? 'flex items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-transform hover:scale-105'
+            : 'flex items-center gap-2 px-2 py-2 sm:px-3 text-sm font-medium text-card-foreground bg-card border border-border rounded-lg hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors'
+        }
       >
         {user.profilePhotoUrl ? (
           <img
@@ -66,21 +88,29 @@ export function UserDropdown() {
             {(user.firstName?.[0] || user.username.charAt(0)).toUpperCase()}
           </div>
         )}
-        <span className="hidden xl:inline">{user.username}</span>
-        <svg
-          className={`hidden sm:block w-4 h-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        {variant === 'footer' ? (
+          !iconOnly && <span className="truncate">{user.username}</span>
+        ) : (
+          <span className="hidden xl:inline">{user.username}</span>
+        )}
+        {(!iconOnly || variant === 'header') && (
+          <svg
+            className={`${variant === 'footer' ? 'block' : 'hidden sm:block'} w-4 h-4 shrink-0 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
       </button>
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border py-1 z-10"
+          className={`absolute w-56 bg-card rounded-lg shadow-lg border border-border py-1 z-10 ${
+            variant === 'footer' ? 'bottom-full left-0 mb-2' : 'right-0 mt-2'
+          }`}
           role="menu"
           aria-orientation="vertical"
         >
@@ -95,6 +125,29 @@ export function UserDropdown() {
               }`}>
                 {user.role === 'admin' ? 'Administrator' : 'User'}
               </span>
+            </div>
+          </div>
+
+          <div className="border-b border-border px-4 py-2">
+            <div className="mb-1.5 text-xs text-muted-foreground">Theme</div>
+            <div className="flex gap-1" role="radiogroup" aria-label="Theme">
+              {themeOptions.map(({ value, label, Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={theme === value}
+                  onClick={() => setTheme(value)}
+                  className={`flex flex-1 items-center justify-center gap-1 rounded-md px-1.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${
+                    theme === value
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 

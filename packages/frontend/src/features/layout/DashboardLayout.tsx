@@ -6,13 +6,9 @@ import { FeedbackWidget } from '@/components/FeedbackWidget';
 import { RecipeImportExport } from '@/features/recipes/RecipeImportExport';
 import { AIGenerateRecipeModal } from '@/features/recipes/AIGenerateRecipeModal';
 import { AIConfigAlert } from '@/components/AIConfigAlert';
-import { useThemeStore } from '@/store/theme.store';
 import { useBrandingStore } from '@/store/branding.store';
 import { useRecipeCreateStore } from '@/store/recipeCreate.store';
 import {
-  Sun,
-  Moon,
-  Monitor,
   LayoutDashboard,
   BookOpen,
   Layers,
@@ -25,25 +21,6 @@ import {
   ChevronsRight,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-
-type Theme = 'light' | 'dark' | 'system';
-
-const ThemeToggle = () => {
-  const { theme, setTheme } = useThemeStore();
-  const next: Record<Theme, Theme> = { system: 'light', light: 'dark', dark: 'system' };
-  const icons = { system: Monitor, light: Sun, dark: Moon };
-  const Icon = icons[theme];
-  return (
-    <button
-      onClick={() => setTheme(next[theme])}
-      className="p-2.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-      title={`Theme: ${theme}`}
-      aria-label={`Theme: ${theme}`}
-    >
-      <Icon className="w-5 h-5" />
-    </button>
-  );
-};
 
 type NavEntry = { path: string; label: string; Icon: LucideIcon };
 type NavGroup = { label: string | null; items: NavEntry[] };
@@ -243,17 +220,7 @@ export default function DashboardLayout() {
             collapsed ? 'flex-col' : ''
           }`}
         >
-          <ThemeToggle />
-          {collapsed ? (
-            <div
-              className="flex h-12 w-10 items-center justify-start overflow-hidden"
-              title="Account"
-            >
-              <UserDropdown />
-            </div>
-          ) : (
-            <UserDropdown />
-          )}
+          <UserDropdown variant="footer" iconOnly={collapsed} />
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -278,7 +245,6 @@ export default function DashboardLayout() {
             <Logo appName={appName} logoSrc={logoSrc} />
             <div className="flex shrink-0 items-center gap-1.5">
               <NewRecipeMenu />
-              <ThemeToggle />
               <UserDropdown />
             </div>
           </div>

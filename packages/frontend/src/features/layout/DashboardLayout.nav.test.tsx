@@ -132,8 +132,9 @@ describe('App shell: sidebar + bottom tab bar', () => {
     // Icons carry the label as a tooltip for accessibility.
     const iconLink = within(nav).getAllByRole('link')[1];
     expect(iconLink.getAttribute('title')).toBe('Recipes');
-    // User chip is contained to avatar width so it can't spill past the rail.
-    expect(screen.getByTitle('Account')).toBeInTheDocument();
+    // Rail mode: the user chip collapses to the avatar, username as tooltip.
+    const userButtons = screen.getAllByRole('button', { name: 'User menu' });
+    expect(userButtons.some((b) => b.getAttribute('title') === 'auditadmin')).toBe(true);
   });
 
   it('restores the collapsed sidebar from localStorage', () => {
