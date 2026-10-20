@@ -14,7 +14,13 @@ import { useAIStatus, AISetupBadge } from '@/hooks/useAIStatus';
  *
  * Keyboard: pressing "n" outside of text inputs toggles the menu.
  */
-export function NewRecipeMenu() {
+export function NewRecipeMenu({
+  variant = 'button',
+  iconOnly = false,
+}: {
+  variant?: 'button' | 'nav';
+  iconOnly?: boolean;
+} = {}) {
   const navigate = useNavigate();
   const { openImport, openAIGenerate } = useRecipeCreateStore();
   const { isReady: aiReady, isLoading: aiLoading } = useAIStatus();
@@ -96,17 +102,32 @@ export function NewRecipeMenu() {
         aria-expanded={menuOpen}
         aria-label="Add a new recipe"
         title="Add a new recipe (N)"
-        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className={
+          variant === 'nav'
+            ? `flex items-center gap-3 rounded-lg text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                iconOnly ? 'justify-center px-0 py-2.5' : 'w-full px-3 py-2.5'
+              }`
+            : 'inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+        }
       >
-        <Plus className="h-4 w-4" aria-hidden="true" />
-        <span className="hidden sm:inline">New</span>
+        <Plus
+          className={variant === 'nav' ? 'h-5 w-5 shrink-0' : 'h-4 w-4'}
+          aria-hidden="true"
+        />
+        {variant === 'nav' ? (
+          !iconOnly && <span>New</span>
+        ) : (
+          <span className="hidden sm:inline">New</span>
+        )}
       </button>
 
       {menuOpen && (
         <div
           role="menu"
           aria-label="Add a new recipe"
-          className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+          className={`absolute z-50 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-xl ${
+            variant === 'nav' ? 'left-0' : 'right-0'
+          }`}
         >
           {items.map(({ label, hint, Icon, onSelect, needsSetup }) => (
             <button
