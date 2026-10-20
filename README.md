@@ -1,12 +1,16 @@
 # Nommable
 
-A self-hosted recipe management system with optional AI features powered by multiple providers (OpenAI, Anthropic, Google AI, Ollama).
+A self-hosted recipe management system with optional AI features powered by multiple providers (OpenAI, Anthropic, Google AI, OpenRouter, Ollama).
 
 ## Screenshots
 
+| Dashboard                                                                                             |
+| ----------------------------------------------------------------------------------------------------- |
+| ![Dashboard home screen with next action, tonight's plan, and expiring items](docs/screenshots/dashboard.png) |
+
 | Recipes                                                                                         | Recipe Detail                                                                                |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| ![Recipes page with recipe cards, search, and pantry suggestions](docs/screenshots/recipes.png) | ![Recipe detail page with photo, times, and ingredients](docs/screenshots/recipe-detail.png) |
+| ![Recipes page with sidebar navigation, recipe cards, and search](docs/screenshots/recipes.png) | ![Recipe detail page with photo, times, and ingredients](docs/screenshots/recipe-detail.png) |
 
 | Pantry                                                                       | Meal Plans                                                                     | Shopping Lists                                                                 |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -26,12 +30,12 @@ A self-hosted recipe management system with optional AI features powered by mult
 - **Meal Planning**: Plan multiple recipes per day across Breakfast, Lunch, Dinner, and Snack slots with optional meal times (`[HH:MM]`) and reusable meal-plan templates
 - **Shopping Lists**: Auto-generate shopping lists from meal plans or add items via a pinned quick-add bar with one-tap recent item chips, automatic keyword-based grocery category detection (~180 common items), collapsible aisle sections, and a collapsed Completed section
 - **Batch Cooking**: Guided 3-step batch cooking session wizard (select recipes → review portions & local-calendar prep date → generate timeline), one-click `Freezer-Friendly` tag bootstrapping, and batch cooking analytics
-- **Multi-Provider AI & BYOK (Bring Your Own Key)**: Choose your preferred AI provider (OpenAI, Anthropic, Google AI, Ollama, or none) with dynamic model listing, 1-hour caching, live model refresh, independent text vs image models, custom model overrides, and admin-selectable **Shared Instance Key** vs. **Per-User BYOK** modes
+- **Multi-Provider AI & BYOK (Bring Your Own Key)**: Choose your preferred AI provider (OpenAI, Anthropic, Google AI, OpenRouter, Ollama, or none) with dynamic model listing, 1-hour caching, live model refresh, independent text vs image models, custom model overrides, and admin-selectable **Shared Instance Key** vs. **Per-User BYOK** modes
 - **Granular Shared Library, Creator Attribution & Per-User Taxonomies**: Choose which elements are shared across all household/team users in Admin Settings — **Recipes & Tags** (with optional **"Show who added or created each recipe"** attribution badges), **Collections & Favorites**, **Meal Plans & Templates**, **Shopping Lists**, **Pantry Inventory**, and **Batch Cooking Plans** — or switch to **Per-User Private Library** mode at any time, with per-user category/tag taxonomy scoping
 - **In-App Feedback Widget & Admin Inbox**: Built-in floating feedback widget for reporting bugs or requesting features (automatically capturing route, viewport, and browser metadata) paired with an admin-only `/admin/feedback` triage inbox
 - **System Status & Updates**: Admin-only **Settings → System** tab shows installed vs. available version, release notes, uptime, database and uploads size, last backup/restore, and migration status — updates are applied manually via your deployment (see [Updating](https://github.com/mortegaux/nommable/wiki/Updating))
 - **Backup & Restore**: Full backup export (database + uploads + versioned manifest) with validated, previewed restore — see [Backup & Restore](https://github.com/mortegaux/nommable/wiki/Backup-and-Restore)
-- **Kitchen Today**: A `/kitchen-today` home screen with your next action, expiring items, tonight's plan, prep due, leftovers, and low stock
+- **Dashboard**: A `/dashboard` home screen with your next action, expiring items, tonight's plan, prep due, leftovers, and low stock
 
 ## User Guide
 
@@ -44,7 +48,7 @@ Step-by-step instructions for using Nommable live in the [wiki](https://github.c
 - [AI Setup](https://github.com/mortegaux/nommable/wiki/AI-Setup) — adding AI provider keys (shared key vs. per-user BYOK), models, image generation
 - [Recipes](https://github.com/mortegaux/nommable/wiki/Recipes) — creating, organizing, generating, and photographing recipes
 - [Pantry](https://github.com/mortegaux/nommable/wiki/Pantry) — tracking stock, expiry, low stock, and AI pantry scan
-- [Meal Planning](https://github.com/mortegaux/nommable/wiki/Meal-Planning) — plans, templates, and Kitchen Today
+- [Meal Planning](https://github.com/mortegaux/nommable/wiki/Meal-Planning) — plans, templates, and the Dashboard
 - [Shopping Lists](https://github.com/mortegaux/nommable/wiki/Shopping-Lists) — generating lists from plans, quick-add, categories
 - [Batch Cooking](https://github.com/mortegaux/nommable/wiki/Batch-Cooking) — the batch session wizard and freezer-friendly tags
 - [Backup & Restore](https://github.com/mortegaux/nommable/wiki/Backup-and-Restore) — exporting backups and restoring them
@@ -270,7 +274,7 @@ Endpoints (`GET`, all require auth):
 - `/api/home-assistant/expiring?days=7` — items expiring within the window (default 7, clamped 1–30), soonest first: `{ windowDays, items: [{ id, name, quantity, unit, category, location, expirationDate, daysUntilExpiry }], count }`
 - `/api/home-assistant/shopping-lists` — lists with unchecked items: `{ lists: [{ id, name, uncheckedCount, totalCount, items: [{ name, quantity, unit, category }] }], count, totalUnchecked }`
 
-Derivation matches the Kitchen Today screen (same 7-day expiry window, same dinner-preferred rule, same local-calendar-day math). Session tokens expire — if a sensor starts returning 401, sign in again and refresh the token.
+Derivation matches the Dashboard screen (same 7-day expiry window, same dinner-preferred rule, same local-calendar-day math). Session tokens expire — if a sensor starts returning 401, sign in again and refresh the token.
 
 ## Environment Variables
 
