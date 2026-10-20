@@ -209,7 +209,7 @@ export default function DashboardLayout() {
         </div>
 
         <div className={`${collapsed ? 'flex justify-center px-1' : 'px-3'} pb-2 pt-4`}>
-          <NewRecipeMenu />
+          <NewRecipeMenu variant="nav" iconOnly={collapsed} />
         </div>
 
         <nav
