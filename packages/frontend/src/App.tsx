@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastHost } from '@/components/ToastHost';
 import { ConfirmHost } from '@/components/ConfirmHost';
+import { OutOfCreditsModal } from '@/components/OutOfCreditsModal';
 import { useAuthStore } from '@/store/auth.store';
 import { useBrandingStore } from '@/store/branding.store';
 
@@ -200,6 +201,7 @@ function App() {
       </Routes>
       <ToastHost />
       <ConfirmHost />
+      <OutOfCreditsModal />
     </BrowserRouter>
   );
 }

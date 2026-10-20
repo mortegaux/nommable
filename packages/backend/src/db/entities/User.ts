@@ -46,6 +46,9 @@ export class User {
   @Column('boolean', { name: 'is_system_admin', default: false })
   isSystemAdmin!: boolean;
 
+  @Column('int', { name: 'credits_remaining', default: 10 })
+  creditsRemaining!: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

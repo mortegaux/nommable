@@ -4,7 +4,7 @@ import { AIProvider, AIModelInfo, AIGeneratedRecipe, AIMode } from '@nommable/sh
 import type { Response } from 'express';
 import { AppDataSource } from '../../db/data-source';
 import { AppError } from '../../api/middleware/error-handler';
-import { AIConfig } from '../../db/entities';
+import { AIConfig, User } from '../../db/entities';
 import { Recipe } from '../../db/entities/Recipe';
 import { config } from '../../config';
 import { safeDecrypt } from '../../utils/crypto';
@@ -76,6 +76,25 @@ export class AIService {
     return aiConfigRepo.findOne({ where: { userId, isGlobal: false } });
   }
 
+  static async deductCredit(userId?: string): Promise<void> {
+    if (!userId) return;
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) return;
+
+    const userConfig = await this.getUserConfig(userId);
+    if (userConfig && userConfig.enabled) {
+      return; // BYOK user, no credit deduction
+    }
+
+    if (user.creditsRemaining <= 0) {
+      throw new AppError(402, 'Out of AI credits. Please upgrade your plan or configure your own API key in Settings.');
+    }
+
+    user.creditsRemaining -= 1;
+    await userRepo.save(user);
+  }
+
   /**
    * Resolve the AI provider for a requesting user.
    * - shared mode: the admin-configured global key, for everyone (legacy behavior).
@@ -119,12 +138,23 @@ export class AIService {
       return this.providerCache.get(cacheKey)!;
     }
 
-    const aiConfig = await aiConfigRepo.findOne({
+    let aiConfig = await aiConfigRepo.findOne({
       where: { isGlobal: true, enabled: true },
     });
 
     if (!aiConfig) {
-      return null;
+      const envKey = config.ai.openai.apiKey;
+      if (envKey) {
+        aiConfig = aiConfigRepo.create({
+          provider: 'openai',
+          apiKey: envKey,
+          model: 'gpt-4o-mini',
+          enabled: true,
+          isGlobal: true,
+        });
+      } else {
+        return null;
+      }
     }
 
     const provider = this.createProvider(aiConfig, mode);
