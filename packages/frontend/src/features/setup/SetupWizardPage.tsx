@@ -605,10 +605,10 @@ export default function SetupWizardPage() {
             <form onSubmit={handleFinishSetup} className="space-y-5">
               <div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  4. AI Features (Optional)
+                  4. AI Features & Free Trial
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Enable AI recipe generation, smart meal planning, and AI food photography using your own API key. Nommable works 100% without AI if you prefer not to use it.
+                  Nommable comes with <strong>10 free AI credits</strong> out of the box for recipe importing, meal planning, and food photography. You can optionally add your own personal API key (BYOK) if you prefer.
                 </p>
               </div>
 
@@ -655,14 +655,14 @@ export default function SetupWizardPage() {
                     <input
                       id="gemini-api-key"
                       type="password"
-                      required={aiEnabled}
+                      required={false}
                       value={geminiApiKey}
                       onChange={(e) => setGeminiApiKey(e.target.value)}
-                      placeholder="AIza..."
+                      placeholder="Optional (leave blank to use managed AI credits)"
                       className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Encrypted at rest with AES-256-GCM. Get a key from Google AI Studio (aistudio.google.com).
+                      Leave blank to use your server&apos;s managed AI credits pool, or bring your own API key (BYOK).
                     </p>
                   </div>
 
