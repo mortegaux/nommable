@@ -56,11 +56,11 @@ Step-by-step instructions for using Nommable live in the [wiki](https://github.c
 - [Email Setup](https://github.com/mortegaux/nommable/wiki/Email-Setup) — SMTP configuration for invitations
 - [Home Assistant](https://github.com/mortegaux/nommable/wiki/Home-Assistant) — read-only summary endpoints for automation
 
-## Pricing
+## Pricing & AI Credits
 
-**Current versions:** all features are accessible with no subscription required.
-
-**Future direction (intent, not a promise):** the plan is to introduce a paid tier / subscription that will be required to use the AI features. No prices, dates, or tier names are decided. This does not change BYOK — you will still bring your own AI provider key; the tier concerns access to the AI features themselves.
+- **Free Trial:** New accounts include **10 free AI credits** to test AI recipe importing, meal planning, and food photography.
+- **Managed AI Credits:** After using free trial credits, users can subscribe to continue using managed AI credits powered by the platform's master API pool.
+- **BYOK (Bring Your Own Key):** Users can optionally enter their own OpenAI, Anthropic, or Google API keys in Settings at any time for **unlimited free AI usage** with zero subscription required.
 
 ## Tech Stack
 
@@ -143,9 +143,7 @@ After creating an account, navigate to **AI Settings** to configure your preferr
 4. (Optional) Configure an independent **Image Generation Model** (OpenAI `gpt-image-1.5`, `gpt-image-2.5-sunburst`, `gpt-image-1`, Google Gemini 2.0 Flash, or Imagen 3) with an optional dedicated image API key for cross-provider generation
 5. Enable AI features
 
-**Note:** AI features are completely optional. The app works fully without any AI configuration.
-
-**Monetization direction:** in current versions, all features — including AI — are accessible with no subscription required. The plan is to introduce a paid tier / subscription in a future version that will be required to use the AI features (no prices, dates, or tier names decided). See [Pricing](#pricing).
+**Note:** AI features work out of the box using managed AI credits (10 free trial credits included). Alternatively, users can bring their own API key (BYOK) in AI Settings for unlimited free usage.
 
 ## Project Structure
 
