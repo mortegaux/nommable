@@ -48,11 +48,8 @@ export default function SetupWizardPage() {
   const [sharedPantry, setSharedPantry] = useState(true);
   const [sharedBatchCooking, setSharedBatchCooking] = useState(true);
 
-  // Step 4: AI Configuration (Managed AI Credits vs BYOK vs Disabled)
-  const [aiMode, setAiMode] = useState<'managed' | 'byok' | 'disabled'>('managed');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [imageModel, setImageModel] = useState('gemini-2.0-flash');
-  const [imageApiKey, setImageApiKey] = useState('');
+  // Step 4: AI Configuration (Managed AI Credits)
+  const [aiEnabled, setAiEnabled] = useState(true);
 
   if (isLoading) {
     return (
@@ -112,11 +109,6 @@ export default function SetupWizardPage() {
     e.preventDefault();
     setError('');
 
-    if (aiMode === 'byok' && !geminiApiKey.trim()) {
-      setError('Please enter your Gemini API key.');
-      return;
-    }
-
     setSubmitting(true);
     try {
       const response = await setupApi.complete({
@@ -148,11 +140,9 @@ export default function SetupWizardPage() {
           sharedBatchCooking,
         },
         ai: {
-          enabled: aiMode !== 'disabled',
-          geminiApiKey: aiMode === 'byok' ? geminiApiKey.trim() : undefined,
-          imageProvider: aiMode !== 'disabled' && imageModel !== 'none' ? 'google' : 'none',
-          imageModel: aiMode !== 'disabled' && imageModel !== 'none' ? imageModel : undefined,
-          imageApiKey: aiMode === 'byok' && imageApiKey.trim() ? imageApiKey.trim() : undefined,
+          enabled: aiEnabled,
+          imageProvider: aiEnabled ? 'google' : 'none',
+          imageModel: aiEnabled ? 'gemini-2.0-flash' : undefined,
         },
       });
 
@@ -608,140 +598,52 @@ export default function SetupWizardPage() {
                   4. AI Features & Free Trial
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Choose how you would like to power AI recipe generation, smart meal planning, and AI food photography.
+                  Do you want to enable AI features like recipe importing, smart meal planning, and AI food photography?
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <label
-                  className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                    aiMode === 'managed'
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-muted/40'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="aiModeChoice"
-                    checked={aiMode === 'managed'}
-                    onChange={() => setAiMode('managed')}
-                    className="mt-1 h-4 w-4 text-primary focus:ring-primary"
-                  />
-                  <div>
-                    <div className="font-medium text-foreground">Managed AI (10 Free Trial Credits) — Recommended</div>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Works instantly out of the box with zero setup. Includes 10 free credits to test recipe imports, meal planning, and AI food photography.
-                    </p>
-                  </div>
-                </label>
-
-                <label
-                  className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                    aiMode === 'byok'
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-muted/40'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="aiModeChoice"
-                    checked={aiMode === 'byok'}
-                    onChange={() => setAiMode('byok')}
-                    className="mt-1 h-4 w-4 text-primary focus:ring-primary"
-                  />
-                  <div>
-                    <div className="font-medium text-foreground">Bring Your Own Key (BYOK)</div>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Use your own Gemini API key for unlimited free AI usage without credit limits.
-                    </p>
-                  </div>
-                </label>
-
-                <label
-                  className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                    aiMode === 'disabled'
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-muted/40'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="aiModeChoice"
-                    checked={aiMode === 'disabled'}
-                    onChange={() => setAiMode('disabled')}
-                    className="mt-1 h-4 w-4 text-primary focus:ring-primary"
-                  />
-                  <div>
-                    <div className="font-medium text-foreground">Disable AI Features</div>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Run Nommable entirely without AI features.
-                    </p>
-                  </div>
-                </label>
+              {/* AI Enabled Yes/No Toggle */}
+              <div className="flex items-center justify-between rounded-xl border border-border p-4">
+                <div>
+                  <div className="font-medium text-foreground">Enable AI features?</div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Powered by managed AI credits. Includes 10 free trial credits out of the box.
+                  </p>
+                </div>
+                <div className="inline-flex rounded-lg border border-border p-1 bg-muted/40">
+                  <button
+                    type="button"
+                    onClick={() => setAiEnabled(true)}
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      aiEnabled
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAiEnabled(false)}
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      !aiEnabled
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
               </div>
 
-              {aiMode === 'byok' && (
-                <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-                  <div>
-                    <label htmlFor="gemini-api-key" className="block text-sm font-medium text-foreground mb-1">
-                      Gemini API Key *
-                    </label>
-                    <input
-                      id="gemini-api-key"
-                      type="password"
-                      required={aiMode === 'byok'}
-                      value={geminiApiKey}
-                      onChange={(e) => setGeminiApiKey(e.target.value)}
-                      placeholder="AIza..."
-                      className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Encrypted at rest with AES-256-GCM. Get a key from Google AI Studio (aistudio.google.com).
-                    </p>
+              {aiEnabled && (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-foreground space-y-2">
+                  <div className="font-medium flex items-center gap-2">
+                    <span>⚡</span> Managed AI Enabled (10 Free Trial Credits)
                   </div>
-                </div>
-              )}
-
-              {aiMode !== 'disabled' && (
-                <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-                  <div>
-                    <label htmlFor="wizard-image-provider" className="block text-sm font-medium text-foreground mb-1">
-                      Image Generation Provider
-                    </label>
-                    <select
-                      id="wizard-image-provider"
-                      value={imageModel}
-                      onChange={(e) => setImageModel(e.target.value)}
-                      className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="gemini-2.0-flash">
-                        Google Gemini 2.0 Flash (Multimodal photo generation)
-                      </option>
-                      <option value="imagen-3.0-generate-002">
-                        Google Imagen 3 (High Quality — requires Google Cloud billing)
-                      </option>
-                      <option value="imagen-3.0-fast-generate-001">
-                        Google Imagen 3 Fast (Requires Google Cloud billing)
-                      </option>
-                      <option value="none">Disabled (No AI image generation)</option>
-                    </select>
-                  </div>
-
-                  {imageModel !== 'none' && aiMode === 'byok' && (
-                    <div>
-                      <label htmlFor="wizard-image-api-key" className="block text-sm font-medium text-foreground mb-1">
-                        Image Provider API Key <span className="text-xs text-muted-foreground">(Optional — uses Gemini API key above if left blank)</span>
-                      </label>
-                      <input
-                        id="wizard-image-api-key"
-                        type="password"
-                        value={imageApiKey}
-                        onChange={(e) => setImageApiKey(e.target.value)}
-                        placeholder="Leave blank to use Gemini key above, or enter dedicated key"
-                        className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    You&apos;re all set! You get 10 free AI credits instantly to test out recipe generation and photo creation. You can track your balance or add your own custom API key anytime later in Settings.
+                  </p>
                 </div>
               )}
 
@@ -800,7 +702,7 @@ export default function SetupWizardPage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">AI Features:</span>
                   <span className="font-medium text-foreground">
-                    {aiMode !== 'disabled' ? (aiMode === 'byok' ? 'Enabled (BYOK)' : 'Enabled (Managed AI Credits)') : 'Disabled'}
+                    {aiEnabled ? 'Enabled (Managed AI Credits)' : 'Disabled'}
                   </span>
                 </div>
               </div>
