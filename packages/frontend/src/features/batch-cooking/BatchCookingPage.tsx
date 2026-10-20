@@ -10,6 +10,7 @@ import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { parseLocalDate } from './batchCookingDates';
 import { PageHeader } from '@/components/PageHeader';
+import { SectionTabs } from '@/components/SectionTabs';
 
 interface Recipe {
   id: string;
@@ -235,6 +236,13 @@ export default function BatchCookingPage() {
 
   return (
     <div>
+      <SectionTabs
+        label="Meal plans sections"
+        tabs={[
+          { path: '/meal-plans', label: 'Meal Plans' },
+          { path: '/batch-cooking', label: 'Batch Cooking' },
+        ]}
+      />
       {/* Header — matches Recipes / Meal Plans / Shopping Lists */}
       <PageHeader
         title="Batch Cooking & Meal Prep"
