@@ -183,8 +183,8 @@ here; this is the seam it will use.
   rule, component fixes, contrast-guard tests. Remaining for a future
   pass: full keyboard-flow audit (focus *order*, landmarks, status
   announcements beyond `role="alert"`, 44px touch targets — focus
-  *visibility* was fixed in #6), Kitchen Today (not in the #6 base;
-  audit it once branched from current main).
+  *visibility* was fixed in #6), the Dashboard (then called Kitchen Today;
+  not in the #6 base; audit it once branched from current main).
 - **Keyboard / a11y audit:** focus order, landmarks, status announcements
   beyond `role="alert"` on error callouts, 44px touch targets. Fold into
   #5 / #6.
@@ -204,5 +204,6 @@ here; this is the seam it will use.
 - **Pages not converted** (file changed on remote main after the local
   base, so editing would clobber remote work): PantryPage, SettingsPage.
   Convert them to PageHeader in a follow-up branched from current main.
-  Kitchen Today (`/kitchen-today`) was not converted either — it is a
-  dashboard, not a list/detail page; decide its anatomy in a follow-up.
+  The Dashboard (`/dashboard`, formerly Kitchen Today, `/kitchen-today`)
+  was not converted either — it is a dashboard, not a list/detail page;
+  decide its anatomy in a follow-up.
