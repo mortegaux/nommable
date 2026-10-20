@@ -13,6 +13,7 @@ export interface User {
   // Note: passwords are managed by Better Auth, never exposed here.
   role: UserRole;
   isSystemAdmin?: boolean;
+  creditsRemaining?: number;
   createdAt: Date;
   updatedAt: Date;
 }

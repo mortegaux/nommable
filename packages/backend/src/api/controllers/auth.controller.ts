@@ -16,6 +16,7 @@ function toUserJson(user: User) {
     lastName: user.lastName,
     profilePhotoUrl: user.profilePhotoUrl,
     role: user.role,
+    creditsRemaining: user.creditsRemaining ?? 10,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
