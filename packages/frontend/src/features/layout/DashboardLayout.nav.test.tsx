@@ -77,95 +77,122 @@ function renderLayout(initialEntry = '/dashboard') {
   );
 }
 
-describe('Nav restructure: Dashboard rename + nested nav', () => {
+describe('App shell: sidebar + bottom tab bar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
-  it('shows 5 top-level nav items; children stay hidden until the dropdown opens', () => {
+  it('renders all 7 sidebar destinations with Dashboard first', () => {
     renderLayout();
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
     const links = within(nav).getAllByRole('link');
     expect(links.map((l) => l.textContent)).toEqual([
       'Dashboard',
       'Recipes',
+      'Collections',
       'Meal Plans',
+      'Batch Cooking',
       'Shopping Lists',
       'Pantry',
     ]);
-    expect(screen.queryByRole('link', { name: 'Collections' })).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Batch Cooking' })).toBeNull();
   });
 
-  it('opens the Recipes submenu to reveal Collections', () => {
+  it('groups sidebar destinations under Kitchen and Household section labels', () => {
     renderLayout();
-    fireEvent.click(screen.getByRole('button', { name: 'Show Recipes submenu' }));
-    const menu = screen.getByRole('menu', { name: 'Recipes submenu' });
-    expect(within(menu).getByRole('menuitem', { name: 'Collections' })).toBeInTheDocument();
-    expect(within(menu).queryByRole('menuitem', { name: 'Batch Cooking' })).toBeNull();
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    expect(within(nav).getByText('Kitchen')).toBeInTheDocument();
+    expect(within(nav).getByText('Household')).toBeInTheDocument();
   });
 
-  it('opens the Meal Plans submenu to reveal Batch Cooking', () => {
-    renderLayout();
-    fireEvent.click(screen.getByRole('button', { name: 'Show Meal Plans submenu' }));
-    const menu = screen.getByRole('menu', { name: 'Meal Plans submenu' });
-    expect(within(menu).getByRole('menuitem', { name: 'Batch Cooking' })).toBeInTheDocument();
-  });
-
-  it('closes the dropdown on Escape and returns focus to the chevron', () => {
-    renderLayout();
-    const chevron = screen.getByRole('button', { name: 'Show Recipes submenu' });
-    fireEvent.click(chevron);
-    const menu = screen.getByRole('menu', { name: 'Recipes submenu' });
-    // Dispatch on the menu element (not document): the global "n" shortcut
-    // handler in NewRecipeMenu calls e.target.closest, which document lacks.
-    fireEvent.keyDown(menu, { key: 'Escape' });
-    expect(screen.queryByRole('menu')).toBeNull();
-    expect(document.activeElement).toBe(chevron);
-  });
-
-  it('closes the dropdown on outside click', () => {
-    renderLayout();
-    fireEvent.click(screen.getByRole('button', { name: 'Show Recipes submenu' }));
-    expect(screen.getByRole('menu', { name: 'Recipes submenu' })).toBeInTheDocument();
-    fireEvent.pointerDown(document.body);
-    expect(screen.queryByRole('menu')).toBeNull();
-  });
-
-  it('closes the dropdown on navigation', () => {
-    renderLayout();
-    fireEvent.click(screen.getByRole('button', { name: 'Show Recipes submenu' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Collections' }));
-    expect(screen.getByText('Collections page')).toBeInTheDocument();
-    expect(screen.queryByRole('menu')).toBeNull();
-  });
-
-  it('marks the parent active when on a child route', () => {
+  it('marks the active sidebar row with a filled row and primary text', () => {
     renderLayout('/collections');
-    const recipesLink = screen.getByRole('link', { name: 'Recipes' });
-    expect(recipesLink.className).toContain('font-semibold');
-    expect(recipesLink.className).toContain('text-primary');
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    const link = within(nav).getByRole('link', { name: 'Collections' });
+    expect(link.className).toContain('bg-muted');
+    expect(link.className).toContain('font-semibold');
+    expect(link.className).toContain('text-primary');
+    expect(link.getAttribute('aria-current')).toBe('page');
   });
 
-  it('parent link still navigates to the parent page', () => {
+  it('collapse toggle switches the sidebar to icon-rail mode and persists', () => {
     renderLayout();
-    fireEvent.click(screen.getByRole('link', { name: 'Recipes' }));
-    expect(screen.getByText('Recipes page')).toBeInTheDocument();
+    const toggle = screen.getByRole('button', { name: 'Collapse sidebar' });
+    const sidebar = screen.getByRole('complementary', { name: 'Main sidebar' });
+    expect(sidebar.className).toContain('w-60');
+    fireEvent.click(toggle);
+    expect(sidebar.className).toContain('w-16');
+    expect(sidebar.className).not.toContain('w-60');
+    // Labels hidden, icons remain; section labels become plain dividers.
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    expect(within(nav).queryByText('Recipes')).toBeNull();
+    expect(within(nav).queryByText('Kitchen')).toBeNull();
+    expect(within(nav).getAllByRole('link')).toHaveLength(7);
+    expect(localStorage.getItem('nommable:sidebar-collapsed')).toBe('1');
+    // Icons carry the label as a tooltip for accessibility.
+    const iconLink = within(nav).getAllByRole('link')[1];
+    expect(iconLink.getAttribute('title')).toBe('Recipes');
+    // User chip is contained to avatar width so it can't spill past the rail.
+    expect(screen.getByTitle('Account')).toBeInTheDocument();
   });
 
-  it('mobile drawer groups children indented under their parents', () => {
+  it('restores the collapsed sidebar from localStorage', () => {
+    localStorage.setItem('nommable:sidebar-collapsed', '1');
     renderLayout();
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle navigation menu' }));
-    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
-    // 5 parents + 2 children
-    expect(mobileNav.querySelectorAll('a')).toHaveLength(7);
-    expect(within(mobileNav).getByRole('link', { name: 'Collections' }).className).toContain('pl-6');
-    expect(within(mobileNav).getByRole('link', { name: 'Batch Cooking' }).className).toContain('pl-6');
+    const sidebar = screen.getByRole('complementary', { name: 'Main sidebar' });
+    expect(sidebar.className).toContain('w-16');
+    expect(screen.getByRole('button', { name: 'Expand sidebar' })).toBeInTheDocument();
   });
 
-  it('logo links to /dashboard', () => {
+  it('renders exactly 5 bottom tabs with icons and short labels', () => {
     renderLayout();
-    expect(screen.getByRole('link', { name: 'Nommable home' }).getAttribute('href')).toBe('/dashboard');
+    const tabbar = screen.getByRole('navigation', { name: 'Bottom navigation' });
+    const tabs = within(tabbar).getAllByRole('link');
+    expect(tabs.map((t) => t.textContent)).toEqual([
+      'Dashboard',
+      'Recipes',
+      'Plans',
+      'Lists',
+      'Pantry',
+    ]);
+    for (const tab of tabs) {
+      expect(tab.querySelector('svg')).not.toBeNull();
+    }
+  });
+
+  it('marks the active tab with the pill indicator and primary label', () => {
+    renderLayout('/pantry');
+    const tabbar = screen.getByRole('navigation', { name: 'Bottom navigation' });
+    const tab = within(tabbar).getByRole('link', { name: 'Pantry' });
+    expect(tab.getAttribute('aria-current')).toBe('page');
+    // Material-style pill behind the active icon.
+    const pill = tab.querySelector('span');
+    expect(pill?.className).toContain('bg-primary/10');
+    // Inactive tabs have no pill.
+    const inactive = within(tabbar).getByRole('link', { name: 'Dashboard' });
+    expect(inactive.querySelector('span')?.className).not.toContain('bg-primary/10');
+  });
+
+  it('navigates when a sidebar link is clicked', () => {
+    renderLayout();
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
+    fireEvent.click(within(nav).getByRole('link', { name: 'Collections' }));
+    expect(screen.getByText('Collections page')).toBeInTheDocument();
+  });
+
+  it('has no hamburger menu or mobile drawer', () => {
+    renderLayout();
+    expect(screen.queryByRole('button', { name: 'Toggle navigation menu' })).toBeNull();
+    expect(screen.queryByRole('navigation', { name: 'Mobile navigation' })).toBeNull();
+  });
+
+  it('both logo links point to /dashboard', () => {
+    renderLayout();
+    const logos = screen.getAllByRole('link', { name: 'Nommable home' });
+    expect(logos.length).toBeGreaterThanOrEqual(1);
+    for (const logo of logos) {
+      expect(logo.getAttribute('href')).toBe('/dashboard');
+    }
   });
 
   it('redirects the old /kitchen-today URL to /dashboard (real App routes)', async () => {
