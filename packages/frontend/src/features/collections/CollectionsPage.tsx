@@ -5,6 +5,7 @@ import type { RecipeCollection, CreateCollectionDto } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { PageHeader, PageShell } from '@/components/PageHeader';
+import { SectionTabs } from '@/components/SectionTabs';
 import { EmptyState } from '@/components/EmptyState';
 
 export default function CollectionsPage() {
@@ -94,6 +95,13 @@ export default function CollectionsPage() {
 
   return (
     <PageShell>
+      <SectionTabs
+        label="Recipes sections"
+        tabs={[
+          { path: '/recipes', label: 'All Recipes' },
+          { path: '/collections', label: 'Collections' },
+        ]}
+      />
       {/* Header */}
       <PageHeader
         title="Collections"

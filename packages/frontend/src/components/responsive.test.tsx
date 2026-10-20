@@ -37,6 +37,7 @@ function renderLayout() {
     <MemoryRouter initialEntries={['/recipes']}>
       <Routes>
         <Route path="/recipes" element={<DashboardLayout />} />
+        <Route path="/pantry" element={<DashboardLayout />} />
         <Route path="/dashboard" element={<div>Dashboard</div>} />
       </Routes>
     </MemoryRouter>
@@ -48,31 +49,25 @@ describe('Mobile responsiveness (issue #5)', () => {
     useAuthStore.setState({ user: testUser, token: 't', isLoading: false });
   });
 
-  it('shows the desktop nav only at lg and up (7 links fit at 1024, not at 768)', () => {
+  it('shows the desktop sidebar only at lg and up', () => {
     renderLayout();
-    const nav = screen.getByRole('navigation', { name: 'Main navigation' });
-    expect(nav.className).toContain('hidden');
-    expect(nav.className).toContain('lg:flex');
-    expect(nav.className).not.toContain('md:flex');
-    expect(nav.className).toContain('lg:space-x-2');
-    expect(nav.className).toContain('xl:space-x-6');
+    const sidebar = screen.getByRole('complementary', { name: 'Main sidebar' });
+    expect(sidebar.className).toContain('hidden');
+    expect(sidebar.className).toContain('lg:flex');
+    expect(sidebar.className).not.toContain('md:flex');
   });
 
-  it('shows the hamburger only below lg, and the mobile menu closes on navigation', () => {
+  it('shows the bottom tab bar only below lg, with no hamburger menu', () => {
     renderLayout();
-    const toggle = screen.getByRole('button', { name: 'Toggle navigation menu' });
-    expect(toggle.className).toContain('lg:hidden');
-    expect(toggle.className).not.toContain('md:hidden');
-    fireEvent.click(toggle);
-    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
-    expect(mobileNav.className).toContain('lg:hidden');
-    expect(mobileNav.className).not.toContain('md:hidden');
-    // 7 links: 5 top-level + 2 nested children (Collections, Batch Cooking)
-    expect(mobileNav.querySelectorAll('a')).toHaveLength(7);
-    // Desktop nav (hidden below lg) also has a Dashboard link — scope to the mobile menu
-    fireEvent.click(within(mobileNav).getByRole('link', { name: 'Dashboard' }));
+    const tabbar = screen.getByRole('navigation', { name: 'Bottom navigation' });
+    expect(tabbar.className).toContain('lg:hidden');
+    expect(tabbar.className).not.toContain('md:hidden');
+    expect(tabbar.className).toContain('fixed');
+    expect(screen.queryByRole('button', { name: 'Toggle navigation menu' })).toBeNull();
     expect(screen.queryByRole('navigation', { name: 'Mobile navigation' })).toBeNull();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    // Tabs navigate directly — no drawer in between.
+    fireEvent.click(within(tabbar).getByRole('link', { name: 'Pantry' }));
+    expect(screen.getByRole('navigation', { name: 'Bottom navigation' })).toBeInTheDocument();
   });
 
   it('hides the username text below xl (avatar-only user menu on tablets)', () => {

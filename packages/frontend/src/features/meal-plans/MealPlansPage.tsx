@@ -10,6 +10,7 @@ import { AIConfigAlert } from '@/components/AIConfigAlert';
 import { checkAIConfiguration, aiUnavailableMessage } from '@/utils/aiValidation';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
 import { Pagination } from '@/components/Pagination';
+import { SectionTabs } from '@/components/SectionTabs';
 import { PageHeader, PageShell } from '@/components/PageHeader';
 import { useToastStore } from '@/store/toast.store';
 import { useConfirmStore } from '@/store/confirm.store';
@@ -207,6 +208,13 @@ export default function MealPlansPage() {
   return (
     <>
       <PageShell>
+        <SectionTabs
+          label="Meal plans sections"
+          tabs={[
+            { path: '/meal-plans', label: 'Meal Plans' },
+            { path: '/batch-cooking', label: 'Batch Cooking' },
+          ]}
+        />
         <PageHeader
           title="Meal Plans"
           subtitle={`${total} meal plan${total === 1 ? '' : 's'}`}
