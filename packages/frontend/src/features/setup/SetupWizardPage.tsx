@@ -800,7 +800,7 @@ export default function SetupWizardPage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">AI Features:</span>
                   <span className="font-medium text-foreground">
-                    {aiEnabled ? 'Enabled (Google Gemini)' : 'Disabled'}
+                    {aiMode !== 'disabled' ? (aiMode === 'byok' ? 'Enabled (BYOK)' : 'Enabled (Managed AI Credits)') : 'Disabled'}
                   </span>
                 </div>
               </div>
