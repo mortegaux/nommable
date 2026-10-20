@@ -207,8 +207,9 @@ export class SetupController {
         });
       }
 
-      // 5. Configure AI (Google Gemini text + working image provider) if enabled
+      // 5. Configure AI based on selected mode ('managed', 'byok', or 'disabled')
       if (ai && ai.enabled) {
+        const aiMode = ai.mode || (ai.geminiApiKey ? 'byok' : 'managed');
         const geminiKey = typeof ai.geminiApiKey === 'string' ? ai.geminiApiKey.trim() : '';
         const imageProvider = ai.imageProvider || 'google';
         const imageModel =
@@ -220,29 +221,43 @@ export class SetupController {
         const aiConfigRepo = AppDataSource.getRepository(AIConfig);
         let globalConfig = await aiConfigRepo.findOne({ where: { isGlobal: true } });
 
-        if (!globalConfig) {
-          globalConfig = aiConfigRepo.create({
-            userId: adminUser.id,
-            isGlobal: true,
-            aiMode: 'shared',
-            provider: 'google',
-            apiKey: geminiKey ? encrypt(geminiKey) : undefined,
-            model: 'gemini-2.0-flash',
-            imageModel,
-            imageApiKey: imageKey ? encrypt(imageKey) : undefined,
-            enabled: Boolean(ai.enabled),
-          });
+        if (aiMode === 'byok' && geminiKey) {
+          if (!globalConfig) {
+            globalConfig = aiConfigRepo.create({
+              userId: adminUser.id,
+              isGlobal: true,
+              aiMode: 'shared',
+              provider: 'google',
+              apiKey: encrypt(geminiKey),
+              model: 'gemini-2.0-flash',
+              imageModel,
+              imageApiKey: imageKey ? encrypt(imageKey) : undefined,
+              enabled: true,
+            });
+          } else {
+            globalConfig.userId = adminUser.id;
+            globalConfig.provider = 'google';
+            globalConfig.apiKey = encrypt(geminiKey);
+            globalConfig.model = 'gemini-2.0-flash';
+            globalConfig.imageModel = imageModel;
+            globalConfig.imageApiKey = imageKey ? encrypt(imageKey) : globalConfig.imageApiKey;
+            globalConfig.enabled = true;
+          }
+          await aiConfigRepo.save(globalConfig);
         } else {
-          globalConfig.userId = adminUser.id;
-          globalConfig.provider = 'google';
-          globalConfig.apiKey = geminiKey ? encrypt(geminiKey) : globalConfig.apiKey;
-          globalConfig.model = 'gemini-2.0-flash';
-          globalConfig.imageModel = imageModel;
-          globalConfig.imageApiKey = imageKey ? encrypt(imageKey) : globalConfig.imageApiKey;
-          globalConfig.enabled = Boolean(ai.enabled);
+          // Managed AI mode: remove global DB config so AIService falls back to server env master keys
+          if (globalConfig) {
+            await aiConfigRepo.remove(globalConfig);
+          }
         }
-
-        await aiConfigRepo.save(globalConfig);
+        AIService.clearCache();
+      } else if (ai && !ai.enabled) {
+        // AI disabled: remove any global config
+        const aiConfigRepo = AppDataSource.getRepository(AIConfig);
+        const globalConfig = await aiConfigRepo.findOne({ where: { isGlobal: true } });
+        if (globalConfig) {
+          await aiConfigRepo.remove(globalConfig);
+        }
         AIService.clearCache();
       }
 
