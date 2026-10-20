@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useRecipeCreateStore } from '@/store/recipeCreate.store';
 import type { Recipe, RecipeSearchQuery, Taxonomy, ContentRecipeSuggestion } from '@nommable/shared';
 import { Pagination } from '@/components/Pagination';
+import { SectionTabs } from '@/components/SectionTabs';
 import { useToastStore } from '@/store/toast.store';
 import { useConfirmStore } from '@/store/confirm.store';
 import { AddToCollectionDialog } from './AddToCollectionDialog';
@@ -386,6 +387,13 @@ export default function RecipesPage() {
 
   return (
     <div>
+      <SectionTabs
+        label="Recipes sections"
+        tabs={[
+          { path: '/recipes', label: 'All Recipes' },
+          { path: '/collections', label: 'Collections' },
+        ]}
+      />
       {/* Header */}
       <PageHeader
         title="Recipes"
