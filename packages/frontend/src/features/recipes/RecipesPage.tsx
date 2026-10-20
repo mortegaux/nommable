@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { Check, X } from 'lucide-react';
 import { recipeApi, taxonomyApi, historyApi, suggestionApi } from '@/services/api';
 import { AutoAwesomeIcon, RestaurantIcon } from '@/components/icons/MaterialIcon';
 import { useAuthStore } from '@/store/auth.store';
@@ -118,6 +119,8 @@ const DIETARY_BADGES = {
   'Healthy': { color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200' },
 };
 
+const SELECT_HINT_KEY = 'nommable:recipes-select-hint';
+
 const DIFFICULTY_DISPLAY = {
   'easy': { label: 'Easy', color: 'text-green-700 dark:text-green-300', icon: '●' },
   'medium': { label: 'Medium', color: 'text-amber-700 dark:text-amber-300', icon: '●●' },
@@ -163,15 +166,55 @@ export default function RecipesPage() {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [selectedDietaryTags, setSelectedDietaryTags] = useState<Set<string>>(new Set());
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
-  /** Explicit bulk-select mode: checkboxes and the bulk action bar only
-   * exist while the user is deliberately doing bulk actions, so a stray
-   * checkbox click can't summon the bar out of nowhere. */
-  const [bulkSelectMode, setBulkSelectMode] = useState(false);
+  /** Selection mode (#90): there is no Select button. The mode is entered by
+   * checking a card — hover-reveal checkbox on desktop, long-press on touch —
+   * and it is on exactly while at least one recipe is selected. It turns off
+   * when the count returns to 0, on Esc, or via the bulk bar's clear button. */
+  const [selectionMode, setSelectionMode] = useState(false);
+  /** Anchor for shift-click range selection (last plainly toggled recipe). */
+  const anchorIdRef = useRef<string | null>(null);
+  /** Mirror of the selection for use inside the long-press timer, whose
+   * closure would otherwise capture a stale set. Kept current by
+   * applySelection, the single funnel for selection changes. */
+  const selectedRecipesRef = useRef<Set<string>>(new Set());
 
-  const exitBulkSelectMode = () => {
-    setBulkSelectMode(false);
-    setSelectedRecipes(new Set());
-  };
+  /** One-time hint chip: shown until dismissed, and auto-dismissed the first
+   * time the user enters selection mode on their own. */
+  const [showHint, setShowHint] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(SELECT_HINT_KEY) !== 'dismissed';
+    } catch {
+      return true;
+    }
+  });
+  const hintVisibleRef = useRef(showHint);
+  const dismissHint = useCallback(() => {
+    if (!hintVisibleRef.current) return;
+    hintVisibleRef.current = false;
+    setShowHint(false);
+    try {
+      localStorage.setItem(SELECT_HINT_KEY, 'dismissed');
+    } catch {
+      // storage unavailable — the chip just comes back next visit
+    }
+  }, []);
+
+  /** Single funnel for selection changes: keeps the ref mirror and
+   * selectionMode in sync, so the mode can never outlive an empty selection. */
+  const applySelection = useCallback(
+    (next: Set<string>) => {
+      selectedRecipesRef.current = next;
+      setSelectedRecipes(next);
+      setSelectionMode(next.size > 0);
+      if (next.size > 0) dismissHint();
+    },
+    [dismissHint]
+  );
+
+  const exitSelectionMode = useCallback(() => {
+    anchorIdRef.current = null;
+    applySelection(new Set());
+  }, [applySelection]);
   const [showAddToCollection, setShowAddToCollection] = useState(false);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [bulkEditTags, setBulkEditTags] = useState('');
@@ -280,22 +323,160 @@ export default function RecipesPage() {
     loadRecipes(1);
   }, [loadRecipes]);
 
-  const toggleRecipeSelection = (id: string) => {
-    const newSelection = new Set(selectedRecipes);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
+  // Esc exits selection mode (#90).
+  useEffect(() => {
+    if (!selectionMode) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') exitSelectionMode();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [selectionMode, exitSelectionMode]);
+
+  // Filter hygiene (#90): changing the search query or any filter clears the
+  // selection — the selected recipes may no longer be on screen. (Runs on
+  // mount too, where clearing an empty selection is a no-op.)
+  useEffect(() => {
+    exitSelectionMode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    searchQuery,
+    selectedCategories,
+    selectedDietaryTags,
+    includeIngredients,
+    excludeIngredients,
+    minCalories,
+    maxCalories,
+    minProtein,
+    maxProtein,
+    selectedSource,
+  ]);
+
+  /** Toggle one recipe, or — with Shift held and a live anchor — apply the
+   * anchor's selected state to the whole range between anchor and target,
+   * using the order of the currently displayed recipes. */
+  const toggleRecipeSelection = (id: string, range = false) => {
+    const current = selectedRecipesRef.current;
+    const anchorId = anchorIdRef.current;
+    const anchorIdx = anchorId ? recipes.findIndex((r) => r.id === anchorId) : -1;
+    const targetIdx = recipes.findIndex((r) => r.id === id);
+    if (range && anchorIdx >= 0 && targetIdx >= 0 && anchorId !== id) {
+      const makeSelected = current.has(anchorId as string);
+      const next = new Set(current);
+      const [from, to] =
+        anchorIdx < targetIdx ? [anchorIdx, targetIdx] : [targetIdx, anchorIdx];
+      for (let i = from; i <= to; i++) {
+        if (makeSelected) {
+          next.add(recipes[i].id);
+        } else {
+          next.delete(recipes[i].id);
+        }
+      }
+      applySelection(next);
+      return; // a range op never moves the anchor
     }
-    setSelectedRecipes(newSelection);
+    const next = new Set(current);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    anchorIdRef.current = id;
+    applySelection(next);
   };
 
-  const toggleSelectAll = () => {
-    if (selectedRecipes.size === recipes.length) {
-      setSelectedRecipes(new Set());
+  /** "Select page (N)" in the bulk bar: selects every recipe on the current
+   * page — or, if the page is already fully selected, deselects just it. */
+  const handleSelectPage = () => {
+    const pageIds = recipes.map((r) => r.id);
+    const current = selectedRecipesRef.current;
+    const allSelected =
+      pageIds.length > 0 && pageIds.every((id) => current.has(id));
+    const next = new Set(current);
+    if (allSelected) {
+      pageIds.forEach((id) => next.delete(id));
     } else {
-      setSelectedRecipes(new Set(recipes.map((r) => r.id)));
+      pageIds.forEach((id) => next.add(id));
     }
+    applySelection(next);
+  };
+
+  /* ---- Long-press entry (touch/pen) ----
+   * pointerdown starts a 500ms timer; a >10px move (scrolling), pointerup,
+   * cancel, or leave cancels it. When it fires, the card is selected and the
+   * synthetic click that trails the gesture on THAT card is swallowed via
+   * pressFiredRef (keyed by recipe id, so a later tap elsewhere is never
+   * eaten). */
+  const pressTimerRef = useRef<number | null>(null);
+  const pressStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pressFiredRef = useRef<string | null>(null);
+
+  const clearPressTimer = () => {
+    if (pressTimerRef.current !== null) {
+      window.clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+  };
+
+  const handleCardPointerDown = (e: React.PointerEvent, id: string) => {
+    if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+    pressStartRef.current = { x: e.clientX, y: e.clientY };
+    pressFiredRef.current = null;
+    clearPressTimer();
+    pressTimerRef.current = window.setTimeout(() => {
+      pressTimerRef.current = null;
+      pressFiredRef.current = id;
+      anchorIdRef.current = id;
+      const next = new Set(selectedRecipesRef.current);
+      next.add(id);
+      applySelection(next);
+    }, 500);
+  };
+
+  const handleCardPointerMove = (e: React.PointerEvent) => {
+    if (!pressStartRef.current) return;
+    const dx = e.clientX - pressStartRef.current.x;
+    const dy = e.clientY - pressStartRef.current.y;
+    if (Math.hypot(dx, dy) > 10) {
+      clearPressTimer();
+      pressStartRef.current = null;
+    }
+  };
+
+  const handleCardPointerEnd = () => {
+    clearPressTimer();
+    pressStartRef.current = null;
+  };
+
+  const handleCardContextMenu = (e: React.MouseEvent, id: string) => {
+    // While a long-press is pending or has just fired on this card, the
+    // browser wants to open a context menu instead — suppress it so the
+    // gesture wins.
+    if (pressFiredRef.current === id || pressStartRef.current) {
+      e.preventDefault();
+    }
+  };
+
+  /** Card clicks: swallow the click trailing a long-press on that same card;
+   * while selecting, toggle instead of navigating. Clicks on the checkbox
+   * button itself are left for the button's own handler. */
+  const handleCardClickCapture = (e: React.MouseEvent, id: string) => {
+    if (pressFiredRef.current !== null) {
+      const firedId = pressFiredRef.current;
+      pressFiredRef.current = null;
+      if (firedId === id) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      // The trailing click never arrived (e.g. the browser turned the
+      // long-press into a suppressed context menu) — don't eat this one.
+    }
+    if (!selectionMode) return;
+    if ((e.target as HTMLElement).closest('[data-recipe-select]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    toggleRecipeSelection(id, e.shiftKey);
   };
 
   const handleBulkDelete = async () => {
@@ -309,7 +490,7 @@ export default function RecipesPage() {
 
     try {
       await recipeApi.bulkDelete(Array.from(selectedRecipes));
-      exitBulkSelectMode();
+      exitSelectionMode();
       loadRecipes(1);
       toast.success(`Deleted ${count} recipe${count === 1 ? '' : 's'}.`);
     } catch (error) {
@@ -338,11 +519,10 @@ export default function RecipesPage() {
         Array.from(selectedRecipes),
         { tags: tags.length > 0 ? tags : undefined, categories: categories.length > 0 ? categories : undefined }
       );
-      setSelectedRecipes(new Set());
       setShowBulkEdit(false);
       setBulkEditTags('');
       setBulkEditCategories('');
-      setBulkSelectMode(false);
+      exitSelectionMode();
       loadRecipes(1);
     } catch (error) {
       console.error('Failed to update recipes:', error);
@@ -400,20 +580,6 @@ export default function RecipesPage() {
         subtitle={`${total} delicious recipes`}
         secondaryActions={
           <>
-            <button
-              onClick={() =>
-                bulkSelectMode ? exitBulkSelectMode() : setBulkSelectMode(true)
-              }
-              className={`rounded-lg border px-4 py-2 font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${
-                bulkSelectMode
-                  ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
-                  : 'border-border bg-background text-foreground hover:bg-accent'
-              }`}
-              aria-label={bulkSelectMode ? 'Exit bulk select mode' : 'Select recipes for bulk actions'}
-              aria-pressed={bulkSelectMode}
-            >
-              {bulkSelectMode ? 'Done' : 'Select'}
-            </button>
             <button
               onClick={() => void openAIGenerate()}
               className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
@@ -538,17 +704,6 @@ export default function RecipesPage() {
               selected={selectedDietaryTags}
               onChange={setSelectedDietaryTags}
             />
-          )}
-          {recipes.length > 0 && bulkSelectMode && (
-            <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={selectedRecipes.size === recipes.length && recipes.length > 0}
-                onChange={toggleSelectAll}
-                className="w-4 h-4 rounded border-input text-primary focus:ring-2 focus:ring-primary"
-              />
-              <span className="text-sm text-muted-foreground">Select page</span>
-            </label>
           )}
           {isAdmin && (
             <Link
@@ -921,11 +1076,38 @@ export default function RecipesPage() {
         </section>
       )}
 
+      {/* Selection hint (#90): one-time, dismissible; also auto-dismisses the
+          first time selection mode is entered. */}
+      {showHint && recipes.length > 0 && (
+        <div
+          className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-primary/25 bg-primary/5 px-4 py-2.5"
+          role="note"
+        >
+          <p className="text-sm text-foreground">
+            Tip: hover or press-and-hold a recipe to select several at once
+          </p>
+          <button
+            type="button"
+            onClick={dismissHint}
+            aria-label="Dismiss tip"
+            className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* Recipe Grid */}
       <span className="sr-only" role="status" aria-live="polite">
         {initialLoading
           ? 'Loading recipes'
           : `${total} ${total === 1 ? 'recipe' : 'recipes'} found${hasActiveFilters ? ' for current filters' : ''}`}
+      </span>
+      {/* Selection announcements for screen readers (#90) */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {selectionMode
+          ? `${selectedRecipes.size} ${selectedRecipes.size === 1 ? 'recipe' : 'recipes'} selected`
+          : ''}
       </span>
       {isRefreshing && (
         <div
@@ -973,22 +1155,42 @@ export default function RecipesPage() {
                     ? 'border-primary ring-2 ring-primary/20'
                     : 'border-border hover:border-primary/30'
                 }`}
+                onClickCapture={(e) => handleCardClickCapture(e, recipe.id)}
+                onPointerDown={(e) => handleCardPointerDown(e, recipe.id)}
+                onPointerMove={handleCardPointerMove}
+                onPointerUp={handleCardPointerEnd}
+                onPointerCancel={handleCardPointerEnd}
+                onPointerLeave={handleCardPointerEnd}
+                onContextMenu={(e) => handleCardContextMenu(e, recipe.id)}
               >
-                {/* Selection Checkbox — only in bulk-select mode */}
-                {bulkSelectMode && (
-                  <div className="absolute top-3 left-3 z-10">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleRecipeSelection(recipe.id);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-5 h-5 rounded border-2 border-white bg-white/90 text-primary shadow-md focus:ring-2 focus:ring-primary cursor-pointer"
-                    />
-                  </div>
-                )}
+                {/* Selection checkbox (#90): a round toggle revealed on hover
+                    or focus while browsing; always visible in selection
+                    mode. Pointer-events follow the same rule so the hidden
+                    button can't intercept clicks meant for the card. */}
+                <button
+                  type="button"
+                  data-recipe-select={recipe.id}
+                  role="checkbox"
+                  aria-checked={isSelected}
+                  aria-label={`Select recipe: ${recipe.title}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleRecipeSelection(recipe.id, e.shiftKey);
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className={`absolute top-3 left-3 z-10 flex h-[26px] w-[26px] items-center justify-center rounded-full shadow-md transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                    selectionMode
+                      ? 'opacity-100'
+                      : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100'
+                  } ${
+                    isSelected
+                      ? 'border-2 border-white bg-primary text-primary-foreground'
+                      : 'border-2 border-white bg-white/90 text-transparent ring-1 ring-black/10'
+                  }`}
+                >
+                  <Check className="h-4 w-4" strokeWidth={3.5} aria-hidden="true" />
+                </button>
 
                 <Link
                   to={`/recipes/${recipe.id}`}
@@ -1193,27 +1395,30 @@ export default function RecipesPage() {
         total={total}
         pageSize={20}
         itemCount={recipes.length}
-        onPageChange={(p) => loadRecipes(p)}
+        onPageChange={(p) => {
+          // Page changes clear the selection (#90); "load more" appends and
+          // keeps it, since everything selected stays on screen.
+          exitSelectionMode();
+          loadRecipes(p);
+        }}
         onLoadMore={() => loadRecipes(page + 1, true)}
         isLoading={isRefreshing}
       />
 
-      {/* Floating Bulk Action Bar — only while doing bulk actions */}
-      {bulkSelectMode && selectedRecipes.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-primary/30 bg-card/95 backdrop-blur-sm shadow-selection">
-          <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-foreground">
-                {selectedRecipes.size} recipe(s) selected
-              </span>
-              <button
-                onClick={() => setSelectedRecipes(new Set())}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                Clear selection
-              </button>
-            </div>
-            <div className="flex gap-2">
+      {/* Floating Bulk Action Bar — floats above the mobile bottom tab bar */}
+      {selectionMode && selectedRecipes.size > 0 && (
+        <div className="fixed inset-x-3 bottom-24 z-40 sm:inset-x-6 lg:inset-x-auto lg:bottom-6 lg:left-1/2 lg:w-auto lg:max-w-3xl lg:-translate-x-1/2">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-primary/30 bg-card/95 px-4 py-3 shadow-selection backdrop-blur-sm">
+            <span className="text-sm font-medium text-foreground">
+              {selectedRecipes.size} recipe(s) selected
+            </span>
+            <button
+              onClick={handleSelectPage}
+              className="text-sm font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded"
+            >
+              Select page ({recipes.length})
+            </button>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setShowBulkEdit(true)}
                 className="rounded-lg bg-background border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent shadow-sm transition-all"
@@ -1233,6 +1438,13 @@ export default function RecipesPage() {
                 Delete Selected
               </button>
             </div>
+            <button
+              onClick={exitSelectionMode}
+              aria-label="Clear selection"
+              className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
       )}
@@ -1242,7 +1454,7 @@ export default function RecipesPage() {
         <AddToCollectionDialog
           recipeIds={Array.from(selectedRecipes)}
           onClose={() => setShowAddToCollection(false)}
-          onAdded={() => exitBulkSelectMode()}
+          onAdded={() => exitSelectionMode()}
         />
       )}
     </div>
