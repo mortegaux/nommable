@@ -70,6 +70,34 @@ export class AIService {
     return aiConfigRepo.findOne({ where: { isGlobal: true } });
   }
 
+  /**
+   * Providers whose keys are configured in the server environment. Those
+   * keys belong to whoever operates the server (the "managed" key on a
+   * hosted instance), never to instance settings stored in the database.
+   */
+  static getManagedEnvProviders(): AIProvider[] {
+    const providers: AIProvider[] = [];
+    if (config.ai.openai.apiKey) providers.push('openai');
+    if (config.ai.anthropic.apiKey) providers.push('anthropic');
+    if (config.ai.google.apiKey) providers.push('google');
+    if (config.ai.openrouter.apiKey) providers.push('openrouter');
+    return providers;
+  }
+
+  /**
+   * A managed instance runs on operator-provided env keys and has no
+   * admin-saved global config — the setup wizard's Managed AI choice
+   * deliberately leaves the global row absent so resolution falls back
+   * to the environment. On such an instance the shared/per-user key
+   * settings do not apply: AI is already provided, and usage is metered
+   * by user credits instead.
+   */
+  static async isManagedInstance(): Promise<boolean> {
+    if (this.getManagedEnvProviders().length === 0) return false;
+    const globalConfig = await this.getGlobalConfig();
+    return !globalConfig;
+  }
+
   /** A user's own BYOK config row (isGlobal = false), if they saved one. */
   static async getUserConfig(userId: string): Promise<AIConfig | null> {
     const aiConfigRepo = AppDataSource.getRepository(AIConfig);

@@ -3,6 +3,14 @@ import { aiApi } from '@/services/api';
 import { invalidateAIStatus } from '@/hooks/useAIStatus';
 import type { AIProvider, AIModelInfo, AIMode } from '@nommable/shared';
 
+/** Display names for providers an operator may configure via env keys. */
+const ENV_PROVIDER_LABELS: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google AI',
+  openrouter: 'OpenRouter',
+};
+
 /** What a single key from each provider actually unlocks in Nommable. */
 const PROVIDER_COVERAGE: Record<string, string> = {
   openai: 'This key covers: recipe text, photo features (vision), and image generation.',
@@ -13,6 +21,11 @@ const PROVIDER_COVERAGE: Record<string, string> = {
 };
 
 export default function AISettingsPage({ hideHeader = false }: { hideHeader?: boolean }) {
+  // Managed instance: AI is provided by the operator's server-side key, so
+  // there is no key configuration to show — the page renders an info panel
+  // instead of the form (see the `managed` branch in loadConfig/render).
+  const [managed, setManaged] = useState(false);
+  const [envProviders, setEnvProviders] = useState<string[]>([]);
   const [provider, setProvider] = useState<AIProvider>('openai');
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('');
@@ -101,6 +114,16 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
       setLoading(true);
       const response = await aiApi.getConfig();
       const config = response.data;
+
+      // Managed instance: the backend reports the managed state with a 200
+      // instead of a saved config. There are no key settings to load.
+      if (config.managed) {
+        setManaged(true);
+        setEnvProviders(Array.isArray(config.envProviders) ? config.envProviders : []);
+        setHasExisting(false);
+        return;
+      }
+
       const loadedProvider = config.provider as AIProvider;
       const loadedModel = config.model || '';
       const loadedImageModel = config.imageModel || '';
@@ -266,6 +289,40 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading AI settings...</div>
+      </div>
+    );
+  }
+
+  if (managed) {
+    return (
+      <div className={hideHeader ? '' : 'mx-auto max-w-2xl'}>
+        {!hideHeader && <h1 className="mb-6 text-3xl font-bold text-foreground">AI Settings</h1>}
+
+        <div className="rounded-lg bg-card border border-border p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-foreground">Managed AI</h2>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              This instance uses a managed AI key provided by the operator, so AI
+              features are already enabled. Usage draws from each user&apos;s AI
+              credits.
+            </p>
+            <p>
+              Site-wide and per-user API keys are not available on a managed
+              instance — there is no key to configure here. Provider and key
+              settings are controlled by the operator through the server
+              environment; to use a different key, the operator updates the
+              server configuration.
+            </p>
+            {envProviders.length > 0 && (
+              <p>
+                Operator-configured provider key{envProviders.length > 1 ? 's' : ''}:{' '}
+                <span className="font-medium text-foreground">
+                  {envProviders.map((p) => ENV_PROVIDER_LABELS[p] ?? p).join(', ')}
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

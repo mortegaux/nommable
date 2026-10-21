@@ -25,6 +25,24 @@ export class AIController {
       const config = await aiConfigRepo.findOne({ where: { isGlobal: true } });
 
       if (!config) {
+        // Managed instance: no admin-saved config, but AI is provided by
+        // the operator's env keys. Report the managed state instead of a
+        // 404 so the settings UI shows that state rather than a key form
+        // whose saved config would silently override the managed key.
+        if (await AIService.isManagedInstance()) {
+          return res.json({
+            managed: true,
+            envProviders: AIService.getManagedEnvProviders(),
+            provider: null,
+            model: null,
+            imageModel: null,
+            baseUrl: null,
+            enabled: true,
+            aiMode: 'shared',
+            hasApiKey: false,
+            hasImageApiKey: false,
+          });
+        }
         return res.status(404).json({ error: 'AI configuration not found' });
       }
 
@@ -39,6 +57,7 @@ export class AIController {
         aiMode: config.aiMode ?? 'shared',
         hasApiKey: !!config.apiKey,
         hasImageApiKey: !!config.imageApiKey,
+        managed: false,
       });
     } catch (error) {
       next(error);
@@ -47,6 +66,16 @@ export class AIController {
 
   async createConfig(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      // On a managed instance the operator's env key is the AI source;
+      // an admin-saved config would silently override it, so key settings
+      // are not accepted here.
+      if (await AIService.isManagedInstance()) {
+        throw new AppError(
+          403,
+          'This instance uses Managed AI provided by the operator, so site-wide and per-user API keys are disabled. AI key settings are controlled through the server environment.'
+        );
+      }
+
       const { provider, apiKey, model, imageModel, imageApiKey, baseUrl, enabled, aiMode } = req.body;
 
       if (aiMode !== undefined && !AI_MODES.includes(aiMode)) {
@@ -195,11 +224,26 @@ export class AIController {
       const aiConfigRepo = AppDataSource.getRepository(AIConfig);
       const config = await aiConfigRepo.findOne({ where: { isGlobal: true } });
 
+      if (!config && (await AIService.isManagedInstance())) {
+        // Managed instance: AI works via the operator's env keys even
+        // though no config row exists — report it as configured so AI
+        // features light up instead of showing "not configured".
+        const envProviders = AIService.getManagedEnvProviders();
+        return res.json({
+          isConfigured: true,
+          isEnabled: true,
+          provider: envProviders[0] ?? null,
+          mode: 'shared' as AIMode,
+          managed: true,
+        });
+      }
+
       res.json({
         isConfigured: !!config,
         isEnabled: !!config?.enabled,
         provider: config?.provider ?? null,
         mode: (config?.aiMode ?? 'shared') as AIMode,
+        managed: false,
       });
     } catch (error) {
       next(error);

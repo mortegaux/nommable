@@ -202,7 +202,7 @@ export const recipeApi = {
 
 // AI API
 export const aiApi = {
-  getStatus: () => api.get<{ isConfigured: boolean; isEnabled: boolean; provider: string | null; mode: AIMode }>('/ai/status'),
+  getStatus: () => api.get<{ isConfigured: boolean; isEnabled: boolean; provider: string | null; mode: AIMode; managed?: boolean }>('/ai/status'),
   getConfig: () => api.get('/ai/config'),
   // Per-user (BYOK) key management — available to any authenticated user
   getMyConfig: () => api.get<UserAIKeyConfig>('/ai/my-config'),
