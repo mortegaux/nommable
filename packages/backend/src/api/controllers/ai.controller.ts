@@ -219,31 +219,49 @@ export class AIController {
     }
   }
 
-  async getStatus(_req: AuthRequest, res: Response, next: NextFunction) {
+  async getStatus(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const aiConfigRepo = AppDataSource.getRepository(AIConfig);
-      const config = await aiConfigRepo.findOne({ where: { isGlobal: true } });
+      const mode = await AIService.getAIMode();
+      const userConfig = req.userId ? await AIService.getUserConfig(req.userId) : null;
+      const hasPersonalKey = !!userConfig?.enabled;
 
-      if (!config && (await AIService.isManagedInstance())) {
-        // Managed instance: AI works via the operator's env keys even
-        // though no config row exists — report it as configured so AI
-        // features light up instead of showing "not configured".
+      if (mode === 'managed') {
+        // Managed instance: AI works via the operator's env keys (or the
+        // caller's own key when they saved one) even though no config row
+        // exists — report it as configured so AI features light up.
         const envProviders = AIService.getManagedEnvProviders();
         return res.json({
           isConfigured: true,
           isEnabled: true,
-          provider: envProviders[0] ?? null,
-          mode: 'shared' as AIMode,
+          provider: hasPersonalKey ? (userConfig?.provider ?? null) : (envProviders[0] ?? null),
+          mode,
           managed: true,
+          hasPersonalKey,
         });
       }
 
+      if (mode === 'per-user') {
+        // Readiness is per user in this mode: the global row alone does not
+        // mean THIS caller can use AI — only their own enabled key does.
+        return res.json({
+          isConfigured: hasPersonalKey,
+          isEnabled: hasPersonalKey,
+          provider: userConfig?.provider ?? null,
+          mode,
+          managed: false,
+          hasPersonalKey,
+        });
+      }
+
+      const aiConfigRepo = AppDataSource.getRepository(AIConfig);
+      const config = await aiConfigRepo.findOne({ where: { isGlobal: true } });
       res.json({
-        isConfigured: !!config,
+        isConfigured: !!config?.enabled,
         isEnabled: !!config?.enabled,
         provider: config?.provider ?? null,
-        mode: (config?.aiMode ?? 'shared') as AIMode,
+        mode,
         managed: false,
+        hasPersonalKey,
       });
     } catch (error) {
       next(error);
@@ -288,6 +306,7 @@ export class AIController {
 
       const substitutions = await resolution.provider.substituteIngredient(ingredient, reason, recipeContext);
 
+      await AIService.consumeManagedCredit(req.userId);
       res.json({ substitutions });
     } catch (error) {
       next(error);
@@ -321,12 +340,14 @@ export class AIController {
 
   /**
    * Save (create or update) the caller's own AI key. The key is encrypted at rest
-   * with the existing encryption util. Rejected when the instance uses shared mode.
+   * with the existing encryption util. Rejected only in shared mode; allowed
+   * in per-user mode and on managed instances (where a personal key takes
+   * over from the operator's key and is never credit-metered).
    */
   async saveMyConfig(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const mode = await AIService.getAIMode();
-      if (mode !== 'per-user') {
+      if (mode === 'shared') {
         throw new AppError(
           403,
           'Personal AI keys are disabled on this instance: it uses the shared AI key configured by your admin.'
@@ -397,7 +418,7 @@ export class AIController {
   async deleteMyConfig(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const mode = await AIService.getAIMode();
-      if (mode !== 'per-user') {
+      if (mode === 'shared') {
         throw new AppError(
           403,
           'Personal AI keys are disabled on this instance: it uses the shared AI key configured by your admin.'
@@ -423,7 +444,7 @@ export class AIController {
   async testMyConfig(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const mode = await AIService.getAIMode();
-      if (mode !== 'per-user') {
+      if (mode === 'shared') {
         throw new AppError(
           403,
           'Personal AI keys are disabled on this instance: it uses the shared AI key configured by your admin.'

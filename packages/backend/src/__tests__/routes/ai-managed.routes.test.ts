@@ -3,6 +3,9 @@ import { createApp } from '../../app';
 import { SystemSettingsService } from '../../services/settings/system-settings.service';
 import { EmailService } from '../../services/email/email.service';
 import { config } from '../../config';
+import { AppDataSource } from '../../db/data-source';
+import { User } from '../../db/entities/User';
+import { AIService } from '../../services/ai';
 
 const app = createApp();
 
@@ -101,5 +104,68 @@ describe('Managed instance AI settings (/api/ai)', () => {
       .send({ provider: 'openai', apiKey: 'sk-admin-key', aiMode: 'shared' });
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/Managed AI/);
+  });
+
+  it('managed status reports the managed mode', async () => {
+    (config.ai.openai as { apiKey?: string }).apiKey = 'test-managed-key';
+
+    const status = await request(app)
+      .get('/api/ai/status')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(status.status).toBe(200);
+    expect(status.body.mode).toBe('managed');
+    expect(status.body.managed).toBe(true);
+    expect(status.body.hasPersonalKey).toBe(false);
+  });
+
+  it('google-only env key: feature resolution passes the config gate (zero balance -> 402, not AI_NOT_CONFIGURED)', async () => {
+    (config.ai.google as { apiKey?: string }).apiKey = 'test-google-key';
+
+    const userRepo = AppDataSource.getRepository(User);
+    const admin = await userRepo.findOne({ where: { username: 'aiadmin' } });
+    await userRepo.update({ id: admin!.id }, { creditsRemaining: 0 });
+
+    const res = await request(app)
+      .post('/api/ai/substitute-ingredient')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ ingredient: 'butter' });
+    expect(res.status).toBe(402);
+    expect(res.body.code).toBe('OUT_OF_CREDITS');
+  });
+
+  it('managed: a personal key can be saved and exempts the user from metering', async () => {
+    (config.ai.openai as { apiKey?: string }).apiKey = 'test-managed-key';
+
+    const put = await request(app)
+      .put('/api/ai/my-config')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ provider: 'google', apiKey: 'my-own-key' });
+    expect(put.status).toBe(200);
+    expect(put.body.mode).toBe('managed');
+    expect(put.body.hasApiKey).toBe(true);
+
+    const status = await request(app)
+      .get('/api/ai/status')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(status.body.hasPersonalKey).toBe(true);
+    expect(status.body.mode).toBe('managed');
+
+    const userRepo = AppDataSource.getRepository(User);
+    const admin = await userRepo.findOne({ where: { username: 'aiadmin' } });
+    await userRepo.update({ id: admin!.id }, { creditsRemaining: 5 });
+    await AIService.consumeManagedCredit(admin!.id);
+    const after = await userRepo.findOne({ where: { id: admin!.id } });
+    expect(after!.creditsRemaining).toBe(5);
+  });
+
+  it('managed: consumeManagedCredit charges a metered user exactly one credit', async () => {
+    (config.ai.openai as { apiKey?: string }).apiKey = 'test-managed-key';
+
+    const userRepo = AppDataSource.getRepository(User);
+    const admin = await userRepo.findOne({ where: { username: 'aiadmin' } });
+    await userRepo.update({ id: admin!.id }, { creditsRemaining: 5 });
+    await AIService.consumeManagedCredit(admin!.id);
+    const after = await userRepo.findOne({ where: { id: admin!.id } });
+    expect(after!.creditsRemaining).toBe(4);
   });
 });
