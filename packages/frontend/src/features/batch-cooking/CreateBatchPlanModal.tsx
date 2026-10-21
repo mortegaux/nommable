@@ -174,7 +174,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
             </div>
 
           {/* Content */}
-          <div className="overflow-y-auto max-h-[calc(90vh-250px)]">
+          <div>
             {/* Basic Info Tab */}
             {activeTab === 'basic' && (
               <div className="space-y-4">

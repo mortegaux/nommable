@@ -52,6 +52,28 @@ export type AIProviderResolution =
  * Per-user mode without a personal key -> 403 with a machine-readable code so the
  * frontend can render an inline "add your API key" prompt instead of a raw error.
  */
+export const AI_PROVIDER_ERROR_CODE = 'AI_PROVIDER_ERROR';
+
+/**
+ * Convert an error thrown by an AI provider call into a 502 AppError that
+ * carries the provider's own message — so the user sees "Incorrect API key
+ * provided" or "model not found" instead of a generic 500. AppErrors (our
+ * own operational errors) pass through untouched.
+ */
+export function providerError(error: any): AppError {
+  if (error instanceof AppError) return error;
+  const providerMessage =
+    error?.response?.data?.error?.message ||
+    error?.response?.data?.message ||
+    (typeof error?.message === 'string' && error.message ? error.message : '') ||
+    'Unknown provider error';
+  const trimmed =
+    providerMessage.length > 300 ? `${providerMessage.slice(0, 300)}…` : providerMessage;
+  const err = new AppError(502, `AI provider error: ${trimmed}`);
+  (err as any).code = AI_PROVIDER_ERROR_CODE;
+  return err;
+}
+
 export function sendAIUnavailable(res: Response, failure: AIResolutionFailure): Response {
   if (failure.reason === 'no-user-key') {
     return res.status(403).json({ error: AI_KEY_REQUIRED_MESSAGE, code: AI_KEY_REQUIRED_CODE });
