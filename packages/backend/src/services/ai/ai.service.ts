@@ -31,14 +31,20 @@ import { IAIProvider } from './types';
 export const AI_KEY_REQUIRED_CODE = 'AI_KEY_REQUIRED';
 export const AI_KEY_REQUIRED_MESSAGE =
   'AI is not configured for your account. Add your API key in Settings to enable AI features.';
+export const AI_OUT_OF_CREDITS_CODE = 'OUT_OF_CREDITS';
+export const AI_OUT_OF_CREDITS_MESSAGE =
+  'Out of AI credits. Add your own API key in Settings for unlimited use, or contact your admin for more credits.';
 
 export interface AIResolutionFailure {
   mode: AIMode;
-  reason: 'no-user-key' | 'not-configured';
+  reason: 'no-user-key' | 'not-configured' | 'out-of-credits';
 }
 
+/** Where a resolved provider draws its key from — drives credit metering. */
+export type AIProviderSource = 'personal' | 'instance' | 'managed';
+
 export type AIProviderResolution =
-  | { ok: true; provider: IAIProvider; mode: AIMode }
+  | { ok: true; provider: IAIProvider; mode: AIMode; source: AIProviderSource }
   | ({ ok: false } & AIResolutionFailure);
 
 /**
@@ -50,6 +56,9 @@ export function sendAIUnavailable(res: Response, failure: AIResolutionFailure): 
   if (failure.reason === 'no-user-key') {
     return res.status(403).json({ error: AI_KEY_REQUIRED_MESSAGE, code: AI_KEY_REQUIRED_CODE });
   }
+  if (failure.reason === 'out-of-credits') {
+    return res.status(402).json({ error: AI_OUT_OF_CREDITS_MESSAGE, code: AI_OUT_OF_CREDITS_CODE });
+  }
   return res.status(400).json({ error: 'AI provider not configured', code: 'AI_NOT_CONFIGURED' });
 }
 
@@ -58,10 +67,19 @@ export class AIService {
   private static modelCache: Map<string, { timestamp: number; models: AIModelInfo[] }> = new Map();
   private static readonly MODEL_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-  /** Read the instance key mode from the global AI config row (defaults to 'shared'). */
+  /**
+   * The instance's effective AI mode:
+   * - a saved global config row decides 'shared' vs 'per-user';
+   * - no global row + at least one provider key in the server environment is
+   *   'managed' (the operator's env key serves everyone, metered by credits);
+   * - no global row and no env key falls back to unconfigured 'shared'.
+   */
   static async getAIMode(): Promise<AIMode> {
     const globalConfig = await this.getGlobalConfig();
-    return globalConfig?.aiMode === 'per-user' ? 'per-user' : 'shared';
+    if (globalConfig) {
+      return globalConfig.aiMode === 'per-user' ? 'per-user' : 'shared';
+    }
+    return this.getManagedEnvProviders().length > 0 ? 'managed' : 'shared';
   }
 
   /** The single admin-managed, instance-wide AI config (isGlobal = true). */
@@ -104,30 +122,68 @@ export class AIService {
     return aiConfigRepo.findOne({ where: { userId, isGlobal: false } });
   }
 
-  static async deductCredit(userId?: string): Promise<void> {
-    if (!userId) return;
+  /** Priority order when several provider keys exist in the server environment. */
+  private static readonly ENV_PROVIDER_PRIORITY: AIProvider[] = [
+    'openai',
+    'google',
+    'anthropic',
+    'openrouter',
+  ];
+
+  /** Default text model per provider for environment-key (managed) resolution. */
+  private static readonly ENV_DEFAULT_MODELS: Record<string, string> = {
+    openai: 'gpt-4o-mini',
+    google: 'gemini-2.0-flash',
+    anthropic: 'claude-3-5-haiku-20241022',
+    openrouter: 'openai/gpt-4o-mini',
+  };
+
+  /** The env-key provider a managed/shared fallback should use, if any. */
+  static pickEnvProvider(): { provider: AIProvider; model: string } | null {
+    const available = this.getManagedEnvProviders();
+    for (const provider of this.ENV_PROVIDER_PRIORITY) {
+      if (available.includes(provider)) {
+        return { provider, model: this.ENV_DEFAULT_MODELS[provider] };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Credit-metering state for a caller. Usage is metered only on managed
+   * instances, and never when the caller uses their own enabled personal key.
+   */
+  static async getManagedCreditState(
+    userId?: string
+  ): Promise<{ metered: boolean; balance: number }> {
+    if (!userId) return { metered: false, balance: 0 };
+    if (!(await this.isManagedInstance())) return { metered: false, balance: 0 };
+    const userConfig = await this.getUserConfig(userId);
+    if (userConfig?.enabled) return { metered: false, balance: 0 };
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({ where: { id: userId } });
-    if (!user) return;
+    return { metered: true, balance: user?.creditsRemaining ?? 0 };
+  }
 
-    const userConfig = await this.getUserConfig(userId);
-    if (userConfig && userConfig.enabled) {
-      return; // BYOK user, no credit deduction
-    }
-
-    if (user.creditsRemaining <= 0) {
-      throw new AppError(402, 'Out of AI credits. Please upgrade your plan or configure your own API key in Settings.');
-    }
-
-    user.creditsRemaining -= 1;
-    await userRepo.save(user);
+  /**
+   * Charge one credit for a successful managed AI generation. Call only after
+   * the generation succeeded; a no-op whenever the caller is not metered.
+   */
+  static async consumeManagedCredit(userId?: string): Promise<void> {
+    const state = await this.getManagedCreditState(userId);
+    if (!state.metered || state.balance <= 0) return;
+    const userRepo = AppDataSource.getRepository(User);
+    await userRepo.decrement({ id: userId! }, 'creditsRemaining', 1);
   }
 
   /**
    * Resolve the AI provider for a requesting user.
-   * - shared mode: the admin-configured global key, for everyone (legacy behavior).
-   * - per-user mode: the user's own enabled key only. No fallback to the global key;
-   *   users without a key get null (callers should 403 via resolveProvider()).
+   * - per-user mode: the user's own enabled key only. No fallback to the global
+   *   key; users without a key get null (callers should 403 via resolveProvider()).
+   * - managed mode: the user's own enabled key when they have one, otherwise
+   *   the operator's environment key (any supported provider, not just OpenAI).
+   * - shared mode: the admin-configured global key for everyone; when no global
+   *   row exists, the same environment-key fallback applies.
    */
   static async getProvider(userId?: string): Promise<IAIProvider | null> {
     const mode = await this.getAIMode();
@@ -159,30 +215,45 @@ export class AIService {
       return provider;
     }
 
-    // Shared mode: the admin-configured global key for everyone (legacy behavior).
-    // Check cache first
+    // Managed mode: a user's own enabled key wins over the operator's key.
+    if (mode === 'managed' && userId) {
+      const cacheKey = `user:${userId}`;
+      if (this.providerCache.has(cacheKey)) {
+        return this.providerCache.get(cacheKey)!;
+      }
+      const userConfig = await aiConfigRepo.findOne({
+        where: { userId, isGlobal: false, enabled: true },
+      });
+      if (userConfig) {
+        const provider = this.createProvider(userConfig, 'per-user');
+        if (provider) {
+          this.providerCache.set(cacheKey, provider);
+          return provider;
+        }
+      }
+      // No usable personal key — fall through to the operator's env key.
+    }
+
+    // Shared/managed: the admin-configured global key, or the env-key fallback.
     const cacheKey = 'shared';
     if (this.providerCache.has(cacheKey)) {
       return this.providerCache.get(cacheKey)!;
     }
 
-    let aiConfig = await aiConfigRepo.findOne({
+    const aiConfig = await aiConfigRepo.findOne({
       where: { isGlobal: true, enabled: true },
     });
 
     if (!aiConfig) {
-      const envKey = config.ai.openai.apiKey;
-      if (envKey) {
-        aiConfig = aiConfigRepo.create({
-          provider: 'openai',
-          apiKey: envKey,
-          model: 'gpt-4o-mini',
-          enabled: true,
-          isGlobal: true,
-        });
-      } else {
+      const envPick = this.pickEnvProvider();
+      if (!envPick) {
         return null;
       }
+      const provider = this.createProviderInstance(envPick.provider, undefined, envPick.model);
+      if (provider) {
+        this.providerCache.set(cacheKey, provider);
+      }
+      return provider;
     }
 
     const provider = this.createProvider(aiConfig, mode);
@@ -200,13 +271,26 @@ export class AIService {
   static async resolveProvider(userId?: string): Promise<AIProviderResolution> {
     const mode = await this.getAIMode();
     const provider = await this.getProvider(userId);
-    if (provider) {
-      return { ok: true, provider, mode };
+    if (!provider) {
+      if (mode === 'per-user') {
+        return { ok: false, mode, reason: 'no-user-key' };
+      }
+      return { ok: false, mode, reason: 'not-configured' };
     }
-    if (mode === 'per-user') {
-      return { ok: false, mode, reason: 'no-user-key' };
+
+    let source: AIProviderSource = mode === 'per-user' ? 'personal' : 'instance';
+    if (mode === 'managed') {
+      const userConfig = userId ? await this.getUserConfig(userId) : null;
+      source = userConfig?.enabled ? 'personal' : 'managed';
+      if (source === 'managed') {
+        // Metered usage: no balance, no generation (402 via sendAIUnavailable).
+        const { balance } = await this.getManagedCreditState(userId);
+        if (balance <= 0) {
+          return { ok: false, mode, reason: 'out-of-credits' };
+        }
+      }
     }
-    return { ok: false, mode, reason: 'not-configured' };
+    return { ok: true, provider, mode, source };
   }
 
   static createProviderInstance(
@@ -889,7 +973,7 @@ export class AIService {
     const imageKey = safeDecrypt(savedConfig?.imageApiKey);
 
     // In per-user mode only the user's own key may be used — never instance env keys.
-    const instanceKeysAllowed = mode === 'shared';
+    const instanceKeysAllowed = mode === 'shared' || mode === 'managed';
 
     if (isExplicitOpenAI || (!isExplicitGoogle && !isExplicitOpenRouter && savedConfig?.provider === 'openai')) {
       const openaiKey =
@@ -932,9 +1016,9 @@ export class AIService {
       return await openaiProvider.generateImage(prompt, effectiveImageModel);
     }
 
-    throw new Error(
-      'Image generation requires Google AI (Gemini/Imagen), OpenAI (DALL-E/GPT-Image), or OpenRouter. Please configure one of them in AI Settings.'
-    );
+    const notConfigured = new AppError(400, 'AI provider not configured');
+    (notConfigured as any).code = 'AI_NOT_CONFIGURED';
+    throw notConfigured;
   }
 
   static buildRecipeImagePrompt(options: {

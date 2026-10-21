@@ -13,7 +13,9 @@ export const pantryController = {
       const items = await pantryService.getAllItems(req.userId!);
       res.json(items);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      // Match the standard error shape used by the other AI endpoints
+      // instead of leaking the raw provider message.
+      res.status(500).json({ error: 'Internal server error' });
     }
   },
 
@@ -187,6 +189,7 @@ export const pantryController = {
       }
 
       const items = await provider.scanPantryFromImages(images, locationHint);
+      await AIService.consumeManagedCredit(req.userId);
       res.json({ items });
     } catch (error: any) {
       if (error.message?.includes('not supported with Ollama') || error.message?.includes('Ollama does not support vision')) {

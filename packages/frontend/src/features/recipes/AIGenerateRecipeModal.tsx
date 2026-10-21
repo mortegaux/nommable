@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { aiErrorMessage } from '@/utils/aiValidation';
 import { useNavigate } from 'react-router-dom';
 import { recipeApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
@@ -116,7 +117,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
       } else if (err.message?.includes('Network Error')) {
         errorMsg += 'Network error. Please check your connection.';
       } else {
-        errorMsg += err.response?.data?.error || 'Please check your AI configuration.';
+        errorMsg += aiErrorMessage(err, 'Please check your AI configuration.');
       }
       setError(errorMsg);
     } finally {
@@ -178,7 +179,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
       navigate(`/recipes/${recipeId}`);
     } catch (err: any) {
       console.error('Failed to generate recipe:', err);
-      setError(err.response?.data?.error || 'Failed to generate recipe. Please check your AI configuration.');
+      setError(aiErrorMessage(err, 'Failed to generate recipe. Please check your AI configuration.'));
     } finally {
       setLoading(false);
     }

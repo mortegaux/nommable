@@ -150,11 +150,20 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
         </div>
       ) : (
         <div className="rounded-lg bg-card border border-border p-6 shadow-sm">
-          <p className="mb-6 text-muted-foreground">
-            This instance uses per-user AI keys. Add your own provider key below to enable
-            AI-powered features like recipe generation, enhancements, and ingredient detection.
-            Your key is stored encrypted and is never shown to anyone else.
-          </p>
+          {mode === 'managed' ? (
+            <p className="mb-6 text-muted-foreground">
+              This instance runs on Managed AI — the operator&apos;s key powers AI features and
+              your usage draws from your AI credits. Prefer your own key? Add it below and your
+              AI features will use it instead, with no credits consumed. Your key is stored
+              encrypted and is never shown to anyone else.
+            </p>
+          ) : (
+            <p className="mb-6 text-muted-foreground">
+              This instance uses per-user AI keys. Add your own provider key below to enable
+              AI-powered features like recipe generation, enhancements, and ingredient detection.
+              Your key is stored encrypted and is never shown to anyone else.
+            </p>
+          )}
 
           {/* Status line */}
           <div

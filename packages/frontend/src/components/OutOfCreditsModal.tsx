@@ -33,19 +33,19 @@ export function OutOfCreditsModal() {
           </div>
           <div>
             <h2 className="text-lg font-semibold text-card-foreground">Out of AI Credits</h2>
-            <p className="text-xs text-muted-foreground">You have used all your free AI generation credits.</p>
+            <p className="text-xs text-muted-foreground">You have used all your AI generation credits.</p>
           </div>
         </div>
 
         <p className="text-sm text-muted-foreground mb-6">
-          To continue using AI features like recipe importing, smart meal planning, and AI food photography, you can either upgrade your plan or bring your own API key (BYOK) for unlimited usage.
+          To continue using AI features like recipe importing, smart meal planning, and AI food photography, add your own API key (BYOK) for unlimited usage — or ask your admin for more credits.
         </p>
 
         <div className="flex flex-col gap-2.5">
           <button
             onClick={() => {
               setIsOpen(false);
-              navigate('/settings');
+              navigate('/settings?tab=ai');
             }}
             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >

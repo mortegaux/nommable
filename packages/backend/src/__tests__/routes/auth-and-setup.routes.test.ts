@@ -19,7 +19,7 @@ describe('Onboarding Wizard (/api/setup) & Better Auth Session Flows', () => {
     it('returns needsSetup: true when no admin user exists', async () => {
       const res = await request(app).get('/api/setup/status');
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ needsSetup: true });
+      expect(res.body).toEqual({ needsSetup: true, managedKeyDetected: expect.any(Boolean) });
     });
 
     it('rejects setup with password shorter than 8 characters', async () => {
@@ -70,7 +70,7 @@ describe('Onboarding Wizard (/api/setup) & Better Auth Session Flows', () => {
       // Status is now needsSetup: false
       const statusRes = await request(app).get('/api/setup/status');
       expect(statusRes.status).toBe(200);
-      expect(statusRes.body).toEqual({ needsSetup: false });
+      expect(statusRes.body).toEqual({ needsSetup: false, managedKeyDetected: expect.any(Boolean) });
 
       // Re-running setup returns 403 Forbidden
       const rerunRes = await request(app)

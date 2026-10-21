@@ -184,6 +184,7 @@ export class MealPlanController {
         true // isAiGenerated flag
       );
 
+      await AIService.consumeManagedCredit(req.userId);
       res.json(mealPlan);
     } catch (error) {
       console.error('Error generating meal plan with AI:', error);
@@ -218,13 +219,20 @@ export class MealPlanController {
       console.log('[MealPlan] Generating preview for user:', req.userId);
       console.log('[MealPlan] Meal selections:', request.mealSelections.length);
 
-      const preview = await MealPlanGenerationService.generatePreview(request);
+      const preview = await MealPlanGenerationService.generatePreview(request, req.userId);
 
       console.log('[MealPlan] Preview generated successfully:', preview.previewId);
       res.json(preview);
     } catch (error: any) {
       console.error('Error generating meal plan preview:', error);
       console.error('Error stack:', error.stack);
+
+      // Standard AI availability errors carry their own status + code.
+      if (error.statusCode) {
+        return res
+          .status(error.statusCode)
+          .json({ error: error.message, ...(error.code ? { code: error.code } : {}) });
+      }
 
       // Send more helpful error messages
       if (error.message?.includes('No recipes')) {

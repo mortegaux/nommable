@@ -1,4 +1,12 @@
-import { AIService } from '../ai';
+import {
+  AIService,
+  AI_KEY_REQUIRED_MESSAGE,
+  AI_KEY_REQUIRED_CODE,
+  AI_OUT_OF_CREDITS_MESSAGE,
+  AI_OUT_OF_CREDITS_CODE,
+} from '../ai';
+import { AppError } from '../../api/middleware/error-handler';
+import type { IAIProvider } from '../ai/types';
 import { MealPlanContextService, RecipeWithScore } from './meal-plan-context.service';
 import type {
   MealPlanGenerateRequest,
@@ -14,9 +22,35 @@ export class MealPlanGenerationService {
    * Generate intelligent meal plan preview
    */
   static async generatePreview(
-    request: MealPlanGenerateRequest
+    request: MealPlanGenerateRequest,
+    userId?: string
   ): Promise<MealPlanPreview> {
     console.log('[MealPlanGeneration] Starting preview generation');
+
+    // Preview is an AI feature: resolve for the actual caller and apply the
+    // standard availability contract instead of silently substituting
+    // placeholder suggestions when the caller cannot use AI.
+    const resolution = await AIService.resolveProvider(userId);
+    if (!resolution.ok) {
+      const status =
+        resolution.reason === 'no-user-key' ? 403 : resolution.reason === 'out-of-credits' ? 402 : 400;
+      const message =
+        resolution.reason === 'no-user-key'
+          ? AI_KEY_REQUIRED_MESSAGE
+          : resolution.reason === 'out-of-credits'
+            ? AI_OUT_OF_CREDITS_MESSAGE
+            : 'AI provider not configured';
+      const code =
+        resolution.reason === 'no-user-key'
+          ? AI_KEY_REQUIRED_CODE
+          : resolution.reason === 'out-of-credits'
+            ? AI_OUT_OF_CREDITS_CODE
+            : 'AI_NOT_CONFIGURED';
+      const err = new AppError(status, message);
+      (err as any).code = code;
+      throw err;
+    }
+    const provider = resolution.provider;
 
     // Gather context about recipes, pantry, shopping list
     const context = await MealPlanContextService.gatherContext();
@@ -83,7 +117,8 @@ export class MealPlanGenerationService {
           context.shoppingListIngredients,
           request,
           usedRecipeIds,
-          usageCountByRecipeId
+          usageCountByRecipeId,
+          provider
         );
 
         mealSuggestions.push(suggestion);
@@ -117,7 +152,8 @@ export class MealPlanGenerationService {
     shoppingListIngredients: string[],
     request: MealPlanGenerateRequest,
     usedRecipeIds: Set<string> = new Set(),
-    usageCountByRecipeId: Map<string, number> = new Map()
+    usageCountByRecipeId: Map<string, number> = new Map(),
+    provider?: IAIProvider
   ): Promise<MealSuggestion> {
     // Try to find a good existing recipe first (when preferExistingRecipes is enabled, default true)
     const preferExisting = request.preferExistingRecipes ?? true;
@@ -165,11 +201,10 @@ export class MealPlanGenerationService {
       };
     }
 
-    // No suitable existing recipe, generate a new one with AI
-    const provider = await AIService.getProvider();
-
+    // No suitable existing recipe, generate a new one with AI. The provider
+    // was resolved by generatePreview for the actual caller; without one
+    // (should not happen) keep the placeholder fallback.
     if (!provider) {
-      // Fallback: return a placeholder
       return this.createPlaceholderSuggestion(date, mealType);
     }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { aiErrorMessage } from '@/utils/aiValidation';
 import { pantryApi } from '@/services/api';
 import { Dialog } from '@/components/Dialog';
 import { useToastStore } from '@/store/toast.store';
@@ -108,7 +109,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
       setStep('review');
     } catch (err: any) {
       const message =
-        err?.response?.data?.error || err?.message || 'Failed to scan photos. Please try again.';
+        aiErrorMessage(err, err?.message || 'Failed to scan photos. Please try again.');
       setError(message);
     } finally {
       setScanning(false);

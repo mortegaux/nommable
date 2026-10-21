@@ -117,9 +117,16 @@ export interface SetupCompletePayload {
 }
 
 export const setupApi = {
-  getStatus: () => api.get<{ needsSetup: boolean }>('/setup/status'),
+  getStatus: () => api.get<{ needsSetup: boolean; managedKeyDetected?: boolean }>('/setup/status'),
   complete: (data: SetupCompletePayload) =>
-    api.post<{ message: string; user: User; token: string; accessToken: string }>('/setup/complete', data),
+    api.post<{
+      message: string;
+      user: User;
+      token: string;
+      accessToken: string;
+      aiModeSelected?: string;
+      managedKeyDetected?: boolean;
+    }>('/setup/complete', data),
 };
 
 // Auth API
@@ -202,7 +209,7 @@ export const recipeApi = {
 
 // AI API
 export const aiApi = {
-  getStatus: () => api.get<{ isConfigured: boolean; isEnabled: boolean; provider: string | null; mode: AIMode; managed?: boolean }>('/ai/status'),
+  getStatus: () => api.get<{ isConfigured: boolean; isEnabled: boolean; provider: string | null; mode: AIMode; managed?: boolean; hasPersonalKey?: boolean }>('/ai/status'),
   getConfig: () => api.get('/ai/config'),
   // Per-user (BYOK) key management — available to any authenticated user
   getMyConfig: () => api.get<UserAIKeyConfig>('/ai/my-config'),

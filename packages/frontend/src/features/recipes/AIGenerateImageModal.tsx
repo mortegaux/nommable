@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { aiErrorMessage } from '@/utils/aiValidation';
 import { recipeApi } from '@/services/api';
 import { Sparkles, RefreshCw, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
@@ -81,10 +82,10 @@ export function AIGenerateImageModal({
       }
     } catch (err: any) {
       console.error('Image generation error:', err);
-      const msg =
-        err.response?.data?.error ||
-        err.message ||
-        'Failed to generate image. Please check your AI configuration in Settings.';
+      const msg = aiErrorMessage(
+        err,
+        err.message || 'Failed to generate image. Please check your AI configuration in Settings.'
+      );
       setError(msg);
     } finally {
       setLoading(false);

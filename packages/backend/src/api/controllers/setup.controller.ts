@@ -69,7 +69,12 @@ export class SetupController {
         where: { role: UserRole.ADMIN },
       });
 
-      res.json({ needsSetup: adminCount === 0 });
+      res.json({
+        needsSetup: adminCount === 0,
+        // Whether this server's environment carries a managed-AI master key,
+        // so the setup wizard can warn before the admin enables Managed AI.
+        managedKeyDetected: AIService.getManagedEnvProviders().length > 0,
+      });
     } catch (error) {
       next(error);
     }
@@ -261,6 +266,15 @@ export class SetupController {
         AIService.clearCache();
       }
 
+      // Report the AI outcome so the wizard can be honest about Managed AI:
+      // the mode the admin picked, and whether this server's environment
+      // actually carries a master key for it. Managed with no detected key
+      // means AI stays off until the operator sets one — the wizard warns.
+      const aiModeSelected = ai?.enabled
+        ? ai.mode || (ai.geminiApiKey ? 'byok' : 'managed')
+        : undefined;
+      const managedKeyDetected = AIService.getManagedEnvProviders().length > 0;
+
       // Forward the Set-Cookie headers (signed session cookie) with the
       // success response only — not on the error path.
       if (setupSetCookie?.length) {
@@ -277,6 +291,8 @@ export class SetupController {
         },
         token: accessToken,
         accessToken,
+        aiModeSelected,
+        managedKeyDetected,
       });
     } catch (error) {
       next(error);

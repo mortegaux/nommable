@@ -7,7 +7,7 @@ import { MealPlanPreviewModal } from './MealPlanPreviewModal';
 import { TemplatesModal } from './TemplatesModal';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { AIConfigAlert } from '@/components/AIConfigAlert';
-import { checkAIConfiguration, aiUnavailableMessage } from '@/utils/aiValidation';
+import { checkAIConfiguration, aiUnavailableMessage, aiErrorMessage } from '@/utils/aiValidation';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
 import { Pagination } from '@/components/Pagination';
 import { SectionTabs } from '@/components/SectionTabs';
@@ -83,7 +83,7 @@ export default function MealPlansPage() {
       setShowIntelligentGenerate(false);
     } catch (error) {
       console.error('Failed to generate meal plan:', error);
-      toast.error('Failed to generate meal plan. Please try again.');
+      toast.error(aiErrorMessage(error, 'Failed to generate meal plan. Please try again.'));
     } finally {
       setGenerating(false);
     }

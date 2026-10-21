@@ -2,7 +2,13 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest, AppError } from '../middleware';
 import { RecipeService } from '../../services/recipe';
 import { ScraperService } from '../../services/scraper';
-import { AIService, sendAIUnavailable, AI_KEY_REQUIRED_CODE } from '../../services/ai';
+import {
+  AIService,
+  sendAIUnavailable,
+  AI_KEY_REQUIRED_CODE,
+  AI_OUT_OF_CREDITS_CODE,
+  AI_OUT_OF_CREDITS_MESSAGE,
+} from '../../services/ai';
 import { RecipeCategorizerService } from '../../services/recipe/recipe-categorizer.service';
 import { RatingService } from '../../services/rating/rating.service';
 import { processImage } from '../../utils/image-processor';
@@ -309,6 +315,7 @@ export class RecipeController {
         }
       }
 
+      await AIService.consumeManagedCredit(req.userId);
       res.status(201).json(recipe);
     } catch (error) {
       next(error);
@@ -329,6 +336,8 @@ export class RecipeController {
       const { enhancementType } = req.body;
 
       const enhancement = await provider.enhanceRecipe(recipe, enhancementType);
+
+      await AIService.consumeManagedCredit(req.userId);
 
       // Strip markdown code fences if the AI wrapped the JSON in them
       const cleaned = enhancement.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/, '').trim();
@@ -393,6 +402,15 @@ export class RecipeController {
 
   async generateImage(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      // Image generation doesn't go through resolveProvider, so apply the
+      // managed credit gate explicitly.
+      const creditState = await AIService.getManagedCreditState(req.userId);
+      if (creditState.metered && creditState.balance <= 0) {
+        return res
+          .status(402)
+          .json({ error: AI_OUT_OF_CREDITS_MESSAGE, code: AI_OUT_OF_CREDITS_CODE });
+      }
+
       const { prompt, title, description, cuisine, model } = req.body || {};
       const recipeId = req.params.id ? (req.params.id as string) : undefined;
 
@@ -406,13 +424,18 @@ export class RecipeController {
         userId: req.userId,
       });
 
+      await AIService.consumeManagedCredit(req.userId);
       res.json(result);
     } catch (error: any) {
       console.error('Recipe image generation error:', error);
       const status = error.statusCode || 500;
       res.status(status).json({
         error: error.message || 'Failed to generate recipe image with AI',
-        ...(status === 403 ? { code: AI_KEY_REQUIRED_CODE } : {}),
+        ...(error.code
+          ? { code: error.code }
+          : status === 403
+            ? { code: AI_KEY_REQUIRED_CODE }
+            : {}),
       });
     }
   }
@@ -476,6 +499,7 @@ export class RecipeController {
 
       // Return the extracted recipe data for preview/editing
       // Don't save it yet - let the user review and edit first
+      await AIService.consumeManagedCredit(req.userId);
       res.json({
         ...generatedRecipe,
         categories: generatedRecipe.categories || categories,
@@ -502,6 +526,15 @@ export class RecipeController {
 
       if (!text || typeof text !== 'string' || !text.trim()) {
         return res.status(400).json({ error: 'Please paste recipe text to extract' });
+      }
+
+      // Per-user callers without a key get the standard 403 rather than a
+      // silent downgrade to the heuristic parser, and metered callers out of
+      // credits get the standard 402. Only a genuinely unconfigured instance
+      // falls through to the heuristic parser inside the service.
+      const resolution = await AIService.resolveProvider(req.userId);
+      if (!resolution.ok && resolution.reason !== 'not-configured') {
+        return sendAIUnavailable(res, resolution);
       }
 
       const generatedRecipe = await AIService.extractRecipeFromText(text.trim(), req.userId);
@@ -561,6 +594,7 @@ export class RecipeController {
         mimeType: effectiveMimeType,
       });
 
+      await AIService.consumeManagedCredit(req.userId);
       res.json({ ingredients });
     } catch (error: any) {
       // Check if it's an Ollama unsupported error
