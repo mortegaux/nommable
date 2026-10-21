@@ -28,6 +28,17 @@ function tempDbPath(): { dir: string; dbPath: string } {
   return { dir, dbPath: join(dir, 'fixture.db') };
 }
 
+/**
+ * Row counts for DATA tables only. The `migrations` bookkeeping table
+ * grows by design whenever a new migration ships, and check (a) already
+ * asserts its exact contents — so it is excluded from the "data
+ * survives" comparisons, which are about the app's own rows.
+ */
+function dataCounts(counts: Record<string, number>): Record<string, number> {
+  const { migrations: _bookkeeping, ...data } = counts;
+  return data;
+}
+
 async function upgradeWithCurrentMigrations(dbPath: string): Promise<DataSource> {
   // migrationsRun stays true from AppDataSource.options: initialize()
   // runs the CURRENT migration set against the fixture, like a real
@@ -55,9 +66,9 @@ describe.each(UPGRADE_BASELINES)('upgrade from $version', ({ version }) => {
         const currentNames = AppDataSource.migrations.map((m) => m.name).sort();
         expect(applied.map((r) => r.name)).toEqual(currentNames);
 
-        // (b) Data survives: row counts identical in every table.
+        // (b) Data survives: row counts identical in every data table.
         const after = readTableCounts(dbPath);
-        expect(after).toEqual(before.counts);
+        expect(dataCounts(after)).toEqual(dataCounts(before.counts));
 
         // (c) Schema matches: every expected table exists.
         const tables = (await dataSource.query(
@@ -82,6 +93,11 @@ describe.each(UPGRADE_BASELINES)('upgrade from $version', ({ version }) => {
           `SELECT email, username FROM "users" WHERE id = 'user-admin-1'`,
         );
         expect(admin).toEqual([{ email: 'admin@example.com', username: 'admin' }]);
+        // Rows that predate the credits migration get its default.
+        const credits = await dataSource.query(
+          `SELECT credits_remaining FROM "users" WHERE id = 'user-admin-1'`,
+        );
+        expect(credits).toEqual([{ credits_remaining: 10 }]);
         const instructions = await dataSource.query(
           `SELECT instructions FROM "recipes" WHERE id = 'recipe-1'`,
         );
@@ -111,7 +127,7 @@ describe.each(UPGRADE_BASELINES)('upgrade from $version', ({ version }) => {
       }
       const second = await upgradeWithCurrentMigrations(dbPath);
       try {
-        expect(readTableCounts(dbPath)).toEqual(before.counts);
+        expect(dataCounts(readTableCounts(dbPath))).toEqual(dataCounts(before.counts));
         const applied = (await second.query(
           `SELECT name FROM "migrations" ORDER BY name`,
         )) as Array<{ name: string }>;
