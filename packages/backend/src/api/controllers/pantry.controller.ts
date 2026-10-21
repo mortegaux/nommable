@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { PantryService } from '../../services/pantry/pantry.service';
 import { AuthRequest } from '../middleware/auth';
-import { AIService, sendAIUnavailable } from '../../services/ai/ai.service';
+import { AIService, sendAIUnavailable, providerError } from '../../services/ai/ai.service';
 import { processImage } from '../../utils/image-processor';
 import type { ImageInput } from '../../services/ai/types';
 
@@ -188,10 +188,21 @@ export const pantryController = {
         }
       }
 
-      const items = await provider.scanPantryFromImages(images, locationHint);
+      const items = await provider
+        .scanPantryFromImages(images, locationHint)
+        .catch((err) => {
+          throw providerError(err);
+        });
       await AIService.consumeManagedCredit(req.userId);
       res.json({ items });
     } catch (error: any) {
+      // Wrapped provider errors (and other AppErrors) keep their status,
+      // message, and code instead of collapsing into a generic 500.
+      if (error.statusCode) {
+        return res
+          .status(error.statusCode)
+          .json({ error: error.message, ...(error.code ? { code: error.code } : {}) });
+      }
       if (error.message?.includes('not supported with Ollama') || error.message?.includes('Ollama does not support vision')) {
         return res.status(400).json({
           error: 'Pantry photo scanning requires OpenAI (GPT-4 Vision), Anthropic (Claude 3+), or Google (Gemini). Ollama does not support vision capabilities.',

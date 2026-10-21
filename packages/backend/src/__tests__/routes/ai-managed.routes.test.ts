@@ -6,6 +6,7 @@ import { config } from '../../config';
 import { AppDataSource } from '../../db/data-source';
 import { User } from '../../db/entities/User';
 import { AIService } from '../../services/ai';
+import { OpenAIProvider } from '../../services/ai/providers/openai.provider';
 
 const app = createApp();
 
@@ -156,6 +157,24 @@ describe('Managed instance AI settings (/api/ai)', () => {
     await AIService.consumeManagedCredit(admin!.id);
     const after = await userRepo.findOne({ where: { id: admin!.id } });
     expect(after!.creditsRemaining).toBe(5);
+  });
+
+  it('managed: a provider failure surfaces as 502 AI_PROVIDER_ERROR with the provider message, not a generic 500', async () => {
+    (config.ai.openai as { apiKey?: string }).apiKey = 'test-managed-key';
+    const spy = jest
+      .spyOn(OpenAIProvider.prototype, 'substituteIngredient')
+      .mockRejectedValue(new Error('401 Incorrect API key provided'));
+    try {
+      const res = await request(app)
+        .post('/api/ai/substitute-ingredient')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ ingredient: 'butter' });
+      expect(res.status).toBe(502);
+      expect(res.body.code).toBe('AI_PROVIDER_ERROR');
+      expect(res.body.error).toMatch(/Incorrect API key provided/);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('managed: consumeManagedCredit charges a metered user exactly one credit', async () => {
