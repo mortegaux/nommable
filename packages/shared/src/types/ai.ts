@@ -5,7 +5,7 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'ollama' | 'openrou
  * - 'shared': every user uses the admin-configured key (default, legacy behavior).
  * - 'per-user': each user supplies their own key in Settings; no fallback to the shared key.
  */
-export type AIMode = 'shared' | 'per-user';
+export type AIMode = 'shared' | 'per-user' | 'managed';
 
 export interface AIModelInfo {
   id: string;
