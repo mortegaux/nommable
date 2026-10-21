@@ -141,3 +141,37 @@ describe('AISettingsPage — OpenRouter (issue #61)', () => {
     );
   });
 });
+
+describe('AISettingsPage — managed instance', () => {
+  it('shows the managed panel and no key form when the instance uses the managed key', async () => {
+    mockedGetConfig.mockResolvedValue({
+      data: {
+        managed: true,
+        envProviders: ['openai'],
+        provider: null,
+        model: null,
+        imageModel: null,
+        baseUrl: null,
+        enabled: true,
+        aiMode: 'shared',
+        hasApiKey: false,
+        hasImageApiKey: false,
+      },
+    });
+
+    render(<AISettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /managed ai/i })).toBeInTheDocument();
+    });
+    // No key-mode radios, provider/key form, or save/test actions.
+    expect(screen.queryByText('Key mode')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('AI Provider')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/API Key/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /save settings/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /test connection/i })).not.toBeInTheDocument();
+    // The operator-configured provider is named.
+    expect(screen.getByText(/OpenAI/)).toBeInTheDocument();
+    expect(screen.getByText(/credits/i)).toBeInTheDocument();
+  });
+});
