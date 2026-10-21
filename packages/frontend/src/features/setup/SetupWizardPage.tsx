@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { setupApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
@@ -50,6 +50,24 @@ export default function SetupWizardPage() {
 
   // Step 4: AI Configuration (Managed AI Credits)
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [managedKeyDetected, setManagedKeyDetected] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setupApi
+      .getStatus()
+      .then((res) => {
+        if (!cancelled && typeof res.data.managedKeyDetected === 'boolean') {
+          setManagedKeyDetected(res.data.managedKeyDetected);
+        }
+      })
+      .catch(() => {
+        // Detection is advisory — setup still works without it.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -147,6 +165,11 @@ export default function SetupWizardPage() {
       });
 
       const { user, token, accessToken } = response.data;
+      setManagedKeyDetected(
+        typeof response.data.managedKeyDetected === 'boolean'
+          ? response.data.managedKeyDetected
+          : null
+      );
       setCompletedLocally(true);
       setAuthFromSetup(user, token || accessToken);
       setStep(5);
@@ -607,7 +630,7 @@ export default function SetupWizardPage() {
                 <div>
                   <div className="font-medium text-foreground">Enable AI features?</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Powered by managed AI credits. Includes 10 free trial credits out of the box.
+                    Powered by the server operator's managed key, metered with AI credits. Includes 10 free trial credits out of the box.
                   </p>
                 </div>
                 <div className="inline-flex rounded-lg border border-border p-1 bg-muted/40">
@@ -636,13 +659,28 @@ export default function SetupWizardPage() {
                 </div>
               </div>
 
+              {aiEnabled && managedKeyDetected === false && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground space-y-2">
+                  <div className="font-medium flex items-center gap-2">
+                    <span>⚠</span> No master key detected on this server
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This server's environment doesn't have a provider key yet, so AI
+                    features will remain off after setup until the operator sets one
+                    (for example <code>OPENAI_API_KEY</code> or{' '}
+                    <code>GOOGLE_AI_API_KEY</code>) and restarts. You can continue —
+                    or add your own key anytime in Settings → AI.
+                  </p>
+                </div>
+              )}
+
               {aiEnabled && (
                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-foreground space-y-2">
                   <div className="font-medium flex items-center gap-2">
                     <span>⚡</span> Managed AI Enabled (10 Free Trial Credits)
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    You&apos;re all set! You get 10 free AI credits instantly to test out recipe generation and photo creation. You can track your balance or add your own custom API key anytime later in Settings.
+                    Each user gets 10 free AI credits to test out recipe generation and photo creation. Managed AI runs on a master key in this server's environment — if the operator hasn't set one, AI features stay off until they do. You can track your balance or add your own API key anytime later in Settings.
                   </p>
                 </div>
               )}
@@ -706,6 +744,19 @@ export default function SetupWizardPage() {
                   </span>
                 </div>
               </div>
+
+              {aiEnabled && managedKeyDetected === false && (
+                <div className="mx-auto max-w-md rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-left text-sm text-foreground">
+                  <p className="font-medium">⚠ No master key detected on this server</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Managed AI is enabled, but this server's environment doesn't have a
+                    provider key yet, so AI features will remain off. The operator can set
+                    one (for example <code>OPENAI_API_KEY</code> or{' '}
+                    <code>GOOGLE_AI_API_KEY</code>) in the server environment and restart —
+                    or you can add your own key anytime in Settings → AI.
+                  </p>
+                </div>
+              )}
 
               <div className="pt-2">
                 <button
