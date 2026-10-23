@@ -85,7 +85,7 @@ export function AIExtractRecipeModal({ onClose }: AIExtractRecipeModalProps) {
         </p>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div>
           {!extractedRecipe ? (
             /* Upload Form */
             <form onSubmit={handleExtract} className="space-y-6">

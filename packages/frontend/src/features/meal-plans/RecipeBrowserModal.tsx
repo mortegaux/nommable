@@ -97,7 +97,7 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
           )}
 
         {/* Recipe List */}
-        <div className="mt-4 overflow-y-auto max-h-[calc(90vh-250px)]">
+        <div className="mt-4">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading recipes...</div>
           ) : filteredRecipes.length === 0 ? (
