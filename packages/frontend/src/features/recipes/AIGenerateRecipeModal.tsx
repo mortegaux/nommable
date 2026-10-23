@@ -229,7 +229,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive">
               {error}
