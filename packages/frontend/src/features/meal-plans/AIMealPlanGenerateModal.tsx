@@ -108,7 +108,7 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
     <Dialog title="Generate Meal Plan with AI" onClose={onClose} panelClassName="max-w-2xl">
       <div className="p-6">
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <Callout tone="error" role="alert">
               {error}

@@ -149,7 +149,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
         </p>
 
         {/* Content */}
-        <div className="space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="space-y-6">
           {/* Day Selection */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
