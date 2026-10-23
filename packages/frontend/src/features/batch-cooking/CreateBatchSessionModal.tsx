@@ -310,7 +310,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-320px)] min-h-[280px]">
+        <div className="min-h-[280px]">
           {/* STEP 1: PICK RECIPES */}
           {step === 'pick' && (
             <div className="space-y-4">

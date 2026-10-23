@@ -12,6 +12,13 @@ describe('aiErrorMessage', () => {
     expect(aiErrorMessage(err, 'fallback')).toMatch(/isn't configured on this instance/);
   });
 
+  it('passes through the provider message for AI_PROVIDER_ERROR', () => {
+    const err = {
+      response: { data: { code: 'AI_PROVIDER_ERROR', error: 'AI provider error: Incorrect API key provided' } },
+    };
+    expect(aiErrorMessage(err, 'fallback')).toBe('AI provider error: Incorrect API key provided');
+  });
+
   it('maps OUT_OF_CREDITS to the credits guidance', () => {
     const err = { response: { data: { code: 'OUT_OF_CREDITS', error: 'raw' } } };
     expect(aiErrorMessage(err, 'fallback')).toMatch(/out of AI credits/i);

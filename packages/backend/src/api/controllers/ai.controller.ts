@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware';
 import { AppDataSource } from '../../db/data-source';
 import { AIConfig } from '../../db/entities';
-import { AIService, sendAIUnavailable } from '../../services/ai';
+import { AIService, sendAIUnavailable, providerError } from '../../services/ai';
 import { AppError } from '../middleware';
 import { encrypt, safeDecrypt } from '../../utils/crypto';
 import { AIMode } from '@nommable/shared';
@@ -304,7 +304,11 @@ export class AIController {
 
       const { ingredient, reason, recipeContext } = req.body;
 
-      const substitutions = await resolution.provider.substituteIngredient(ingredient, reason, recipeContext);
+      const substitutions = await resolution.provider
+        .substituteIngredient(ingredient, reason, recipeContext)
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       await AIService.consumeManagedCredit(req.userId);
       res.json({ substitutions });

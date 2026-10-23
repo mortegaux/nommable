@@ -78,6 +78,10 @@ export function aiErrorMessage(error: any, fallback: string): string {
   if (code === 'AI_NOT_CONFIGURED') {
     return "AI isn't configured on this instance yet.";
   }
+  if (code === 'AI_PROVIDER_ERROR') {
+    // The server message already carries the provider's own explanation.
+    return error?.response?.data?.error || fallback;
+  }
   if (code === 'OUT_OF_CREDITS') {
     return "You're out of AI credits. Add your own API key in Settings → AI for unlimited use.";
   }

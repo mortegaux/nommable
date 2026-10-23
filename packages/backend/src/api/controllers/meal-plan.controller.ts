@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware';
 import { MealPlanService, MealPlanGenerationService, ShoppingListIntegrationService } from '../../services/meal-plan';
 import { RecipeService } from '../../services/recipe';
-import { AIService, sendAIUnavailable } from '../../services/ai';
+import { AIService, sendAIUnavailable, providerError } from '../../services/ai';
 import { CalendarExportService } from '../../services/calendar/calendar-export.service';
 import type { MealPlanGenerateRequest, ReplaceMealRequest, MealPlanCommitRequest } from '@nommable/shared';
 
@@ -110,14 +110,18 @@ export class MealPlanController {
       const { days, servings, dietary, cuisine, excludeIngredients, budget } = req.body;
 
       // Get AI meal plan suggestion
-      const suggestion = await provider.generateMealPlan({
-        days,
-        servings,
-        dietary,
-        cuisine,
-        excludeIngredients,
-        budget,
-      });
+      const suggestion = await provider
+        .generateMealPlan({
+          days,
+          servings,
+          dietary,
+          cuisine,
+          excludeIngredients,
+          budget,
+        })
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       // Create placeholder recipes for each meal suggestion
       const mealRecipes: Array<{

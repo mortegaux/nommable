@@ -146,7 +146,7 @@ export function MealPlanPreviewModal({ preview, onClose, onReplaceMeal, onManual
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+        className="bg-card rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -221,7 +221,7 @@ export function MealPlanPreviewModal({ preview, onClose, onReplaceMeal, onManual
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-280px)]">
+        <div className="p-6 space-y-6 overflow-y-auto min-h-0 flex-1">
           {error && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive">
               {error}

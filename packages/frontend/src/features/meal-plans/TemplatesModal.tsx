@@ -109,7 +109,7 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
         </p>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div>
           {error && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive mb-4">
               {error}

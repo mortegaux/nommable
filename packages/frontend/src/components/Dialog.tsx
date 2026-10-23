@@ -120,9 +120,9 @@ export function Dialog({
         aria-describedby={descriptionId}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className={`max-h-[90vh] w-full overflow-hidden rounded-xl bg-card shadow-2xl focus:outline-none ${panelClassName}`}
+        className={`flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-card shadow-2xl focus:outline-none ${panelClassName}`}
       >
-        <div className="flex items-center justify-between border-b border-border p-6">
+        <div className="flex shrink-0 items-center justify-between border-b border-border p-6">
           <h2 id={titleId.current} className="text-2xl font-bold text-foreground">
             {title}
           </h2>
@@ -138,7 +138,7 @@ export function Dialog({
             </button>
           )}
         </div>
-        <div className="overflow-y-auto">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>,
     document.body

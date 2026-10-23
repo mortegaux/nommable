@@ -8,6 +8,7 @@ import {
   AI_KEY_REQUIRED_CODE,
   AI_OUT_OF_CREDITS_CODE,
   AI_OUT_OF_CREDITS_MESSAGE,
+  providerError,
 } from '../../services/ai';
 import { RecipeCategorizerService } from '../../services/recipe/recipe-categorizer.service';
 import { RatingService } from '../../services/rating/rating.service';
@@ -274,12 +275,16 @@ export class RecipeController {
 
       const { prompt, ingredients, dietary, cuisine, servings } = req.body;
 
-      const generatedRecipe = await provider.generateRecipe(prompt, {
-        ingredients,
-        dietary,
-        cuisine,
-        servings,
-      });
+      const generatedRecipe = await provider
+        .generateRecipe(prompt, {
+          ingredients,
+          dietary,
+          cuisine,
+          servings,
+        })
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       // Auto-categorize the AI-generated recipe if needed
       const { categories, tags } = RecipeCategorizerService.autoCategorizRecipe(generatedRecipe);
@@ -335,7 +340,11 @@ export class RecipeController {
       const recipe = await this.recipeService.findById(req.params.id, req.userId!);
       const { enhancementType } = req.body;
 
-      const enhancement = await provider.enhanceRecipe(recipe, enhancementType);
+      const enhancement = await provider
+        .enhanceRecipe(recipe, enhancementType)
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       await AIService.consumeManagedCredit(req.userId);
 
@@ -492,7 +501,11 @@ export class RecipeController {
       }
 
       // Extract recipe using AI vision
-      const generatedRecipe = await provider.extractRecipeFromImages(images);
+      const generatedRecipe = await provider
+        .extractRecipeFromImages(images)
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       // Auto-categorize the extracted recipe if needed
       const { categories, tags } = RecipeCategorizerService.autoCategorizRecipe(generatedRecipe);
@@ -589,10 +602,14 @@ export class RecipeController {
         : mimeType;
 
       // Use the buffer directly from multer memory storage
-      const ingredients = await provider.extractIngredientsFromImage({
-        data: file.buffer,
-        mimeType: effectiveMimeType,
-      });
+      const ingredients = await provider
+        .extractIngredientsFromImage({
+          data: file.buffer,
+          mimeType: effectiveMimeType,
+        })
+        .catch((err) => {
+          throw providerError(err);
+        });
 
       await AIService.consumeManagedCredit(req.userId);
       res.json({ ingredients });
