@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
 import { AutoAwesomeIcon, WarningIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
@@ -40,6 +41,10 @@ export function AIExtractRecipeModal({ onClose }: AIExtractRecipeModalProps) {
     try {
       const response = await recipeApi.extractFromImages(files);
       setExtractedRecipe(response.data);
+
+      // Extraction is the metered AI generation (saving is plain CRUD) —
+      // refresh the credits badge so it stays accurate without a reload.
+      await useAuthStore.getState().refreshUser();
     } catch (err: any) {
       console.error('Failed to extract recipe:', err);
       setError(err.response?.data?.error || 'Failed to extract recipe. Please check your AI configuration and try again.');

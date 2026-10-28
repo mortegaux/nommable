@@ -3,7 +3,7 @@
 # One container, one volume (/data), one port.
 
 # ---------- Builder stage ----------
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 ARG NODE_OPTIONS="--max-old-space-size=2048"
 ENV NODE_OPTIONS=$NODE_OPTIONS
@@ -40,7 +40,7 @@ WORKDIR /app/packages/frontend
 RUN npm run build
 
 # ---------- Production stage ----------
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 

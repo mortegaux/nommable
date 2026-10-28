@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { aiErrorMessage } from '@/utils/aiValidation';
 import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/store/toast.store';
+import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
@@ -99,6 +100,10 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
 
       // Update ingredients field with detected ingredients
       setIngredients(response.data.ingredients.join(', '));
+
+      // Ingredient detection is a metered AI generation — refresh the
+      // credits badge so it stays accurate without a page reload.
+      await useAuthStore.getState().refreshUser();
     } catch (err: any) {
       console.error('Failed to detect ingredients:', err);
       console.error('Error details:', {
@@ -184,6 +189,10 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
       if (imageError) {
         toast.error(`Recipe created, but the image could not be generated: ${imageError}`);
       }
+
+      // A successful generation may have consumed a credit — refresh the
+      // badge before navigating so it shows the true balance.
+      await useAuthStore.getState().refreshUser();
 
       // Close modal and navigate to the new recipe
       onClose();

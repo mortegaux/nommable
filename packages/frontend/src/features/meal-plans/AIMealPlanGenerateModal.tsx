@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/auth.store';
 import { mealPlanApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
@@ -76,6 +77,10 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
 
       const response = await mealPlanApi.generateWithAI(requestData);
       const mealPlanId = response.data.id;
+
+      // A successful generation may have consumed a credit — refresh the
+      // badge before navigating so it shows the true balance.
+      await useAuthStore.getState().refreshUser();
 
       // Close modal and navigate to the new meal plan
       onClose();
