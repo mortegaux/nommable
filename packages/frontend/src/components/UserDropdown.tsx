@@ -117,15 +117,15 @@ export function UserDropdown({
           <div className="px-4 py-2 text-xs text-muted-foreground border-b border-border">
             <div className="font-medium text-card-foreground">{user.username}</div>
             <div className="mt-0.5">{user.email}</div>
-            <div className="mt-2 flex items-center justify-between">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5">
+              <span className={`inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded text-xs font-medium ${
                 user.role === 'admin'
                   ? 'bg-primary/10 text-primary'
                   : 'bg-secondary/10 text-secondary'
               }`}>
                 {user.role === 'admin' ? 'Administrator' : 'User'}
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 ⚡ {user.creditsRemaining ?? 10} AI Credits
               </span>
             </div>
