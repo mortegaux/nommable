@@ -82,3 +82,19 @@ export function compareEntries(
   if (!a.time && b.time) return 1;
   return MEAL_TYPE_ORDER[resolveMealType(a.mealType)] - MEAL_TYPE_ORDER[resolveMealType(b.mealType)];
 }
+
+/**
+ * Parse a date value as a LOCAL date.
+ *
+ * The backend stores plan dates in Postgres `date` columns, which arrive as
+ * date-only strings ("2026-10-28"). `new Date("2026-10-28")` parses as UTC
+ * midnight, which renders as the previous day in the Americas — a plan dated
+ * 10/28 showed a header of 10/27. Appending 'T00:00:00' forces local-midnight
+ * parsing, matching how the schedule headings already render. Full ISO strings
+ * (and Date objects) pass through untouched.
+ */
+export function parseLocalDate(value: string | Date): Date {
+  if (value instanceof Date) return value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00`);
+  return new Date(value);
+}

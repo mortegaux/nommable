@@ -12,6 +12,7 @@ import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAISt
 import { Pagination } from '@/components/Pagination';
 import { SectionTabs } from '@/components/SectionTabs';
 import { PageHeader, PageShell } from '@/components/PageHeader';
+import { parseLocalDate } from './mealPlanEntry';
 import { useToastStore } from '@/store/toast.store';
 import { useConfirmStore } from '@/store/confirm.store';
 import type { MealPlan, MealPlanPreview, MealPlanSearchQuery, Recipe } from '@nommable/shared';
@@ -317,8 +318,8 @@ export default function MealPlansPage() {
                       <p className="mb-4 text-muted-foreground">{plan.description}</p>
                     )}
                     <div className="text-sm text-muted-foreground">
-                      {new Date(plan.startDate).toLocaleDateString()} -{' '}
-                      {new Date(plan.endDate).toLocaleDateString()}
+                      {parseLocalDate(plan.startDate).toLocaleDateString()} -{' '}
+                      {parseLocalDate(plan.endDate).toLocaleDateString()}
                     </div>
                   </Link>
                   <div className="mt-4 flex items-center gap-2">
