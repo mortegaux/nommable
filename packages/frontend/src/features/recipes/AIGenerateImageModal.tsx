@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { aiErrorMessage } from '@/utils/aiValidation';
+import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
 import { Sparkles, RefreshCw, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
@@ -80,6 +81,10 @@ export function AIGenerateImageModal({
         });
         setGeneratedImageUrl(res.data.imageUrl);
       }
+
+      // Image generation (saved or preview) is a metered AI generation —
+      // refresh the credits badge so it stays accurate without a reload.
+      await useAuthStore.getState().refreshUser();
     } catch (err: any) {
       console.error('Image generation error:', err);
       const msg = aiErrorMessage(

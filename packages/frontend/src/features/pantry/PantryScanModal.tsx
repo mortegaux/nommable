@@ -3,6 +3,7 @@ import { aiErrorMessage } from '@/utils/aiValidation';
 import { pantryApi } from '@/services/api';
 import { Dialog } from '@/components/Dialog';
 import { useToastStore } from '@/store/toast.store';
+import { useAuthStore } from '@/store/auth.store';
 import type { PantryItem, ScannedPantryItem } from '@nommable/shared';
 
 const CATEGORIES = [
@@ -107,6 +108,10 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
       const items = res.data.items ?? [];
       setReviewItems(items.map(toReviewItem));
       setStep('review');
+
+      // The scan is the metered AI generation — refresh the credits badge
+      // so it stays accurate without a page reload.
+      await useAuthStore.getState().refreshUser();
     } catch (err: any) {
       const message =
         aiErrorMessage(err, err?.message || 'Failed to scan photos. Please try again.');

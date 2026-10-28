@@ -21,6 +21,12 @@ import {
   OPENROUTER_DEFAULT_IMAGE_MODEL,
 } from './providers/openrouter.provider';
 import { IAIProvider } from './types';
+import {
+  managedGoogleFlashChain,
+  managedGoogleFlashImageChain,
+  resolveManagedGoogleImageModel,
+  resolveManagedGoogleModel,
+} from './managed-google-model';
 
 /**
  * Key distribution mode for this instance (stored on the global ai_configs row).
@@ -152,10 +158,18 @@ export class AIService {
     'openrouter',
   ];
 
-  /** Default text model per provider for environment-key (managed) resolution. */
+  /**
+   * Default text model per provider for environment-key (managed) resolution.
+   * Google is the exception: getProvider resolves it dynamically from
+   * Google's live model list (see managed-google-model.ts) because a
+   * hardcoded Gemini id rots — `gemini-2.0-flash` was shut down 2026-06-01
+   * and hard-failed every managed Google query. The google entry below is
+   * kept only as documentation of the fallback chain's head; managed Google
+   * resolution never reads it.
+   */
   private static readonly ENV_DEFAULT_MODELS: Record<string, string> = {
     openai: 'gpt-4o-mini',
-    google: 'gemini-2.0-flash',
+    google: 'gemini-3.8-flash',
     anthropic: 'claude-3-5-haiku-20241022',
     openrouter: 'openai/gpt-4o-mini',
   };
@@ -271,6 +285,31 @@ export class AIService {
       if (!envPick) {
         return null;
       }
+      if (envPick.provider === 'google') {
+        // Managed Google: never trust a stored or hardcoded model id. Resolve
+        // the newest stable Flash from Google's live model list (cached
+        // ~1h), with a request-time fallback down the Flash chain if the
+        // resolved model disappears mid-flight. The provider is deliberately
+        // NOT stored in providerCache: caching it would pin the resolved
+        // model for the process lifetime and defeat the live-list refresh
+        // (model-change awareness is the resolution path itself, not a
+        // scheduler). Resolution is cached, so this costs one lookup per
+        // request, not one Google API call.
+        const googleKey = config.ai.google.apiKey;
+        if (!googleKey) {
+          return null;
+        }
+        const model = await resolveManagedGoogleModel(googleKey);
+        // Managed image generation resolves its own model the same way:
+        // the text resolution never applied to images, and the provider's
+        // hardcoded image chain started with the dead `gemini-2.0-flash`.
+        // Resolving here (same cached live list) makes recipe+image work.
+        const imageModel = await resolveManagedGoogleImageModel(googleKey);
+        return this.createProviderInstance('google', googleKey, model, undefined, {
+          managedFallbackChain: managedGoogleFlashChain(model),
+          managedImageChain: managedGoogleFlashImageChain(imageModel),
+        });
+      }
       const provider = this.createProviderInstance(envPick.provider, undefined, envPick.model);
       if (provider) {
         this.providerCache.set(cacheKey, provider);
@@ -319,7 +358,8 @@ export class AIService {
     provider: AIProvider,
     apiKey?: string,
     model?: string,
-    baseUrl?: string
+    baseUrl?: string,
+    options?: { managedFallbackChain?: string[]; managedImageChain?: string[] }
   ): IAIProvider | null {
     switch (provider) {
       case 'openai': {
@@ -337,7 +377,16 @@ export class AIService {
       case 'google': {
         const googleKey = apiKey || config.ai.google.apiKey;
         if (!googleKey) return null;
-        return new GoogleProvider(googleKey, model || undefined);
+        return new GoogleProvider(
+          googleKey,
+          model || undefined,
+          options?.managedFallbackChain || options?.managedImageChain
+            ? {
+                managedFallbackChain: options.managedFallbackChain,
+                managedImageChain: options.managedImageChain,
+              }
+            : undefined
+        );
       }
 
       case 'ollama': {

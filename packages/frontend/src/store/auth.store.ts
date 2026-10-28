@@ -15,6 +15,14 @@ interface AuthState {
   registerWithInvite: (token: string, username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  /**
+   * Best-effort refresh of the current user (e.g. creditsRemaining after
+   * an AI generation). Generation success paths call this so the credits
+   * badge stays accurate without a page reload. It never throws and never
+   * logs the user out: a failed refresh leaves the last known user in
+   * place and the generation flow that just succeeded is unaffected.
+   */
+  refreshUser: () => Promise<void>;
   setUser: (user: User) => void;
   setAuthFromSetup: (user: User, token: string) => void;
 }
@@ -110,6 +118,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Still unreachable: session is preserved, UI shows the transient
       // state (ProtectedRoute) instead of bouncing to /login.
       set({ needsSetup: false, isLoading: false, authError: 'transient' });
+    }
+  },
+
+  refreshUser: async () => {
+    try {
+      const response = await authApi.me();
+      set({ user: response.data });
+    } catch {
+      // Best effort only: a failed refresh must never break the
+      // generation flow that just succeeded or log the user out.
     }
   },
 

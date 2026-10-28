@@ -12,11 +12,31 @@ import {
 export class GoogleProvider implements IAIProvider {
   private apiKey: string;
   private model: string;
+  /**
+   * Managed-mode fallback chain (resolved model first, then older stable
+   * Flash models). Empty for every other construction — BYOK providers never
+   * retry with a different model: a BYOK user's chosen model is theirs, and
+   * its failure must surface, not silently change.
+   */
+  private readonly managedFallbackChain: string[];
+  /**
+   * Managed-mode image chain (resolved Flash image model first, then the
+   * static image fallbacks). Empty for every other construction. Without
+   * it, generateImage runs its own hardcoded chain starting with the dead
+   * `gemini-2.0-flash` — the text resolution above never applied to images.
+   */
+  private readonly managedImageChain: string[];
 
-  constructor(apiKey: string, model?: string) {
+  constructor(
+    apiKey: string,
+    model?: string,
+    options?: { managedFallbackChain?: string[]; managedImageChain?: string[] }
+  ) {
     this.apiKey = apiKey;
     const clean = model ? model.replace(/^models\//, '').trim() : '';
     this.model = clean || 'gemini-1.5-flash';
+    this.managedFallbackChain = options?.managedFallbackChain ?? [];
+    this.managedImageChain = options?.managedImageChain ?? [];
   }
 
   private get cleanModel(): string {
@@ -24,35 +44,65 @@ export class GoogleProvider implements IAIProvider {
   }
 
   private async generate(parts: Array<any>): Promise<string> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.cleanModel)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
+    // Managed mode only: if the resolved model has disappeared between
+    // resolution and request time, Google answers 404 for that model id.
+    // Walk down the Flash chain instead of hard-failing the query; the
+    // last error still surfaces when every model in the chain is gone.
+    // With no chain (BYOK and every other path) this is exactly one attempt.
+    const attempts = [
+      this.cleanModel,
+      ...this.managedFallbackChain.filter((model) => model !== this.cleanModel),
+    ];
+    let lastError: unknown = null;
+    for (const model of attempts) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
 
-    const response = await axios.post(
-      url,
-      {
-        contents: [
+        const response = await axios.post(
+          url,
           {
-            parts,
+            contents: [
+              {
+                parts,
+              },
+            ],
           },
-        ],
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 60000,
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 60000,
+          }
+        );
+
+        const candidate = response.data?.candidates?.[0];
+        if (!candidate) {
+          const err = response.data?.error?.message || 'No candidate returned from Google AI';
+          throw new Error(err);
+        }
+
+        const text = candidate.content?.parts?.map((p: any) => p.text).filter(Boolean).join('');
+        if (!text) {
+          throw new Error('Empty response from Google AI');
+        }
+
+        return text;
+      } catch (error: any) {
+        lastError = error;
+        const nextIndex = attempts.indexOf(model) + 1;
+        const next = attempts[nextIndex];
+        // A 404 on this endpoint means the model id itself is unknown or
+        // retired (Google returns 404 for shut-down models). Other statuses
+        // (403 key/permission, 429 quota, 5xx) are not model problems and
+        // must surface immediately, never trigger a model change.
+        if (this.managedFallbackChain.length > 0 && error?.response?.status === 404 && next) {
+          console.warn(
+            `Google AI model "${model}" is no longer available, falling back to "${next}"`
+          );
+          continue;
+        }
+        throw error;
       }
-    );
-
-    const candidate = response.data?.candidates?.[0];
-    if (!candidate) {
-      const err = response.data?.error?.message || 'No candidate returned from Google AI';
-      throw new Error(err);
     }
-
-    const text = candidate.content?.parts?.map((p: any) => p.text).filter(Boolean).join('');
-    if (!text) {
-      throw new Error('Empty response from Google AI');
-    }
-
-    return text;
+    throw lastError ?? new Error('Google AI generation failed');
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
@@ -479,21 +529,47 @@ Return ONLY a JSON object with an "items" array.`;
         if (res3) return res3;
       }
     } else {
-      // Default: try Gemini multimodal first, then OpenAI compat Imagen, then predict
-      const resGemini = await tryGemini('gemini-2.0-flash');
-      if (resGemini) return resGemini;
+      // Default: no explicit image model.
+      if (this.managedImageChain.length > 0) {
+        // Managed mode: use the resolved image chain first (newest stable
+        // Flash image model from Google's live list), then the resolved
+        // text Flash model — multimodal Flash models can also output
+        // images — then the Imagen strategies. The dead `gemini-2.0-flash`
+        // / `gemini-2.0-flash-exp` entries of the legacy chain below are
+        // deliberately NOT attempted here: they only add failed calls.
+        for (const imageModel of this.managedImageChain) {
+          const resImage = await tryGemini(imageModel);
+          if (resImage) return resImage;
+        }
+        const resTextModel = await tryGemini(this.cleanModel);
+        if (resTextModel) return resTextModel;
 
-      const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
-      if (resCompat) return resCompat;
+        const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
+        if (resCompat) return resCompat;
 
-      const resPredict1 = await tryPredict('imagen-3.0-generate-002');
-      if (resPredict1) return resPredict1;
+        const resPredict1 = await tryPredict('imagen-3.0-generate-002');
+        if (resPredict1) return resPredict1;
 
-      const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
-      if (resPredict2) return resPredict2;
+        const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
+        if (resPredict2) return resPredict2;
+      } else {
+        // Legacy default (BYOK and every other non-managed construction):
+        // unchanged — try Gemini multimodal first, then OpenAI compat Imagen, then predict
+        const resGemini = await tryGemini('gemini-2.0-flash');
+        if (resGemini) return resGemini;
 
-      const resGeminiExp = await tryGemini('gemini-2.0-flash-exp');
-      if (resGeminiExp) return resGeminiExp;
+        const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
+        if (resCompat) return resCompat;
+
+        const resPredict1 = await tryPredict('imagen-3.0-generate-002');
+        if (resPredict1) return resPredict1;
+
+        const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
+        if (resPredict2) return resPredict2;
+
+        const resGeminiExp = await tryGemini('gemini-2.0-flash-exp');
+        if (resGeminiExp) return resGeminiExp;
+      }
     }
 
     const rawMessage =

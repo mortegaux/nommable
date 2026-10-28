@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
@@ -50,6 +51,10 @@ export function AIEnhanceRecipeModal({
     try {
       const response = await recipeApi.enhanceWithAI(recipeId, enhancementType);
       setResult(response.data);
+
+      // Enhancement is a metered AI generation — refresh the credits badge
+      // so it stays accurate without a page reload.
+      await useAuthStore.getState().refreshUser();
     } catch (err: any) {
       console.error('Failed to enhance recipe:', err);
       setError(err.response?.data?.error || 'Failed to enhance recipe. Please check your AI configuration.');
