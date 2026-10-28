@@ -19,12 +19,24 @@ export class GoogleProvider implements IAIProvider {
    * its failure must surface, not silently change.
    */
   private readonly managedFallbackChain: string[];
+  /**
+   * Managed-mode image chain (resolved Flash image model first, then the
+   * static image fallbacks). Empty for every other construction. Without
+   * it, generateImage runs its own hardcoded chain starting with the dead
+   * `gemini-2.0-flash` — the text resolution above never applied to images.
+   */
+  private readonly managedImageChain: string[];
 
-  constructor(apiKey: string, model?: string, options?: { managedFallbackChain?: string[] }) {
+  constructor(
+    apiKey: string,
+    model?: string,
+    options?: { managedFallbackChain?: string[]; managedImageChain?: string[] }
+  ) {
     this.apiKey = apiKey;
     const clean = model ? model.replace(/^models\//, '').trim() : '';
     this.model = clean || 'gemini-1.5-flash';
     this.managedFallbackChain = options?.managedFallbackChain ?? [];
+    this.managedImageChain = options?.managedImageChain ?? [];
   }
 
   private get cleanModel(): string {
@@ -517,21 +529,47 @@ Return ONLY a JSON object with an "items" array.`;
         if (res3) return res3;
       }
     } else {
-      // Default: try Gemini multimodal first, then OpenAI compat Imagen, then predict
-      const resGemini = await tryGemini('gemini-2.0-flash');
-      if (resGemini) return resGemini;
+      // Default: no explicit image model.
+      if (this.managedImageChain.length > 0) {
+        // Managed mode: use the resolved image chain first (newest stable
+        // Flash image model from Google's live list), then the resolved
+        // text Flash model — multimodal Flash models can also output
+        // images — then the Imagen strategies. The dead `gemini-2.0-flash`
+        // / `gemini-2.0-flash-exp` entries of the legacy chain below are
+        // deliberately NOT attempted here: they only add failed calls.
+        for (const imageModel of this.managedImageChain) {
+          const resImage = await tryGemini(imageModel);
+          if (resImage) return resImage;
+        }
+        const resTextModel = await tryGemini(this.cleanModel);
+        if (resTextModel) return resTextModel;
 
-      const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
-      if (resCompat) return resCompat;
+        const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
+        if (resCompat) return resCompat;
 
-      const resPredict1 = await tryPredict('imagen-3.0-generate-002');
-      if (resPredict1) return resPredict1;
+        const resPredict1 = await tryPredict('imagen-3.0-generate-002');
+        if (resPredict1) return resPredict1;
 
-      const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
-      if (resPredict2) return resPredict2;
+        const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
+        if (resPredict2) return resPredict2;
+      } else {
+        // Legacy default (BYOK and every other non-managed construction):
+        // unchanged — try Gemini multimodal first, then OpenAI compat Imagen, then predict
+        const resGemini = await tryGemini('gemini-2.0-flash');
+        if (resGemini) return resGemini;
 
-      const resGeminiExp = await tryGemini('gemini-2.0-flash-exp');
-      if (resGeminiExp) return resGeminiExp;
+        const resCompat = await tryOpenAICompat('imagen-3.0-generate-002');
+        if (resCompat) return resCompat;
+
+        const resPredict1 = await tryPredict('imagen-3.0-generate-002');
+        if (resPredict1) return resPredict1;
+
+        const resPredict2 = await tryPredict('imagen-3.0-fast-generate-001');
+        if (resPredict2) return resPredict2;
+
+        const resGeminiExp = await tryGemini('gemini-2.0-flash-exp');
+        if (resGeminiExp) return resGeminiExp;
+      }
     }
 
     const rawMessage =

@@ -163,3 +163,116 @@ export function managedGoogleFlashChain(resolvedModel: string): string[] {
 export function clearManagedGoogleModelCache(): void {
   liveListCache = null;
 }
+
+/**
+ * Managed-mode Google IMAGE model resolution.
+ *
+ * Background: the text fix above never reached image generation. When a
+ * managed-mode recipe is created with its image checkbox on, the request
+ * flows through GoogleProvider.generateImage — which ignored the resolved
+ * text model and the fallback chain entirely and ran its own hardcoded
+ * chain starting with `gemini-2.0-flash` (shut down 2026-06-01), then
+ * Imagen endpoints that need a billed Google Cloud project. Every strategy
+ * failed, and the recipe controller swallowed the error, so the user got a
+ * recipe with no image and no error. The same rot, one layer down.
+ *
+ * Image selection rule (same principles as the text rule, Flash tier only):
+ * - Prefer the newest stable dedicated Flash image model: ids matching
+ *   `gemini-<major>.<minor>-flash-image` (no suffix), ranked by version
+ *   descending. These are the models built for generateContent image output
+ *   (responseModalities TEXT+IMAGE).
+ * - Only if no stable image model exists, accept a preview/experimental
+ *   Flash image id. A preview model is better than a hard failure.
+ * - Never select Pro image models, `-001` aliases, or 2.0-era `-exp-image`
+ *   ids — the matcher requires `-flash-image` right after the version.
+ *
+ * Managed mode only, like the text resolution. BYOK image-model choices
+ * are untouched, and nothing here touches credit metering.
+ */
+
+/**
+ * Last-resort image chain when Google's live model list cannot be fetched
+ * at all. `gemini-2.5-flash-image` is the dedicated Flash image model the
+ * codebase already treats as its image default; the live list is always
+ * tried first and supersedes this the moment it changes.
+ */
+export const MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS: string[] = [
+  'gemini-2.5-flash-image',
+];
+
+interface FlashImageCandidate {
+  id: string;
+  major: number;
+  minor: number;
+  /** 0 = stable Flash image model, 1 = preview/experimental Flash image model. */
+  tier: number;
+}
+
+/**
+ * Parse a Gemini model id into a Flash image candidate, or null when the id
+ * is not a Flash-tier image model.
+ */
+function parseFlashImageCandidate(id: string): FlashImageCandidate | null {
+  const match = /^gemini-(\d+)(?:\.(\d+))?-flash-image(-.+)?$/.exec(id);
+  if (!match) return null;
+  const suffix = match[3] ?? '';
+  if (suffix && !/preview|exp/.test(suffix)) return null;
+  return {
+    id,
+    major: Number(match[1]),
+    minor: match[2] === undefined ? 0 : Number(match[2]),
+    tier: suffix ? 1 : 0,
+  };
+}
+
+/**
+ * Pick the managed Google image model from a list of model ids (e.g.
+ * Google's live `GET /v1beta/models` list, stripped of the `models/`
+ * prefix). Returns null when the list contains no Flash image model.
+ */
+export function selectManagedGoogleFlashImage(modelIds: string[]): string | null {
+  const candidates: FlashImageCandidate[] = [];
+  for (const id of modelIds) {
+    const candidate = parseFlashImageCandidate(id);
+    if (candidate) candidates.push(candidate);
+  }
+  candidates.sort((a, b) => {
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    if (a.major !== b.major) return b.major - a.major;
+    if (a.minor !== b.minor) return b.minor - a.minor;
+    return a.id.localeCompare(b.id);
+  });
+  return candidates.length > 0 ? candidates[0].id : null;
+}
+
+/**
+ * Resolve the model a managed-mode Google image request should use: the
+ * newest stable Flash image model from Google's live list (same cached list
+ * as the text resolution — one lookup per request at most), or the head of
+ * the static image fallback chain when the live list is unavailable or
+ * contains no image model. Never throws for a missing list.
+ */
+export async function resolveManagedGoogleImageModel(apiKey: string): Promise<string> {
+  const liveIds = await fetchLiveGoogleModelIds(apiKey);
+  if (liveIds) {
+    const pick = selectManagedGoogleFlashImage(liveIds);
+    if (pick) return pick;
+    console.warn(
+      'Managed Google image resolution: live list contains no Flash image model, using fallback chain'
+    );
+  }
+  return MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS[0];
+}
+
+/**
+ * The request-time fallback chain for one resolved image model: the resolved
+ * model first, then the static image fallbacks (excluding the resolved model
+ * itself). Used by GoogleProvider so an image model that disappears between
+ * resolution and request time degrades instead of failing.
+ */
+export function managedGoogleFlashImageChain(resolvedImageModel: string): string[] {
+  return [
+    resolvedImageModel,
+    ...MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS.filter((model) => model !== resolvedImageModel),
+  ];
+}

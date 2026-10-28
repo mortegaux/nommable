@@ -315,8 +315,15 @@ export class RecipeController {
             userId: req.userId,
           });
           recipe.imageUrl = imageUrl;
-        } catch (imgErr) {
+        } catch (imgErr: any) {
           console.warn('Failed to auto-generate image for AI recipe:', imgErr);
+          // Do NOT swallow this: a recipe that looks complete while its
+          // image silently failed is exactly how "recipe made, no image"
+          // goes unnoticed. The recipe still returns 201, but the client
+          // gets an honest imageError it can show the user.
+          const message = String(imgErr?.message || 'Failed to generate recipe image');
+          (recipe as any).imageError =
+            message.length > 300 ? `${message.slice(0, 300)}…` : message;
         }
       }
 

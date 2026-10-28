@@ -1,10 +1,14 @@
 import axios from 'axios';
 import {
   MANAGED_GOOGLE_FLASH_FALLBACKS,
+  MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS,
   clearManagedGoogleModelCache,
   managedGoogleFlashChain,
+  managedGoogleFlashImageChain,
+  resolveManagedGoogleImageModel,
   resolveManagedGoogleModel,
   selectManagedGoogleFlash,
+  selectManagedGoogleFlashImage,
 } from '../../services/ai/managed-google-model';
 
 jest.mock('axios');
@@ -140,5 +144,101 @@ describe('resolveManagedGoogleModel', () => {
     await resolveManagedGoogleModel('test-key');
     await resolveManagedGoogleModel('test-key');
     expect(mockedGet).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('selectManagedGoogleFlashImage', () => {
+  it('picks the newest stable Flash image model from a realistic live list', () => {
+    expect(
+      selectManagedGoogleFlashImage([
+        'gemini-2.5-flash',
+        'gemini-3.8-flash',
+        'gemini-2.5-flash-image',
+        'gemini-3.1-flash-image',
+        'gemini-2.5-pro',
+        'gemini-3-pro-image-preview',
+      ])
+    ).toBe('gemini-3.1-flash-image');
+  });
+
+  it('orders by version, not by list position', () => {
+    expect(
+      selectManagedGoogleFlashImage(['gemini-2.5-flash-image', 'gemini-3.1-flash-image'])
+    ).toBe('gemini-3.1-flash-image');
+  });
+
+  it('accepts a preview image model only when no stable image model exists', () => {
+    expect(
+      selectManagedGoogleFlashImage(['gemini-3-flash-image-preview', 'gemini-2.5-flash'])
+    ).toBe('gemini-3-flash-image-preview');
+  });
+
+  it('never selects text Flash, Pro image, -001 aliases, or 2.0-era exp-image ids', () => {
+    expect(
+      selectManagedGoogleFlashImage([
+        'gemini-3.8-flash',
+        'gemini-3-pro-image-preview',
+        'gemini-2.5-flash-image-001',
+        'gemini-2.0-flash-exp-image',
+        'gemini-embedding-001',
+      ])
+    ).toBeNull();
+  });
+
+  it('returns null for an empty list', () => {
+    expect(selectManagedGoogleFlashImage([])).toBeNull();
+  });
+});
+
+describe('managedGoogleFlashImageChain', () => {
+  it('puts the resolved image model first, then the static fallbacks', () => {
+    expect(managedGoogleFlashImageChain('gemini-3.1-flash-image')).toEqual([
+      'gemini-3.1-flash-image',
+      'gemini-2.5-flash-image',
+    ]);
+  });
+
+  it('does not duplicate the resolved model when it is already in the chain', () => {
+    expect(managedGoogleFlashImageChain('gemini-2.5-flash-image')).toEqual([
+      'gemini-2.5-flash-image',
+    ]);
+  });
+});
+
+describe('resolveManagedGoogleImageModel', () => {
+  beforeEach(() => {
+    clearManagedGoogleModelCache();
+    jest.clearAllMocks();
+  });
+
+  it('resolves the newest stable Flash image model from the live list', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        models: [
+          liveListEntry('gemini-3.8-flash'),
+          liveListEntry('gemini-2.5-flash-image'),
+          liveListEntry('gemini-3.1-flash-image'),
+        ],
+      },
+    });
+    await expect(resolveManagedGoogleImageModel('test-key')).resolves.toBe(
+      'gemini-3.1-flash-image'
+    );
+  });
+
+  it('falls back to the static image chain head when the live list fetch fails', async () => {
+    mockedGet.mockRejectedValue(new Error('network down'));
+    await expect(resolveManagedGoogleImageModel('test-key')).resolves.toBe(
+      MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS[0]
+    );
+  });
+
+  it('falls back to the static image chain head when the live list has no image model', async () => {
+    mockedGet.mockResolvedValue({
+      data: { models: [liveListEntry('gemini-3.8-flash')] },
+    });
+    await expect(resolveManagedGoogleImageModel('test-key')).resolves.toBe(
+      MANAGED_GOOGLE_FLASH_IMAGE_FALLBACKS[0]
+    );
   });
 });

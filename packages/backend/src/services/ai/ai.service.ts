@@ -21,7 +21,12 @@ import {
   OPENROUTER_DEFAULT_IMAGE_MODEL,
 } from './providers/openrouter.provider';
 import { IAIProvider } from './types';
-import { managedGoogleFlashChain, resolveManagedGoogleModel } from './managed-google-model';
+import {
+  managedGoogleFlashChain,
+  managedGoogleFlashImageChain,
+  resolveManagedGoogleImageModel,
+  resolveManagedGoogleModel,
+} from './managed-google-model';
 
 /**
  * Key distribution mode for this instance (stored on the global ai_configs row).
@@ -295,8 +300,14 @@ export class AIService {
           return null;
         }
         const model = await resolveManagedGoogleModel(googleKey);
+        // Managed image generation resolves its own model the same way:
+        // the text resolution never applied to images, and the provider's
+        // hardcoded image chain started with the dead `gemini-2.0-flash`.
+        // Resolving here (same cached live list) makes recipe+image work.
+        const imageModel = await resolveManagedGoogleImageModel(googleKey);
         return this.createProviderInstance('google', googleKey, model, undefined, {
           managedFallbackChain: managedGoogleFlashChain(model),
+          managedImageChain: managedGoogleFlashImageChain(imageModel),
         });
       }
       const provider = this.createProviderInstance(envPick.provider, undefined, envPick.model);
@@ -348,7 +359,7 @@ export class AIService {
     apiKey?: string,
     model?: string,
     baseUrl?: string,
-    options?: { managedFallbackChain?: string[] }
+    options?: { managedFallbackChain?: string[]; managedImageChain?: string[] }
   ): IAIProvider | null {
     switch (provider) {
       case 'openai': {
@@ -369,8 +380,11 @@ export class AIService {
         return new GoogleProvider(
           googleKey,
           model || undefined,
-          options?.managedFallbackChain
-            ? { managedFallbackChain: options.managedFallbackChain }
+          options?.managedFallbackChain || options?.managedImageChain
+            ? {
+                managedFallbackChain: options.managedFallbackChain,
+                managedImageChain: options.managedImageChain,
+              }
             : undefined
         );
       }

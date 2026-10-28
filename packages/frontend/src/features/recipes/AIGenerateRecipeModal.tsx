@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { aiErrorMessage } from '@/utils/aiValidation';
 import { useNavigate } from 'react-router-dom';
+import { useToastStore } from '@/store/toast.store';
 import { recipeApi } from '@/services/api';
 import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
 import { Dialog } from '@/components/Dialog';
@@ -38,6 +39,7 @@ type TabType = 'describe' | 'photo';
 
 export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
   const navigate = useNavigate();
+  const toast = useToastStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('describe');
@@ -173,6 +175,15 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
 
       const response = await recipeApi.generateWithAI(requestData);
       const recipeId = response.data.id;
+
+      // The recipe is created even when its auto-image fails — the backend
+      // reports that as imageError instead of failing the whole request.
+      // Surface it honestly rather than landing on a recipe that silently
+      // has no image.
+      const imageError = (response.data as unknown as { imageError?: string }).imageError;
+      if (imageError) {
+        toast.error(`Recipe created, but the image could not be generated: ${imageError}`);
+      }
 
       // Close modal and navigate to the new recipe
       onClose();
