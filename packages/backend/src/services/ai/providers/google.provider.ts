@@ -12,11 +12,19 @@ import {
 export class GoogleProvider implements IAIProvider {
   private apiKey: string;
   private model: string;
+  /**
+   * Managed-mode fallback chain (resolved model first, then older stable
+   * Flash models). Empty for every other construction — BYOK providers never
+   * retry with a different model: a BYOK user's chosen model is theirs, and
+   * its failure must surface, not silently change.
+   */
+  private readonly managedFallbackChain: string[];
 
-  constructor(apiKey: string, model?: string) {
+  constructor(apiKey: string, model?: string, options?: { managedFallbackChain?: string[] }) {
     this.apiKey = apiKey;
     const clean = model ? model.replace(/^models\//, '').trim() : '';
     this.model = clean || 'gemini-1.5-flash';
+    this.managedFallbackChain = options?.managedFallbackChain ?? [];
   }
 
   private get cleanModel(): string {
@@ -24,35 +32,65 @@ export class GoogleProvider implements IAIProvider {
   }
 
   private async generate(parts: Array<any>): Promise<string> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.cleanModel)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
+    // Managed mode only: if the resolved model has disappeared between
+    // resolution and request time, Google answers 404 for that model id.
+    // Walk down the Flash chain instead of hard-failing the query; the
+    // last error still surfaces when every model in the chain is gone.
+    // With no chain (BYOK and every other path) this is exactly one attempt.
+    const attempts = [
+      this.cleanModel,
+      ...this.managedFallbackChain.filter((model) => model !== this.cleanModel),
+    ];
+    let lastError: unknown = null;
+    for (const model of attempts) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
 
-    const response = await axios.post(
-      url,
-      {
-        contents: [
+        const response = await axios.post(
+          url,
           {
-            parts,
+            contents: [
+              {
+                parts,
+              },
+            ],
           },
-        ],
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 60000,
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 60000,
+          }
+        );
+
+        const candidate = response.data?.candidates?.[0];
+        if (!candidate) {
+          const err = response.data?.error?.message || 'No candidate returned from Google AI';
+          throw new Error(err);
+        }
+
+        const text = candidate.content?.parts?.map((p: any) => p.text).filter(Boolean).join('');
+        if (!text) {
+          throw new Error('Empty response from Google AI');
+        }
+
+        return text;
+      } catch (error: any) {
+        lastError = error;
+        const nextIndex = attempts.indexOf(model) + 1;
+        const next = attempts[nextIndex];
+        // A 404 on this endpoint means the model id itself is unknown or
+        // retired (Google returns 404 for shut-down models). Other statuses
+        // (403 key/permission, 429 quota, 5xx) are not model problems and
+        // must surface immediately, never trigger a model change.
+        if (this.managedFallbackChain.length > 0 && error?.response?.status === 404 && next) {
+          console.warn(
+            `Google AI model "${model}" is no longer available, falling back to "${next}"`
+          );
+          continue;
+        }
+        throw error;
       }
-    );
-
-    const candidate = response.data?.candidates?.[0];
-    if (!candidate) {
-      const err = response.data?.error?.message || 'No candidate returned from Google AI';
-      throw new Error(err);
     }
-
-    const text = candidate.content?.parts?.map((p: any) => p.text).filter(Boolean).join('');
-    if (!text) {
-      throw new Error('Empty response from Google AI');
-    }
-
-    return text;
+    throw lastError ?? new Error('Google AI generation failed');
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
