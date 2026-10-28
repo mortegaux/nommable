@@ -5,7 +5,7 @@ import { AccessTimeIcon, LocalFireDepartmentIcon, RecyclingIcon } from '@/compon
 import { MealPlanShoppingListIntegration } from './MealPlanShoppingListIntegration';
 import { SaveAsTemplateModal } from './SaveAsTemplateModal';
 import type { MealPlan, MealPlanRecipe } from '@nommable/shared';
-import { compareEntries, decodeEntryNotes, formatTimeForDisplay, resolveMealType } from './mealPlanEntry';
+import { compareEntries, decodeEntryNotes, formatTimeForDisplay, parseLocalDate, resolveMealType } from './mealPlanEntry';
 import { useToastStore } from '@/store/toast.store';
 import { PageHeader, PageShell } from '@/components/PageHeader';
 
@@ -182,8 +182,8 @@ export default function MealPlanDashboard() {
           <>
             {mealPlan.description && <p>{mealPlan.description}</p>}
             <p className="mt-2 text-sm">
-              {new Date(mealPlan.startDate).toLocaleDateString()} -{' '}
-              {new Date(mealPlan.endDate).toLocaleDateString()}
+              {parseLocalDate(mealPlan.startDate).toLocaleDateString()} -{' '}
+              {parseLocalDate(mealPlan.endDate).toLocaleDateString()}
             </p>
           </>
         }

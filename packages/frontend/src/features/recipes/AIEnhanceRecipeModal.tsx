@@ -30,6 +30,64 @@ const ENHANCEMENT_INFO = {
   },
 };
 
+/** Collapse whitespace and lowercase, for matching AI-returned ingredient lines. */
+function normalizeLine(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/** Format an ingredient exactly the way the AI prompt does: "quantity unit name". */
+function promptLineOf(ing: { quantity?: number | string; unit?: string; name: string }): string {
+  return normalizeLine(`${ing.quantity || ''} ${ing.unit || ''} ${ing.name}`);
+}
+
+const KNOWN_UNITS = new Set([
+  'teaspoon', 'teaspoons', 'tsp',
+  'tablespoon', 'tablespoons', 'tbsp',
+  'cup', 'cups',
+  'pound', 'pounds', 'lb', 'lbs',
+  'ounce', 'ounces', 'oz',
+  'gram', 'grams', 'g', 'kilogram', 'kilograms', 'kg',
+  'milliliter', 'milliliters', 'ml', 'liter', 'liters', 'l',
+  'pinch', 'dash',
+  'clove', 'cloves',
+  'can', 'cans', 'package', 'packages', 'bunch', 'bunches',
+  'slice', 'slices', 'piece', 'pieces', 'stalk', 'stalks',
+]);
+
+/**
+ * Split a suggestion line into quantity/unit/name when it starts with its own
+ * amount (e.g. "1 teaspoon crushed Calabrian chili paste"). Returns null when
+ * the suggestion carries no leading amount, in which case the caller keeps the
+ * original ingredient's quantity/unit and uses the whole suggestion as the name.
+ */
+function parseSuggestionAmount(text: string): { quantity?: number; unit?: string; name: string } | null {
+  const trimmed = text.trim();
+  const match = /^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s+(.+)$/.exec(trimmed);
+  if (!match) return null;
+  const rawQty = match[1];
+  let quantity: number;
+  if (rawQty.includes('/')) {
+    const parts = rawQty.split(/\s+/);
+    if (parts.length === 2) {
+      const [whole, frac] = parts;
+      const [num, den] = frac.split('/');
+      quantity = parseInt(whole, 10) + parseInt(num, 10) / parseInt(den, 10);
+    } else {
+      const [num, den] = rawQty.split('/');
+      quantity = parseInt(num, 10) / parseInt(den, 10);
+    }
+  } else {
+    quantity = parseFloat(rawQty);
+  }
+  if (!Number.isFinite(quantity)) return null;
+  const rest = match[2].trim();
+  const [first, ...remainder] = rest.split(/\s+/);
+  if (remainder.length > 0 && KNOWN_UNITS.has(first.toLowerCase())) {
+    return { quantity, unit: first, name: remainder.join(' ') };
+  }
+  return { quantity, unit: undefined, name: rest };
+}
+
 export function AIEnhanceRecipeModal({
   recipeId,
   recipeTitle,
@@ -77,8 +135,34 @@ export function AIEnhanceRecipeModal({
         // Append tips to the recipe notes
         const tipsText = result.tips.join('\n');
         await recipeApi.update(recipeId, { notes: tipsText });
+      } else if (enhancementType === 'optimize_ingredients' && result.optimizations) {
+        // Fetch the current recipe so substitutions apply to what the user has
+        // now, then replace each matched ingredient with its suggestion.
+        const { data: current } = await recipeApi.getById(recipeId);
+        const currentIngredients = current.ingredients ?? [];
+        let applied = 0;
+        const nextIngredients = currentIngredients.map((ing) => {
+          const match = result.optimizations.find((opt: any) => {
+            if (!opt?.original || !opt?.suggestion) return false;
+            const original = normalizeLine(opt.original);
+            return promptLineOf(ing) === original || normalizeLine(ing.name) === original;
+          });
+          if (!match) return ing;
+          applied++;
+          const parsed = parseSuggestionAmount(match.suggestion);
+          if (parsed) {
+            return { ...ing, quantity: parsed.quantity, unit: parsed.unit, name: parsed.name };
+          }
+          return { ...ing, name: match.suggestion.trim() };
+        });
+        if (applied === 0) {
+          setError('No matching ingredients found — the recipe may have changed since these suggestions were generated.');
+          return;
+        }
+        await recipeApi.update(recipeId, {
+          ingredients: nextIngredients.map(({ id: _id, recipeId: _recipeId, ...rest }) => rest),
+        });
       }
-      // optimize_ingredients is informational only — no auto-apply
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -189,6 +273,11 @@ export function AIEnhanceRecipeModal({
                       Applying will add {result.tips.length} {result.tips.length === 1 ? 'tip' : 'tips'} to the recipe notes.
                     </p>
                   )}
+                  {enhancementType === 'optimize_ingredients' && result.optimizations && (
+                    <p className="text-xs font-medium text-foreground mt-1">
+                      Applying will update the recipe&apos;s ingredients with these suggestions.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -206,15 +295,13 @@ export function AIEnhanceRecipeModal({
               >
                 {enhancementType === 'optimize_ingredients' ? 'Close' : 'Dismiss'}
               </button>
-              {enhancementType !== 'optimize_ingredients' && (
-                <button
-                  onClick={handleApply}
-                  disabled={applying}
-                  className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
-                >
-                  {applying ? 'Applying...' : enhancementType === 'improve_instructions' ? 'Apply Instructions' : 'Apply Tips'}
-                </button>
-              )}
+              <button
+                onClick={handleApply}
+                disabled={applying}
+                className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+              >
+                {applying ? 'Applying...' : enhancementType === 'improve_instructions' ? 'Apply Instructions' : enhancementType === 'add_tips' ? 'Apply Tips' : 'Apply Optimizations'}
+              </button>
             </>
           ) : (
             <button
