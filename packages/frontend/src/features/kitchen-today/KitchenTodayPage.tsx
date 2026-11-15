@@ -8,7 +8,6 @@ import {
   ListTodo,
   Refrigerator,
   ShoppingBasket,
-  UtensilsCrossed,
 } from 'lucide-react';
 import { batchCookingApi, mealPlanApi, pantryApi, shoppingListApi } from '@/services/api';
 import type { MealPlan, PantryItem, ShoppingList } from '@nommable/shared';
@@ -51,11 +50,15 @@ function SectionCard({
   return (
     <section className="bg-card rounded-lg border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-4">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Icon className="w-5 h-5 text-primary" aria-hidden="true" />
+        <h2 className="flex items-center gap-2 text-lg font-medium text-foreground">
+          <Icon
+            className="h-[18px] w-[18px] text-muted-foreground"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
           {title}
           {count > 0 && (
-            <span className="text-sm font-normal text-muted-foreground">({count})</span>
+            <span className="font-mono text-sm tabular-nums text-muted-foreground">({count})</span>
           )}
         </h2>
         <Link
@@ -63,7 +66,7 @@ function SectionCard({
           className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           {viewAllLabel}
-          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          <ArrowRight className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
         </Link>
       </div>
       {hasRows ? (
@@ -153,13 +156,13 @@ export default function KitchenTodayPage() {
   if (loadError || !summary) {
     return (
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-3xl font-medium text-foreground">Dashboard</h1>
         <div className="mt-6 bg-card rounded-lg border border-border p-6 shadow-sm">
           <p className="text-muted-foreground">{loadError ?? 'Nothing to show yet.'}</p>
           <button
             type="button"
             onClick={loadToday}
-            className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             Try again
           </button>
@@ -179,7 +182,7 @@ export default function KitchenTodayPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-3xl font-medium text-foreground">Dashboard</h1>
         <p className="text-muted-foreground mt-1">{todayLabel}</p>
       </div>
 
@@ -194,15 +197,15 @@ export default function KitchenTodayPage() {
         aria-label="Next useful action"
         className="mb-6 rounded-lg bg-primary p-6 text-primary-foreground shadow"
       >
-        <p className="text-sm font-semibold uppercase tracking-wide opacity-80">Next up</p>
-        <h2 className="mt-1 text-2xl font-bold">{nextAction.title}</h2>
-        <p className="mt-1 opacity-90">{nextAction.detail}</p>
+        <p className="text-sm font-medium">Next up</p>
+        <h2 className="mt-1 text-2xl font-medium">{nextAction.title}</h2>
+        <p className="mt-1">{nextAction.detail}</p>
         <Link
           to={nextAction.href}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary-foreground px-4 py-2 font-medium text-primary shadow-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary-foreground"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary-foreground px-4 py-2 font-medium text-primary shadow-sm transition-colors hover:bg-primary-foreground/90 focus:outline-none focus:ring-2 focus:ring-primary-foreground"
         >
           Take action
-          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          <ArrowRight className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
         </Link>
       </section>
 
@@ -228,13 +231,13 @@ export default function KitchenTodayPage() {
               <li key={meal.mealId}>
                 <Link
                   to={meal.recipeId ? `/recipes/${meal.recipeId}` : `/meal-plans/${meal.planId}`}
-                  className="block rounded-lg border border-border p-3 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="block rounded-md border border-border p-3 transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-foreground">
                       {meal.recipeTitle ?? 'Planned meal'}
                     </span>
-                    <span className="text-xs font-semibold uppercase text-muted-foreground">
+                    <span className="text-xs font-medium capitalize text-muted-foreground">
                       {meal.mealType}
                     </span>
                   </div>
@@ -273,8 +276,8 @@ export default function KitchenTodayPage() {
                 <span
                   className={
                     daysUntilExpiry <= 0
-                      ? 'font-semibold text-red-600 dark:text-red-400'
-                      : 'font-medium text-amber-700 dark:text-amber-300'
+                      ? 'font-semibold tabular-nums text-red-600 dark:text-red-400'
+                      : 'font-medium tabular-nums text-amber-700 dark:text-amber-300'
                   }
                 >
                   {formatDaysUntil(daysUntilExpiry)}
@@ -340,7 +343,7 @@ export default function KitchenTodayPage() {
                 >
                   {leftover.recipeTitle}
                 </Link>
-                <span className="text-muted-foreground">
+                <span className="tabular-nums text-muted-foreground">
                   Use by {formatDateKey(leftover.useByKey)} (
                   {leftover.daysRemaining === 0 ? 'today' : `${leftover.daysRemaining}d left`})
                 </span>
@@ -415,13 +418,13 @@ export default function KitchenTodayPage() {
                   ? `/recipes/${summary.nextPlannedMeal.recipeId}`
                   : `/meal-plans/${summary.nextPlannedMeal.planId}`
               }
-              className="block rounded-lg border border-border p-3 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+              className="block rounded-md border border-border p-3 transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="font-medium text-foreground">
                   {summary.nextPlannedMeal.recipeTitle ?? 'Planned meal'}
                 </span>
-                <span className="text-xs font-semibold uppercase text-muted-foreground">
+                <span className="text-xs font-medium capitalize text-muted-foreground">
                   {summary.nextPlannedMeal.mealType}
                 </span>
               </div>
@@ -434,8 +437,7 @@ export default function KitchenTodayPage() {
         </SectionCard>
       </div>
 
-      <p className="mt-6 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <UtensilsCrossed className="w-4 h-4" aria-hidden="true" />
+      <p className="mt-6 text-sm text-muted-foreground">
         Read-only view — changes happen on the pantry, meal plan, and batch cooking pages.
       </p>
     </div>

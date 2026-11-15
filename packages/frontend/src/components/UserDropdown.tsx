@@ -73,7 +73,7 @@ export function UserDropdown({
         title={iconOnly ? user.username : undefined}
         className={
           iconOnly && variant === 'footer'
-            ? 'flex items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-transform hover:scale-105'
+            ? 'flex items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-transform active:scale-[0.98]'
             : 'flex items-center gap-2 px-2 py-2 sm:px-3 text-sm font-medium text-card-foreground bg-card border border-border rounded-lg hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors'
         }
       >

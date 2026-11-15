@@ -74,7 +74,7 @@ function SidebarLink({
       aria-current={active ? 'page' : undefined}
       title={collapsed ? entry.label : undefined}
       className={`flex items-center gap-3 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-        collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
+        collapsed ? 'justify-center px-0 py-2' : 'px-3 py-2'
       } ${
         active
           ? 'bg-muted font-semibold text-primary'
@@ -82,7 +82,8 @@ function SidebarLink({
       }`}
     >
       <Icon
-        className={`h-5 w-5 shrink-0 ${active ? 'text-primary' : ''}`}
+        className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-primary' : ''}`}
+        strokeWidth={1.5}
         aria-hidden="true"
       />
       {!collapsed && <span className="truncate">{entry.label}</span>}
@@ -94,7 +95,7 @@ function Logo({ appName, logoSrc }: { appName: string; logoSrc: string }) {
   return (
     <Link
       to="/dashboard"
-      className="flex min-w-0 items-center gap-2 text-xl font-bold text-primary md:gap-2.5 md:text-2xl"
+      className="flex min-w-0 items-center gap-2 text-xl font-semibold text-primary md:gap-2.5 md:text-2xl"
       aria-label={`${appName} home`}
     >
       <img
@@ -180,7 +181,7 @@ export default function DashboardLayout() {
               }}
             />
             {!collapsed && (
-              <span className="truncate text-lg font-bold text-primary">{appName}</span>
+              <span className="truncate text-lg font-semibold text-primary">{appName}</span>
             )}
           </Link>
         </div>
@@ -191,14 +192,12 @@ export default function DashboardLayout() {
 
         <nav
           aria-label="Main navigation"
-          className={`flex-1 space-y-5 overflow-y-auto ${collapsed ? 'px-2' : 'px-3'} py-2`}
+          className={`flex-1 space-y-6 overflow-y-auto ${collapsed ? 'px-2' : 'px-3'} py-2`}
         >
           {navGroups.map((group, gi) => (
             <div key={group.label ?? 'top'} className="space-y-1">
               {group.label && !collapsed && (
-                <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {group.label}
-                </p>
+                <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">{group.label}</p>
               )}
               {group.label && collapsed && gi > 0 && (
                 <div className="mx-2 border-t border-border" aria-hidden="true" />
@@ -229,9 +228,9 @@ export default function DashboardLayout() {
             className="p-2.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors lg:ml-auto"
           >
             {collapsed ? (
-              <ChevronsRight className="h-5 w-5" aria-hidden="true" />
+              <ChevronsRight className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
             ) : (
-              <ChevronsLeft className="h-5 w-5" aria-hidden="true" />
+              <ChevronsLeft className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" />
             )}
           </button>
         </div>
