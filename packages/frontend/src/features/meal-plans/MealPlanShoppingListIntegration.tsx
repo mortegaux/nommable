@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, Loader2, ShoppingCart } from 'lucide-react';
 import { mealPlanApi } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/store/toast.store';
@@ -69,7 +70,7 @@ export function MealPlanShoppingListIntegration({
   return (
     <div className="border-t border-border pt-4 mt-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-foreground">Shopping List</h3>
+        <h3 className="text-base font-medium text-foreground">Shopping list</h3>
         <button
           onClick={loadMissingIngredients}
           disabled={loading}
@@ -77,37 +78,25 @@ export function MealPlanShoppingListIntegration({
         >
           {loading ? (
             <>
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Checking...
+              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+              Checking
             </>
           ) : (
             <>
-              🛒 Check Missing Ingredients
+              <ShoppingCart className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              Check missing ingredients
             </>
           )}
         </button>
       </div>
 
       {showIngredients && (
-        <div className="bg-accent/10 rounded-lg p-4 space-y-4">
+        <div className="bg-muted rounded-lg p-4 space-y-4">
           {missingIngredients.length === 0 ? (
             <div className="text-center py-4">
-              <p className="text-green-700 dark:text-green-400 font-medium">
-                ✓ You have all ingredients in your pantry!
+              <p className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <Check className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                You have all ingredients in your pantry.
               </p>
             </div>
           ) : (
@@ -143,30 +132,16 @@ export function MealPlanShoppingListIntegration({
                 <button
                   onClick={handleAddToShoppingList}
                   disabled={adding}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {adding ? (
                     <>
-                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Adding...
+                      <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+                      Adding
                     </>
                   ) : (
                     <>
-                      + Add to Shopping List
+                      Add to shopping list
                     </>
                   )}
                 </button>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, ChevronDown, BarChart3, BadgeCheck, MessageSquare, Settings, LogOut, Zap } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
 
@@ -84,7 +84,7 @@ export function UserDropdown({
             className="w-8 h-8 rounded-full object-cover border border-border"
           />
         ) : (
-          <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full text-primary-foreground font-semibold">
+          <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full text-primary-foreground font-medium">
             {(user.firstName?.[0] || user.username.charAt(0)).toUpperCase()}
           </div>
         )}
@@ -94,15 +94,10 @@ export function UserDropdown({
           <span className="hidden xl:inline">{user.username}</span>
         )}
         {(!iconOnly || variant === 'header') && (
-          <svg
-            className={`${variant === 'footer' ? 'block' : 'hidden sm:block'} w-4 h-4 shrink-0 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <ChevronDown className={`${variant === 'footer' ? 'block' : 'hidden sm:block'} w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
         )}
       </button>
 
@@ -125,8 +120,8 @@ export function UserDropdown({
               }`}>
                 {user.role === 'admin' ? 'Administrator' : 'User'}
               </span>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                ⚡ {user.creditsRemaining ?? 10} AI Credits
+              <span className="inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground tabular-nums">
+                <Zap className="w-3.5 h-3.5" strokeWidth={1.5} aria-hidden="true" /> {user.creditsRemaining ?? 10} AI credits
               </span>
             </div>
           </div>
@@ -147,7 +142,7 @@ export function UserDropdown({
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Icon className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                   {label}
                 </button>
               ))}
@@ -159,14 +154,7 @@ export function UserDropdown({
             className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
+            <BarChart3 className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
             Analytics
           </button>
 
@@ -175,14 +163,7 @@ export function UserDropdown({
             className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-              />
-            </svg>
+            <BadgeCheck className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
             Achievements
           </button>
 
@@ -192,14 +173,7 @@ export function UserDropdown({
               className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
               role="menuitem"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                />
-              </svg>
+              <MessageSquare className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
               Feedback inbox
             </button>
           )}
@@ -209,20 +183,7 @@ export function UserDropdown({
             className="w-full text-left px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-accent"
             role="menuitem"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
+            <Settings className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
             Settings
           </button>
 
@@ -231,15 +192,8 @@ export function UserDropdown({
             className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:bg-destructive/10"
             role="menuitem"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            Logout
+            <LogOut className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
+            Log out
           </button>
         </div>
       )}

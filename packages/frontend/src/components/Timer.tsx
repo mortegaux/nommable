@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Check, RotateCcw, X } from 'lucide-react';
 
 interface TimerProps {
   initialMinutes?: number;
@@ -29,7 +30,7 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
             audioRef.current.play();
           }
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Timer Complete!', {
+            new Notification('Timer complete', {
               body: `${label} is done`,
               icon: '/favicon.ico',
             });
@@ -73,9 +74,9 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
   const progress = ((initialMinutes * 60 - totalSeconds) / (initialMinutes * 60)) * 100;
 
   return (
-    <div className={`rounded-xl border-2 p-4 transition-all ${
+    <div className={`rounded-xl border p-4 transition-colors ${
       isComplete
-        ? 'border-secondary bg-secondary/10 animate-pulse-subtle'
+        ? 'border-secondary bg-secondary/10'
         : isRunning
         ? 'border-primary bg-primary/5'
         : 'border-border bg-card'
@@ -88,22 +89,20 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
       </span>
 
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-foreground">{label}</h3>
+        <h3 className="font-medium text-foreground">{label}</h3>
         {onDelete && (
           <button
             onClick={onDelete}
             className="text-muted-foreground hover:text-destructive transition-colors p-1"
             aria-label="Delete timer"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           </button>
         )}
       </div>
 
       <div className="mb-4">
-        <div className={`text-5xl font-bold text-center mb-2 font-mono ${
+        <div className={`text-5xl font-medium text-center mb-2 font-mono tabular-nums ${
           isComplete ? 'text-secondary' : isRunning ? 'text-primary' : 'text-foreground'
         }`}>
           {formatTime(minutes, seconds)}
@@ -112,7 +111,7 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
         {/* Progress bar */}
         <div className="w-full bg-background rounded-full h-2 overflow-hidden">
           <div
-            className={`h-full transition-all ${isComplete ? 'bg-secondary' : 'bg-primary'}`}
+            className={`h-full transition-[width] ${isComplete ? 'bg-secondary' : 'bg-primary'}`}
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
@@ -158,14 +157,15 @@ export function Timer({ initialMinutes = 5, label = 'Timer', onComplete, onDelet
             className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-accent transition-colors"
             aria-label="Reset timer"
           >
-            ↺
+            <RotateCcw className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           </button>
         )}
       </div>
 
       {isComplete && (
-        <div className="mt-3 text-center text-sm font-medium text-success animate-pulse">
-          ✓ Timer Complete!
+        <div className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-success">
+          <Check className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          Timer complete
         </div>
       )}
     </div>

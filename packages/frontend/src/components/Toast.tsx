@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Check, X, Info } from 'lucide-react';
 
 interface ToastProps {
   message: string;
@@ -20,9 +21,9 @@ export function Toast({ message, type = 'info', onClose, duration = 3000 }: Toas
   };
 
   const icons = {
-    success: '✓',
-    error: '✕',
-    info: 'ℹ',
+    success: <Check className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />,
+    error: <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />,
+    info: <Info className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />,
   };
 
   return (
@@ -30,14 +31,14 @@ export function Toast({ message, type = 'info', onClose, duration = 3000 }: Toas
       className={`${bgColors[type]} px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-up`}
       role="alert"
     >
-      <span className="text-lg font-bold">{icons[type]}</span>
+      {icons[type]}
       <span className="font-medium">{message}</span>
       <button
         onClick={onClose}
         className="ml-2 p-1 min-w-6 min-h-6 hover:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current rounded"
         aria-label="Close notification"
       >
-        ×
+        <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
       </button>
     </div>
   );

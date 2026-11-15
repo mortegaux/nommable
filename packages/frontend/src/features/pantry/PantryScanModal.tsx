@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Image as ImageIcon, X } from 'lucide-react';
 import { aiErrorMessage } from '@/utils/aiValidation';
 import { pantryApi } from '@/services/api';
+import { Callout } from '@/components/Callout';
 import { Dialog } from '@/components/Dialog';
 import { useToastStore } from '@/store/toast.store';
 import { useAuthStore } from '@/store/auth.store';
@@ -186,25 +188,20 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
   };
 
   return (
-    <Dialog title="Scan Pantry with AI" onClose={onClose} panelClassName="max-w-4xl">
+    <Dialog title="Scan pantry with AI" onClose={onClose} size="wide">
       <div className="p-6 space-y-5">
         {step === 'capture' && (
           <>
             {/* AI vision cost notice */}
-            <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
-              <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">
-                AI Vision Cost Notice
-              </h3>
-              <p className="text-sm text-amber-800 dark:text-amber-300">
-                Scanning photos uses AI vision models, which have higher costs than text-only AI
-                features. Each image processed will consume AI tokens.
-              </p>
-            </div>
+            <Callout tone="warning" title="AI vision cost notice">
+              Scanning photos uses AI vision models, which have higher costs than text-only AI
+              features. Each image processed will consume AI tokens.
+            </Callout>
 
             {error && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive">
+              <Callout tone="error" role="alert">
                 {error}
-              </div>
+              </Callout>
             )}
 
             {/* Where were the photos taken? */}
@@ -261,13 +258,13 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                   htmlFor="pantry-scan-camera"
                   className={`cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors ${scanning ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  Take Photo
+                  Take photo
                 </label>
                 <label
                   htmlFor="pantry-scan-gallery"
                   className={`cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-input bg-background text-foreground text-sm font-medium hover:bg-accent transition-colors ${scanning ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  Choose from Gallery
+                  Choose from gallery
                 </label>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -281,16 +278,16 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
             {files.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-foreground">
-                  Selected Photos ({files.length}/{MAX_PHOTOS})
+                  Selected photos ({files.length}/{MAX_PHOTOS})
                 </h3>
                 <div className="space-y-2">
                   {files.map((file, index) => (
                     <div
                       key={`${file.name}-${index}`}
-                      className="flex items-center justify-between p-3 rounded-lg bg-accent/10 border border-accent/20"
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span aria-hidden="true">🖼️</span>
+                        <ImageIcon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                         <div className="min-w-0">
                           <div className="font-medium text-foreground text-sm truncate">
                             {file.name}
@@ -306,7 +303,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                         className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
                         aria-label={`Remove ${file.name}`}
                       >
-                        ✕
+                        <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -328,7 +325,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                 disabled={files.length === 0 || scanning}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                {scanning ? 'Scanning…' : `Scan ${files.length} Photo${files.length === 1 ? '' : 's'}`}
+                {scanning ? 'Scanning' : `Scan ${files.length} photo${files.length === 1 ? '' : 's'}`}
               </button>
             </div>
           </>
@@ -337,19 +334,19 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
         {step === 'review' && (
           <>
             {error && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-destructive">
+              <Callout tone="error" role="alert">
                 {error}
-              </div>
+              </Callout>
             )}
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               Review what the AI found. Fix anything wrong, add missing items, fill in expiration
               dates — nothing is added until you confirm.
             </p>
 
             {reviewItems.length === 0 ? (
-              <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
-                <p className="text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-border p-8 text-center">
+                <p className="leading-relaxed text-muted-foreground">
                   No items detected in these photos. Add items manually below, or go back and try
                   different photos.
                 </p>
@@ -394,7 +391,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                         className="px-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                         aria-label={`Remove ${item.name || 'item'}`}
                       >
-                        ✕
+                        <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -472,7 +469,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
               onClick={addBlankItem}
               className="px-3 py-1.5 rounded-lg border border-input bg-background text-foreground text-sm font-medium hover:bg-accent transition-colors"
             >
-              + Add missing item
+              Add missing item
             </button>
 
             <div className="flex justify-between gap-3">
@@ -482,7 +479,7 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                 disabled={adding}
                 className="px-4 py-2 rounded-lg border border-input bg-background text-foreground text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
               >
-                Back to Photos
+                Back to photos
               </button>
               <div className="flex gap-3">
                 <button
@@ -500,8 +497,8 @@ export function PantryScanModal({ onClose, existingItems, onAdded, availableLoca
                   className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   {adding
-                    ? 'Adding…'
-                    : `Add ${reviewItems.length} Item${reviewItems.length === 1 ? '' : 's'} to Pantry`}
+                    ? 'Adding'
+                    : `Add ${reviewItems.length} item${reviewItems.length === 1 ? '' : 's'} to pantry`}
                 </button>
               </div>
             </div>

@@ -50,7 +50,7 @@ function SectionCard({
   return (
     <section className="bg-card rounded-lg border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-4">
-        <h2 className="flex items-center gap-2 text-lg font-medium text-foreground">
+        <h2 className="flex items-center gap-2 text-base font-medium text-foreground">
           <Icon
             className="h-[18px] w-[18px] text-muted-foreground"
             strokeWidth={1.5}
@@ -58,7 +58,7 @@ function SectionCard({
           />
           {title}
           {count > 0 && (
-            <span className="font-mono text-sm tabular-nums text-muted-foreground">({count})</span>
+            <span className="font-mono text-[13px] tabular-nums text-muted-foreground">({count})</span>
           )}
         </h2>
         <Link
@@ -156,7 +156,7 @@ export default function KitchenTodayPage() {
   if (loadError || !summary) {
     return (
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-medium text-foreground">Dashboard</h1>
+        <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Dashboard</h1>
         <div className="mt-6 bg-card rounded-lg border border-border p-6 shadow-sm">
           <p className="text-muted-foreground">{loadError ?? 'Nothing to show yet.'}</p>
           <button
@@ -182,8 +182,8 @@ export default function KitchenTodayPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-medium text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">{todayLabel}</p>
+        <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground tabular-nums mt-1">{todayLabel}</p>
       </div>
 
       {partialError && (
@@ -198,7 +198,7 @@ export default function KitchenTodayPage() {
         className="mb-6 rounded-lg bg-primary p-6 text-primary-foreground shadow"
       >
         <p className="text-sm font-medium">Next up</p>
-        <h2 className="mt-1 text-2xl font-medium">{nextAction.title}</h2>
+        <h2 className="mt-1 text-2xl font-medium leading-tight text-balance">{nextAction.title}</h2>
         <p className="mt-1">{nextAction.detail}</p>
         <Link
           to={nextAction.href}
@@ -308,7 +308,7 @@ export default function KitchenTodayPage() {
             {summary.prepDue.slice(0, MAX_ROWS).map((prep) => (
               <li key={`${prep.planId}-${prep.task}-${prep.order}`} className="text-sm">
                 <span className="text-foreground">{prep.task}</span>
-                <span className="text-muted-foreground">
+                <span className="tabular-nums text-muted-foreground">
                   {' '}
                   — “{prep.planName}” · {formatDateKey(prep.cookingDateKey)}
                 </span>
@@ -428,7 +428,7 @@ export default function KitchenTodayPage() {
                   {summary.nextPlannedMeal.mealType}
                 </span>
               </div>
-              <div className="mt-1 text-sm text-muted-foreground">
+              <div className="mt-1 text-sm tabular-nums text-muted-foreground">
                 {formatDateKey(summary.nextPlannedMeal.dateKey)} · in “
                 {summary.nextPlannedMeal.planName}”
               </div>

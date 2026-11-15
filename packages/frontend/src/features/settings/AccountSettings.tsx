@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 import { useAuthStore } from '@/store/auth.store';
 import { userApi } from '@/services/api';
 
@@ -140,38 +142,31 @@ export function AccountSettings() {
     <div className="space-y-6">
       {/* Success/Error Messages */}
       {successMessage && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
-          {successMessage}
-        </div>
+        <Callout tone="success">{successMessage}</Callout>
       )}
       {errorMessage && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
-          {errorMessage}
-        </div>
+        <Callout tone="error" role="alert">{errorMessage}</Callout>
       )}
 
       {/* Profile Photo Section */}
       <div className="bg-card border border-border rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Profile Photo</h2>
+        <h2 className="text-base font-medium mb-4 text-foreground">Profile photo</h2>
         <div className="flex items-center gap-6">
           <div className="relative">
             {user.profilePhotoUrl ? (
               <img
                 src={user.profilePhotoUrl}
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-2 border-border"
+                className="w-24 h-24 rounded-full object-cover border border-border"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-semibold border-2 border-border">
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-medium border border-border">
                 {(user.firstName?.[0] || user.username[0]).toUpperCase()}
               </div>
             )}
             {uploadingPhoto && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
-                <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <Loader2 className="h-6 w-6 animate-spin text-white" strokeWidth={1.5} aria-hidden="true" />
               </div>
             )}
           </div>
@@ -189,7 +184,7 @@ export function AccountSettings() {
               disabled={uploadingPhoto}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              {uploadingPhoto ? 'Uploading...' : 'Change Photo'}
+              {uploadingPhoto ? 'Uploading' : 'Change photo'}
             </button>
             <p className="text-sm text-muted-foreground mt-2">
               JPG, PNG, GIF or WebP. Max 5MB.
@@ -201,7 +196,7 @@ export function AccountSettings() {
       {/* Profile Information Section */}
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Profile Information</h2>
+          <h2 className="text-base font-medium text-foreground">Profile information</h2>
           {!isEditingProfile && (
             <button
               onClick={() => {
@@ -219,7 +214,7 @@ export function AccountSettings() {
         {isEditingProfile ? (
           <form onSubmit={handleUpdateProfile} className="space-y-4">
             <div>
-              <label htmlFor="profile-first-name" className="block text-sm font-medium text-foreground mb-1">First Name</label>
+              <label htmlFor="profile-first-name" className="block text-sm font-medium text-foreground mb-1">First name</label>
               <input
                 id="profile-first-name"
                 type="text"
@@ -229,7 +224,7 @@ export function AccountSettings() {
               />
             </div>
             <div>
-              <label htmlFor="profile-last-name" className="block text-sm font-medium text-foreground mb-1">Last Name</label>
+              <label htmlFor="profile-last-name" className="block text-sm font-medium text-foreground mb-1">Last name</label>
               <input
                 id="profile-last-name"
                 type="text"
@@ -243,7 +238,7 @@ export function AccountSettings() {
                 type="submit"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
-                Save Changes
+                Save changes
               </button>
               <button
                 type="button"
@@ -257,11 +252,11 @@ export function AccountSettings() {
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1">First Name</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">First name</label>
               <div className="text-foreground">{user.firstName || 'Not set'}</div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1">Last Name</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Last name</label>
               <div className="text-foreground">{user.lastName || 'Not set'}</div>
             </div>
             <div>
@@ -270,7 +265,7 @@ export function AccountSettings() {
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">Role</label>
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
+              <div className="text-foreground">
                 {user.role === 'admin' ? 'Administrator' : 'User'}
               </div>
             </div>
@@ -281,7 +276,7 @@ export function AccountSettings() {
       {/* Email Section */}
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Email Address</h2>
+          <h2 className="text-base font-medium text-foreground">Email address</h2>
           {!isEditingEmail && (
             <button
               onClick={() => {
@@ -290,7 +285,7 @@ export function AccountSettings() {
               }}
               className="text-sm text-primary hover:text-primary/80 font-medium"
             >
-              Change Email
+              Change email
             </button>
           )}
         </div>
@@ -298,7 +293,7 @@ export function AccountSettings() {
         {isEditingEmail ? (
           <form onSubmit={handleUpdateEmail} className="space-y-4">
             <div>
-              <label htmlFor="email-new" className="block text-sm font-medium text-foreground mb-1">New Email</label>
+              <label htmlFor="email-new" className="block text-sm font-medium text-foreground mb-1">New email</label>
               <input
                 id="email-new"
                 type="email"
@@ -310,7 +305,7 @@ export function AccountSettings() {
             </div>
             <div>
               <label htmlFor="email-current-password" className="block text-sm font-medium text-foreground mb-1">
-                Current Password (for verification)
+                Current password (for verification)
               </label>
               <input
                 id="email-current-password"
@@ -326,7 +321,7 @@ export function AccountSettings() {
                 type="submit"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
-                Update Email
+                Update email
               </button>
               <button
                 type="button"
@@ -345,16 +340,16 @@ export function AccountSettings() {
         )}
       </div>
 
-      {/* Change Password Section */}
+      {/* Change password Section */}
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Password</h2>
+          <h2 className="text-base font-medium text-foreground">Password</h2>
           {!isChangingPassword && (
             <button
               onClick={() => setIsChangingPassword(true)}
               className="text-sm text-primary hover:text-primary/80 font-medium"
             >
-              Change Password
+              Change password
             </button>
           )}
         </div>
@@ -362,12 +357,10 @@ export function AccountSettings() {
         {isChangingPassword ? (
           <form onSubmit={handleChangePassword} className="space-y-4">
             {errorMessage && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg text-sm">
-                {errorMessage}
-              </div>
+              <Callout tone="error" role="alert">{errorMessage}</Callout>
             )}
             <div>
-              <label htmlFor="pw-current" className="block text-sm font-medium text-foreground mb-1">Current Password</label>
+              <label htmlFor="pw-current" className="block text-sm font-medium text-foreground mb-1">Current password</label>
               <input
                 id="pw-current"
                 type="password"
@@ -378,7 +371,7 @@ export function AccountSettings() {
               />
             </div>
             <div>
-              <label htmlFor="pw-new" className="block text-sm font-medium text-foreground mb-1">New Password</label>
+              <label htmlFor="pw-new" className="block text-sm font-medium text-foreground mb-1">New password</label>
               <input
                 id="pw-new"
                 type="password"
@@ -391,7 +384,7 @@ export function AccountSettings() {
               <p className="text-sm text-muted-foreground mt-1">Must be at least 8 characters</p>
             </div>
             <div>
-              <label htmlFor="pw-confirm" className="block text-sm font-medium text-foreground mb-1">Confirm New Password</label>
+              <label htmlFor="pw-confirm" className="block text-sm font-medium text-foreground mb-1">Confirm new password</label>
               <input
                 id="pw-confirm"
                 type="password"
@@ -406,7 +399,7 @@ export function AccountSettings() {
                 type="submit"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
-                Change Password
+                Change password
               </button>
               <button
                 type="button"

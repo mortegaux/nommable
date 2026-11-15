@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { recipeApi, taxonomyApi } from '@/services/api';
 import { fractionToDecimal } from '@/utils/fractions';
 import type { Recipe, Taxonomy } from '@nommable/shared';
-import { DescriptionIcon, RestaurantIcon, ListIcon, SettingsIcon } from '@/components/icons/MaterialIcon';
+import { FileText, UtensilsCrossed, List, Settings, Pencil, X } from 'lucide-react';
 import { ImageUpload } from '@/components/ImageUpload';
 import { useAuthStore } from '@/store/auth.store';
 import { useConfirmStore } from '@/store/confirm.store';
@@ -293,9 +293,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
             </label>
             {isAdmin && (
               <Link to="/settings/taxonomies" className="text-muted-foreground hover:text-primary transition-colors" title="Manage default categories">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
+                <Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </Link>
             )}
           </div>
@@ -322,7 +320,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                 addCustomCategory();
               }
             }}
-            placeholder="Add a category (e.g. Appetizers, Dinner) and press Enter..."
+            placeholder="Add a category, press Enter"
             className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
@@ -349,7 +347,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                     : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                 }`}
               >
-                {isSelected ? `✓ ${category}` : `+ ${category}`}
+                {category}
               </button>
             );
           })}
@@ -365,9 +363,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
             </label>
             {isAdmin && (
               <Link to="/settings/taxonomies" className="text-muted-foreground hover:text-primary transition-colors" title="Manage default tags">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
+                <Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </Link>
             )}
           </div>
@@ -397,7 +393,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                 addCustomTag();
               }
             }}
-            placeholder="Type any tag (e.g. Quick, Kid Friendly, Vegan) and press Enter..."
+            placeholder="Type a tag, press Enter"
             className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
@@ -424,7 +420,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                     : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                 }`}
               >
-                {isSelected ? `✓ ${tag}` : `+ ${tag}`}
+                {tag}
               </button>
             );
           })}
@@ -536,31 +532,31 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
   };
 
   const tabs = [
-    { id: 'basics', label: 'Basics', icon: <DescriptionIcon size={18} /> },
-    { id: 'ingredients', label: 'Ingredients', icon: <RestaurantIcon size={18} /> },
-    { id: 'instructions', label: 'Instructions', icon: <ListIcon size={18} /> },
-    { id: 'details', label: 'Details', icon: <SettingsIcon size={18} /> },
+    { id: 'basics', label: 'Basics', icon: <FileText className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" /> },
+    { id: 'ingredients', label: 'Ingredients', icon: <UtensilsCrossed className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" /> },
+    { id: 'instructions', label: 'Instructions', icon: <List className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" /> },
+    { id: 'details', label: 'Details', icon: <Settings className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden="true" /> },
   ];
 
   if (loadingRecipe) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading recipe...</div>
+          <div className="text-muted-foreground">Loading recipe</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-primary">
-            {recipeId ? 'Edit Recipe' : 'Create New Recipe'}
+          <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">
+            {recipeId ? 'Edit recipe' : 'Create new recipe'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {recipeId ? 'Update your recipe details' : 'Add a delicious recipe to your collection'}
+            {recipeId ? 'Update your recipe details' : 'Add a recipe to your collection'}
           </p>
         </div>
       </div>
@@ -652,7 +648,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Brief description of your recipe..."
+                placeholder="Brief description of your recipe"
               />
             </div>
 
@@ -702,7 +698,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
 
             <div>
               <label id="difficulty-label" className="block text-sm font-medium text-card-foreground mb-3">
-                Difficulty Level
+                Difficulty
               </label>
               <div className="grid grid-cols-3 gap-4" role="group" aria-labelledby="difficulty-label">
                 {DIFFICULTY_OPTIONS.map((option) => (
@@ -710,7 +706,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                     key={option.value}
                     type="button"
                     onClick={() => setFormData({ ...formData, difficulty: option.value as any })}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`p-4 rounded-lg border transition-colors ${
                       formData.difficulty === option.value
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/50'
@@ -732,7 +728,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-card-foreground">Ingredients</h3>
+                <h3 className="text-xl font-medium text-card-foreground">Ingredients</h3>
                 {errorFor('ingredient-0-name') && (
                   <p className="text-destructive text-sm mt-1">{errorFor('ingredient-0-name')!.message}</p>
                 )}
@@ -802,9 +798,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                     className="text-destructive hover:text-destructive/80 p-2 flex items-center justify-center"
                     aria-label="Remove ingredient"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -817,7 +811,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-card-foreground">Cooking Instructions</h3>
+                <h3 className="text-xl font-medium text-card-foreground">Cooking instructions</h3>
                 {errorFor('instruction-0') && (
                   <p className="text-destructive text-sm mt-1">{errorFor('instruction-0')!.message}</p>
                 )}
@@ -833,7 +827,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
 
             {formData.instructions.map((instruction, index) => (
               <div key={index} className="flex gap-3 items-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium text-sm tabular-nums">
                   {index + 1}
                 </div>
                 <label htmlFor={`instruction-${index}`} className="sr-only">
@@ -845,7 +839,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                   onChange={(e) => updateInstruction(index, e.target.value)}
                   rows={2}
                   className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder={`Step ${index + 1} instructions...`}
+                  placeholder={`Step ${index + 1} instructions`}
                 />
                 <button
                   type="button"
@@ -853,9 +847,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                   className="text-destructive hover:text-destructive/80 p-2 flex items-center justify-center"
                   aria-label="Remove step"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
             ))}
@@ -907,7 +899,7 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Any additional notes or tips..."
+                placeholder="Any additional notes or tips"
               />
             </div>
           </div>
@@ -928,8 +920,8 @@ export default function RecipeForm({ recipeId }: RecipeFormProps) {
             className="px-6 py-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
-              ? (recipeId ? 'Saving...' : 'Creating...')
-              : (recipeId ? 'Save Changes' : 'Create Recipe')
+              ? (recipeId ? 'Saving' : 'Creating')
+              : (recipeId ? 'Save changes' : 'Create recipe')
             }
           </button>
         </div>

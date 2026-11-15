@@ -34,7 +34,7 @@ export function EmptyState({
       )}
       <p className="font-medium text-foreground">{title}</p>
       {description != null && (
-        <div className="mt-1 text-sm text-muted-foreground">{description}</div>
+        <div className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</div>
       )}
       {action != null && (
         <div className="mt-4 flex justify-center">{action}</div>

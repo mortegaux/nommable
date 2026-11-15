@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mealPlanApi } from '@/services/api';
-import { AccessTimeIcon, LocalFireDepartmentIcon, RecyclingIcon } from '@/components/icons/MaterialIcon';
+import { Bookmark, Calendar, Clock, Flame, Recycle, UtensilsCrossed } from 'lucide-react';
 import { MealPlanShoppingListIntegration } from './MealPlanShoppingListIntegration';
 import { SaveAsTemplateModal } from './SaveAsTemplateModal';
 import type { MealPlan, MealPlanRecipe } from '@nommable/shared';
@@ -10,10 +10,10 @@ import { useToastStore } from '@/store/toast.store';
 import { PageHeader, PageShell } from '@/components/PageHeader';
 
 const MEAL_TYPE_CONFIG = {
-  breakfast: { color: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800', label: 'Breakfast' },
-  lunch: { color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800', label: 'Lunch' },
-  dinner: { color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800', label: 'Dinner' },
-  snack: { color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800', label: 'Snack' },
+  breakfast: { dot: 'bg-amber-500', label: 'Breakfast' },
+  lunch: { dot: 'bg-green-500', label: 'Lunch' },
+  dinner: { dot: 'bg-blue-500', label: 'Dinner' },
+  snack: { dot: 'bg-purple-500', label: 'Snack' },
 };
 
 export default function MealPlanDashboard() {
@@ -52,7 +52,7 @@ export default function MealPlanDashboard() {
   };
 
   const handleTemplateSaved = () => {
-    toast.success('Template saved successfully!');
+    toast.success('Template saved.');
   };
 
   // Group meals by date
@@ -139,7 +139,7 @@ export default function MealPlanDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading meal plan...</div>
+        <div className="text-muted-foreground">Loading meal plan</div>
       </div>
     );
   }
@@ -152,7 +152,7 @@ export default function MealPlanDashboard() {
           onClick={() => navigate('/meal-plans')}
           className="text-sm text-primary hover:underline"
         >
-          Back to Meal Plans
+          Back to meal plans
         </button>
       </div>
     );
@@ -181,7 +181,7 @@ export default function MealPlanDashboard() {
         subtitle={
           <>
             {mealPlan.description && <p>{mealPlan.description}</p>}
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm font-mono tabular-nums">
               {parseLocalDate(mealPlan.startDate).toLocaleDateString()} -{' '}
               {parseLocalDate(mealPlan.endDate).toLocaleDateString()}
             </p>
@@ -194,29 +194,15 @@ export default function MealPlanDashboard() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-background text-foreground font-medium hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
               aria-label="Save as template"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-              Save as Template
+              <Bookmark className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+              Save as template
             </button>
             <button
               onClick={handleExport}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-background text-foreground font-medium hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
               aria-label="Export to calendar"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+              <Calendar className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
               Export
             </button>
           </>
@@ -229,9 +215,10 @@ export default function MealPlanDashboard() {
         <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total Meals</p>
-              <p className="text-2xl font-bold text-foreground">{mealPlan.meals.length}</p>
+              <p className="text-sm text-muted-foreground">Total meals</p>
+              <p className="text-2xl font-medium tabular-nums text-foreground">{mealPlan.meals.length}</p>
             </div>
+            <UtensilsCrossed className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           </div>
         </div>
 
@@ -239,10 +226,10 @@ export default function MealPlanDashboard() {
         <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total Prep Time</p>
-              <p className="text-2xl font-bold text-foreground">{timeline.totalPrepTime}m</p>
+              <p className="text-sm text-muted-foreground">Total prep time</p>
+              <p className="text-2xl font-medium font-mono tabular-nums text-foreground">{timeline.totalPrepTime}m</p>
             </div>
-            <AccessTimeIcon size={28} className="text-primary" />
+            <Clock className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           </div>
         </div>
 
@@ -250,10 +237,10 @@ export default function MealPlanDashboard() {
         <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total Cook Time</p>
-              <p className="text-2xl font-bold text-foreground">{timeline.totalCookTime}m</p>
+              <p className="text-sm text-muted-foreground">Total cook time</p>
+              <p className="text-2xl font-medium font-mono tabular-nums text-foreground">{timeline.totalCookTime}m</p>
             </div>
-            <LocalFireDepartmentIcon size={28} className="text-primary" />
+            <Flame className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           </div>
         </div>
 
@@ -262,10 +249,10 @@ export default function MealPlanDashboard() {
           <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg Daily Calories</p>
-                <p className="text-2xl font-bold text-foreground">{nutrition.avgCalories}</p>
+                <p className="text-sm text-muted-foreground">Avg daily calories</p>
+                <p className="text-2xl font-medium tabular-nums text-foreground">{nutrition.avgCalories}</p>
               </div>
-              <LocalFireDepartmentIcon size={28} className="text-primary" />
+              <Flame className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             </div>
           </div>
         )}
@@ -274,28 +261,19 @@ export default function MealPlanDashboard() {
       {/* Nutrition Summary */}
       {nutrition && (
         <div className="bg-card rounded-lg border border-border p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Nutrition Overview</h2>
+          <h2 className="text-xl font-medium text-foreground mb-4">Nutrition overview</h2>
           <div className="grid grid-cols-3 gap-6">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Protein (avg/day)</p>
-              <p className="text-xl font-bold text-foreground">{nutrition.avgProtein}g</p>
-              <div className="mt-2 h-2 bg-background rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500" style={{ width: '60%' }} />
-              </div>
+              <p className="text-xl font-medium tabular-nums text-foreground">{nutrition.avgProtein}g</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">Carbs (avg/day)</p>
-              <p className="text-xl font-bold text-foreground">{nutrition.avgCarbs}g</p>
-              <div className="mt-2 h-2 bg-background rounded-full overflow-hidden">
-                <div className="h-full bg-green-500" style={{ width: '75%' }} />
-              </div>
+              <p className="text-xl font-medium tabular-nums text-foreground">{nutrition.avgCarbs}g</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">Fat (avg/day)</p>
-              <p className="text-xl font-bold text-foreground">{nutrition.avgFat}g</p>
-              <div className="mt-2 h-2 bg-background rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500" style={{ width: '45%' }} />
-              </div>
+              <p className="text-xl font-medium tabular-nums text-foreground">{nutrition.avgFat}g</p>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
@@ -306,7 +284,7 @@ export default function MealPlanDashboard() {
 
       {/* Weekly Calendar View */}
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Weekly Schedule</h2>
+        <h2 className="text-xl font-medium text-foreground mb-4">Weekly schedule</h2>
 
         <div className="space-y-6">
           {sortedDates.map(dateKey => {
@@ -322,8 +300,8 @@ export default function MealPlanDashboard() {
               );
 
             return (
-              <div key={dateKey} className="border-l-4 border-primary pl-4">
-                <h3 className="text-lg font-semibold text-foreground mb-3">
+              <div key={dateKey} className="border-l border-border pl-4">
+                <h3 className="text-base font-medium tabular-nums text-foreground mb-3">
                   {new Date(dateKey + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </h3>
 
@@ -336,16 +314,17 @@ export default function MealPlanDashboard() {
                       <Link
                         key={meal.id}
                         to={meal.recipe ? `/recipes/${meal.recipe.id}` : '#'}
-                        className={`block rounded-lg border-2 ${config.color} p-3 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary`}
+                        className="block rounded-lg border border-border bg-card p-3 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         {/* Meal Type Header */}
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-semibold text-muted-foreground uppercase">
+                          <span className={`h-2 w-2 rounded-full ${config.dot}`} aria-hidden="true" />
+                          <span className="text-xs font-medium text-muted-foreground">
                             {config.label}
                           </span>
                           {time && (
-                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                              <AccessTimeIcon size={12} aria-hidden="true" />
+                            <span className="inline-flex items-center gap-1 font-mono text-xs tabular-nums text-muted-foreground">
+                              <Clock className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
                               {formatTimeForDisplay(time)}
                             </span>
                           )}
@@ -354,7 +333,7 @@ export default function MealPlanDashboard() {
                               className="ml-auto text-xs bg-accent/20 text-accent-foreground px-1.5 py-0.5 rounded flex items-center gap-1"
                               title="Recipe appears multiple times this week"
                             >
-                              <RecyclingIcon size={12} />
+                              <Recycle className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
                             </span>
                           )}
                         </div>
@@ -387,7 +366,7 @@ export default function MealPlanDashboard() {
 
                         {/* Notes (time prefix already stripped by decodeEntryNotes) */}
                         {notes && (
-                          <p className="text-xs text-muted-foreground italic mt-2">
+                          <p className="text-xs text-muted-foreground mt-2">
                             {notes}
                           </p>
                         )}
@@ -403,12 +382,12 @@ export default function MealPlanDashboard() {
 
       {/* Leftover Optimization Info */}
       {Object.keys(leftovers).length > 0 && (
-        <div className="mt-6 bg-accent/10 border border-accent/20 rounded-lg p-4">
+        <div className="mt-6 bg-muted border border-border rounded-lg p-4">
           <div>
-            <h3 className="font-semibold text-foreground mb-1">Meal Prep Opportunity</h3>
+            <h3 className="font-medium text-foreground mb-1">Meal prep opportunity</h3>
             <p className="text-sm text-muted-foreground">
-              {Object.keys(leftovers).length} recipe(s) appear multiple times this week. Consider batch
-              cooking to save time!
+              {Object.keys(leftovers).length} recipe{Object.keys(leftovers).length !== 1 ? 's' : ''} appear{Object.keys(leftovers).length === 1 ? 's' : ''} multiple times this week. Consider batch
+              cooking to save time.
             </p>
           </div>
         </div>

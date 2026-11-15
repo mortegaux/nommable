@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { aiErrorMessage } from '@/utils/aiValidation';
 import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
-import { Sparkles, RefreshCw, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { RefreshCw, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
 
 interface AIGenerateImageModalProps {
@@ -112,7 +112,7 @@ export function AIGenerateImageModal({
   };
 
   return (
-    <Dialog title="Generate Recipe Image" onClose={onClose} panelClassName="max-w-xl">
+    <Dialog title="Generate recipe image" onClose={onClose}>
       <div className="p-6">
         <p className="text-xs text-muted-foreground mb-4">Powered by Google Imagen 3 or OpenAI DALL-E</p>
 
@@ -134,26 +134,26 @@ export function AIGenerateImageModal({
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-green-400" />
+                <Check className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                 Generated with AI
               </div>
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-border p-8 text-center bg-muted/30">
-              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
-                <ImageIcon className="w-6 h-6" />
+              <div className="flex items-center justify-center mx-auto mb-3">
+                <ImageIcon className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               </div>
-              <h4 className="font-semibold text-foreground text-sm">AI Food Photography</h4>
+              <h4 className="font-medium text-foreground text-sm">AI food photography</h4>
               <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">
-                Generate an appetizing, high-resolution photo for &quot;{recipeTitle}&quot; using your configured AI provider.
+                Generate a photo for &quot;{recipeTitle}&quot; using your configured AI provider.
               </p>
             </div>
           )}
 
           {/* Style Presets */}
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Style Inspiration
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Style inspiration
             </label>
             <div className="flex flex-wrap gap-1.5">
               {STYLE_PRESETS.map((preset) => (
@@ -172,8 +172,8 @@ export function AIGenerateImageModal({
 
           {/* Model Selection */}
           <div>
-            <label htmlFor="modal-image-model" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Image Generation Model
+            <label htmlFor="modal-image-model" className="block text-sm font-medium text-foreground mb-1.5">
+              Image generation model
             </label>
             <select
               id="modal-image-model"
@@ -190,7 +190,7 @@ export function AIGenerateImageModal({
               disabled={loading}
               className="w-full text-xs rounded-xl border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             >
-              <option value="">Default (Configured in AI Settings)</option>
+              <option value="">Default (configured in AI settings)</option>
               <optgroup label="OpenAI Image Models">
                 <option value="gpt-image-1.5">GPT-Image 1.5 (Recommended / Fast)</option>
                 <option value="gpt-image-2.5-sunburst">GPT-Image 2.5 Sunburst (Flagship Quality)</option>
@@ -203,7 +203,7 @@ export function AIGenerateImageModal({
                 <option value="imagen-3.0-generate-002">Imagen 3 High Quality (Requires billing)</option>
                 <option value="imagen-3.0-fast-generate-001">Imagen 3 Fast (Requires billing)</option>
               </optgroup>
-              <option value="__custom__">Custom model (enter manually)...</option>
+              <option value="__custom__">Custom model (enter manually)</option>
             </select>
 
             {isCustomModel && (
@@ -223,8 +223,8 @@ export function AIGenerateImageModal({
 
           {/* Prompt customization */}
           <div>
-            <label htmlFor="image-prompt" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              AI Prompt (Customize if desired)
+            <label htmlFor="image-prompt" className="block text-sm font-medium text-foreground mb-1.5">
+              AI prompt
             </label>
             <textarea
               id="image-prompt"
@@ -233,7 +233,7 @@ export function AIGenerateImageModal({
               onChange={(e) => setPrompt(e.target.value)}
               disabled={loading}
               className="w-full text-sm rounded-xl border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 resize-none"
-              placeholder="Describe the desired presentation, lighting, and table setting..."
+              placeholder="Describe the desired presentation, lighting, and table setting"
             />
           </div>
         </div>
@@ -248,7 +248,7 @@ export function AIGenerateImageModal({
                 disabled={loading}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors disabled:opacity-50"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" /> : <RefreshCw className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
                 Regenerate
               </button>
               <button
@@ -257,8 +257,8 @@ export function AIGenerateImageModal({
                 disabled={loading}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
               >
-                <Check className="w-4 h-4" />
-                Apply to Recipe
+                <Check className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                Apply to recipe
               </button>
             </>
           ) : (
@@ -279,13 +279,12 @@ export function AIGenerateImageModal({
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Generating Image...</span>
+                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+                    <span>Generating image</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Generate Photo</span>
+                    <span>Generate photo</span>
                   </>
                 )}
               </button>

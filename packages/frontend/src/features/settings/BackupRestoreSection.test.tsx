@@ -87,11 +87,11 @@ describe('BackupRestoreSection (issue #71)', () => {
     mockListServerBackups.mockResolvedValue({ data: { backups: [] } });
   });
 
-  it('renders the Backup & Restore section for admins', () => {
+  it('renders the Backup & restore section for admins', () => {
     useAuthStore.setState({ user: adminUser } as never);
     renderSection();
-    expect(screen.getByText('Backup & Restore')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Download Backup' })).toBeTruthy();
+    expect(screen.getByText('Backup & restore')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Download backup' })).toBeTruthy();
     expect(screen.getByLabelText('Backup archive (.zip)')).toBeTruthy();
   });
 
@@ -99,7 +99,7 @@ describe('BackupRestoreSection (issue #71)', () => {
     useAuthStore.setState({ user: plainUser } as never);
     renderSection();
     expect(screen.getByText('Only admins can manage backups.')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Download Backup' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Download backup' })).toBeNull();
   });
 
   it('export triggers a download and shows success', async () => {
@@ -113,7 +113,7 @@ describe('BackupRestoreSection (issue #71)', () => {
     const revokeObjectURL = vi.fn();
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
     renderSection();
-    fireEvent.click(screen.getByRole('button', { name: 'Download Backup' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Download backup' }));
     await waitFor(() => expect(mockExportBackup).toHaveBeenCalledTimes(1));
     expect(createObjectURL).toHaveBeenCalledWith(blob);
     await waitFor(() => expect(screen.getByText('Backup downloaded.')).toBeTruthy());
@@ -130,17 +130,17 @@ describe('BackupRestoreSection (issue #71)', () => {
     fireEvent.change(screen.getByLabelText('Backup archive (.zip)'), {
       target: { files: [file] },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Preview Restore' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview restore' }));
     await waitFor(() => expect(mockPreviewRestore).toHaveBeenCalledTimes(1));
     // Preview shows the manifest + verified counts.
     expect(screen.getByText('Backup preview')).toBeTruthy();
     expect(screen.getByText('1.2.0')).toBeTruthy();
     // Restore requires the explicit checkbox first: the button exists but is disabled.
-    const restoreButton = screen.getByRole('button', { name: 'Restore Backup' });
+    const restoreButton = screen.getByRole('button', { name: 'Restore backup' });
     expect((restoreButton as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByText(/I understand this will replace all current data/));
     expect((restoreButton as HTMLButtonElement).disabled).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Restore Backup' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Restore backup' }));
     await waitFor(() =>
       expect(mockConfirmRestore).toHaveBeenCalledWith('preview-token-123')
     );
@@ -160,10 +160,10 @@ describe('BackupRestoreSection (issue #71)', () => {
     fireEvent.change(screen.getByLabelText('Backup archive (.zip)'), {
       target: { files: [file] },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Preview Restore' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview restore' }));
     await waitFor(() => expect(screen.getByText('This backup failed validation')).toBeTruthy());
     expect(screen.getByText('Manifest counts do not match database')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Restore Backup' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Restore backup' })).toBeNull();
   });
 
   it('a preview failure shows an error', async () => {
@@ -176,7 +176,7 @@ describe('BackupRestoreSection (issue #71)', () => {
     fireEvent.change(screen.getByLabelText('Backup archive (.zip)'), {
       target: { files: [file] },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Preview Restore' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview restore' }));
     await waitFor(() => expect(screen.getByText('Not a valid backup archive')).toBeTruthy());
   });
 
@@ -249,7 +249,7 @@ describe('BackupRestoreSection (issue #71)', () => {
     await waitFor(() =>
       expect(screen.getByText(/Could not load server backups/)).toBeTruthy()
     );
-    expect(screen.getByRole('button', { name: 'Download Backup' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Download backup' })).toBeTruthy();
   });
 
   it('download from the list triggers a download', async () => {
@@ -306,10 +306,10 @@ describe('BackupRestoreSection (issue #71)', () => {
       expect(mockPreviewServerRestore).toHaveBeenCalledWith('safety-1.zip')
     );
     expect(screen.getByText('Backup preview')).toBeTruthy();
-    const restoreButton = screen.getByRole('button', { name: 'Restore Backup' });
+    const restoreButton = screen.getByRole('button', { name: 'Restore backup' });
     expect((restoreButton as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByText(/I understand this will replace all current data/));
-    fireEvent.click(screen.getByRole('button', { name: 'Restore Backup' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Restore backup' }));
     await waitFor(() =>
       expect(mockConfirmRestore).toHaveBeenCalledWith('preview-token-123')
     );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { taxonomyApi } from '@/services/api';
 import type { Taxonomy, TaxonomyType } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
@@ -101,15 +102,15 @@ export default function TaxonomyManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">Loading</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <PageHeader
-        title="Categories & Tags"
+        title="Categories & tags"
         subtitle="Manage the categories and tags available for recipes."
       />
 
@@ -126,14 +127,14 @@ export default function TaxonomyManagement() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-4 py-3 text-sm font-medium border-b transition-colors ${
                 activeTab === tab
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
             >
               {tab === 'category' ? 'Categories' : 'Tags'}
-              <span className="ml-2 text-xs text-muted-foreground">
+              <span className="ml-2 font-mono text-xs tabular-nums text-muted-foreground">
                 ({taxonomies.filter((t) => t.type === tab).length})
               </span>
             </button>
@@ -144,7 +145,7 @@ export default function TaxonomyManagement() {
       {/* Add New */}
       <div className="mb-6 bg-card rounded-lg border border-border p-4 shadow-sm">
         <h3 className="text-sm font-medium text-foreground mb-3">
-          Add New {activeTab === 'category' ? 'Category' : 'Tag'}
+          Add new {activeTab === 'category' ? 'category' : 'tag'}
         </h3>
         <div className="flex gap-3">
           <label htmlFor="taxonomy-new-name" className="sr-only">
@@ -193,18 +194,18 @@ export default function TaxonomyManagement() {
                 <button
                   onClick={() => handleMoveUp(index)}
                   disabled={index === 0}
-                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs"
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                   aria-label="Move up"
                 >
-                  ▲
+                  <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => handleMoveDown(index)}
                   disabled={index === filtered.length - 1}
-                  className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs"
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                   aria-label="Move down"
                 >
-                  ▼
+                  <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
 

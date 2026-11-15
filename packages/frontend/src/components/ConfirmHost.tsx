@@ -20,7 +20,7 @@ export function ConfirmHost() {
   } = request;
 
   return (
-    <Dialog title={title} onClose={() => resolve(false)} panelClassName="max-w-md">
+    <Dialog title={title} onClose={() => resolve(false)} size="small">
       <div className="p-6">
         <p className="text-sm text-muted-foreground">{message}</p>
         <div className="mt-6 flex justify-end gap-3">

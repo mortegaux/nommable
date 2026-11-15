@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Folder, Heart, Trash2 } from 'lucide-react';
 import { collectionApi } from '@/services/api';
 import type { RecipeCollection, CreateCollectionDto } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
@@ -98,7 +99,7 @@ export default function CollectionsPage() {
       <SectionTabs
         label="Recipes sections"
         tabs={[
-          { path: '/recipes', label: 'All Recipes' },
+          { path: '/recipes', label: 'All recipes' },
           { path: '/collections', label: 'Collections' },
         ]}
       />
@@ -109,9 +110,9 @@ export default function CollectionsPage() {
         primaryAction={
           <button
             onClick={() => setShowCreateForm(true)}
-            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            Create Collection
+            Create collection
           </button>
         }
       />
@@ -119,8 +120,8 @@ export default function CollectionsPage() {
       {/* Create Collection Modal */}
       {showCreateForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-foreground mb-4">Create Collection</h2>
+          <div className="bg-card rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 className="text-2xl font-medium leading-tight text-balance text-foreground mb-4">Create collection</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label htmlFor="col-name" className="block text-sm font-medium text-foreground mb-1">
@@ -144,7 +145,7 @@ export default function CollectionsPage() {
                   id="col-desc"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="A short description of this collection..."
+                  placeholder="A short description of this collection"
                   rows={3}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                 />
@@ -159,16 +160,16 @@ export default function CollectionsPage() {
                     setNewDescription('');
                     setError('');
                   }}
-                  className="flex-1 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent transition-all"
+                  className="flex-1 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {creating ? 'Creating...' : 'Create'}
+                  {creating ? 'Creating' : 'Create'}
                 </button>
               </div>
             </form>
@@ -180,14 +181,14 @@ export default function CollectionsPage() {
       {sorted.length === 0 ? (
         <EmptyState
           title="No collections yet"
-          description="Create your first collection!"
+          description="Create your first collection"
           action={
             <button
               type="button"
               onClick={() => setShowCreateForm(true)}
-              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
-              Create Collection
+              Create collection
             </button>
           }
         />
@@ -196,7 +197,7 @@ export default function CollectionsPage() {
           {sorted.map((collection) => (
             <div
               key={collection.id}
-              className="relative group rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/30"
+              className="relative group rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/30"
             >
               <Link
                 to={`/collections/${collection.id}`}
@@ -205,19 +206,15 @@ export default function CollectionsPage() {
               >
                 <div className="flex items-start gap-3 mb-2">
                   {collection.isFavorites ? (
-                    <span className="text-red-500 text-xl" aria-label="Favorites collection">
-                      &#10084;
-                    </span>
+                    <Heart className="h-5 w-5 fill-primary text-primary" strokeWidth={1.5} aria-label="Favorites collection" />
                   ) : (
-                    <span className="text-muted-foreground text-xl" aria-hidden="true">
-                      &#128193;
-                    </span>
+                    <Folder className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                    <h2 className="text-base font-medium text-foreground group-hover:text-primary transition-colors truncate">
                       {collection.name}
                     </h2>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-mono text-[13px] tabular-nums text-muted-foreground">
                       {collection.recipeCount ?? 0} recipe{(collection.recipeCount ?? 0) !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -235,13 +232,7 @@ export default function CollectionsPage() {
                   aria-label={`Delete collection "${collection.name}"`}
                   title="Delete collection"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               )}
             </div>

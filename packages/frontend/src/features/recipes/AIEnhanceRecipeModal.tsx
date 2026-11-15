@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
+import { FileText, Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
 
 interface AIEnhanceRecipeModalProps {
@@ -14,19 +14,19 @@ interface AIEnhanceRecipeModalProps {
 
 const ENHANCEMENT_INFO = {
   improve_instructions: {
-    title: 'Improve Instructions',
+    title: 'Improve instructions',
     description: 'Make cooking steps clearer and more detailed',
-    icon: '📝',
+    Icon: FileText,
   },
   add_tips: {
-    title: 'Add Cooking Tips',
-    description: 'Get helpful tips and tricks for this recipe',
-    icon: '💡',
+    title: 'Add cooking tips',
+    description: 'Get helpful tips for this recipe',
+    Icon: Lightbulb,
   },
   optimize_ingredients: {
-    title: 'Optimize Ingredients',
+    title: 'Optimize ingredients',
     description: 'Get suggestions for ingredient improvements and substitutions',
-    icon: '🔄',
+    Icon: RefreshCw,
   },
 };
 
@@ -174,7 +174,7 @@ export function AIEnhanceRecipeModal({
   };
 
   return (
-    <Dialog title={info.title} onClose={onClose} panelClassName="max-w-3xl">
+    <Dialog title={info.title} onClose={onClose}>
       <div className="p-6">
         <p className="text-sm text-muted-foreground mb-4">{recipeTitle}</p>
 
@@ -188,13 +188,14 @@ export function AIEnhanceRecipeModal({
 
           {!result && !loading && (
             <div className="text-center py-8">
-              <div className="text-6xl mb-4">{info.icon}</div>
-              <p className="text-muted-foreground mb-6">{info.description}</p>
+              <div className="mb-4 flex justify-center">
+                <info.Icon className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+              </div>
+              <p className="leading-relaxed text-muted-foreground mb-6">{info.description}</p>
               <button
                 onClick={handleEnhance}
-                className="px-6 py-3 rounded-lg border border-border bg-background font-medium text-foreground hover:bg-accent transition-all inline-flex items-center gap-2"
+                className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
               >
-                <AutoAwesomeIcon size={18} />
                 {info.title}
               </button>
             </div>
@@ -202,20 +203,16 @@ export function AIEnhanceRecipeModal({
 
           {loading && (
             <div className="text-center py-12">
-              <svg className="animate-spin h-12 w-12 mx-auto text-primary mb-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p className="text-muted-foreground">AI is analyzing your recipe...</p>
+              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" strokeWidth={1.5} aria-hidden="true" />
+              <p className="text-muted-foreground">Analyzing your recipe</p>
             </div>
           )}
 
           {result && (
             <div className="space-y-4">
-              <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
+              <div className="bg-muted rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <AutoAwesomeIcon size={20} className="text-primary" />
-                  <h3 className="font-semibold text-foreground">AI Suggestions</h3>
+                  <h3 className="font-medium text-foreground">AI suggestions</h3>
                 </div>
 
                 {enhancementType === 'improve_instructions' && result.improvedInstructions && (
@@ -298,9 +295,9 @@ export function AIEnhanceRecipeModal({
               <button
                 onClick={handleApply}
                 disabled={applying}
-                className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+                className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                {applying ? 'Applying...' : enhancementType === 'improve_instructions' ? 'Apply Instructions' : enhancementType === 'add_tips' ? 'Apply Tips' : 'Apply Optimizations'}
+                {applying ? 'Applying' : enhancementType === 'improve_instructions' ? 'Apply instructions' : enhancementType === 'add_tips' ? 'Apply tips' : 'Apply optimizations'}
               </button>
             </>
           ) : (

@@ -1,31 +1,20 @@
 import { useNavigate } from 'react-router-dom';
+import { Frown } from 'lucide-react';
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="max-w-lg w-full text-center">
+    <div className="min-h-screen bg-background flex items-center justify-center px-8">
+      <div className="max-w-md w-full text-center">
         {/* 404 Icon */}
         <div className="mb-8">
-          <svg
-            className="mx-auto h-32 w-32 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <Frown className="mx-auto h-32 w-32 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
         </div>
 
         {/* Error Message */}
-        <h1 className="text-6xl font-bold text-foreground mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-foreground mb-4">Page Not Found</h2>
+        <h1 className="text-6xl font-medium text-foreground mb-4 tabular-nums">404</h1>
+        <h2 className="text-2xl font-medium leading-tight text-balance text-foreground mb-4">Page not found</h2>
         <p className="text-muted-foreground mb-8">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -36,13 +25,13 @@ export default function NotFoundPage() {
             onClick={() => navigate(-1)}
             className="px-6 py-3 rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-colors"
           >
-            Go Back
+            Go back
           </button>
           <button
             onClick={() => navigate('/recipes')}
             className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
-            Go to Recipes
+            Go to recipes
           </button>
         </div>
 
@@ -61,14 +50,14 @@ export default function NotFoundPage() {
               onClick={() => navigate('/meal-plans')}
               className="text-sm text-primary hover:underline"
             >
-              Meal Plans
+              Meal plans
             </button>
             <span className="text-muted-foreground">•</span>
             <button
               onClick={() => navigate('/shopping-lists')}
               className="text-sm text-primary hover:underline"
             >
-              Shopping Lists
+              Shopping lists
             </button>
             <span className="text-muted-foreground">•</span>
             <button

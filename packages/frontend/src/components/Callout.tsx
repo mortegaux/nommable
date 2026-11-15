@@ -51,9 +51,9 @@ export function Callout({
         {icon != null && <div className="flex-shrink-0">{icon}</div>}
         <div className="min-w-0 flex-1">
           {title != null && (
-            <h3 className="mb-1 font-semibold">{title}</h3>
+            <h3 className="mb-1 font-medium">{title}</h3>
           )}
-          <div className="text-sm opacity-90">{children}</div>
+          <div className="text-sm leading-relaxed">{children}</div>
         </div>
       </div>
     </div>

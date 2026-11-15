@@ -44,7 +44,7 @@ export function ServingScaler({ servings, multiplier, onMultiplierChange }: Serv
         </select>
         {adjustedServings !== servings && (
           <p className="text-sm text-muted-foreground">
-            Adjusted for <span className="font-semibold text-foreground">{adjustedServings}</span> servings
+            Adjusted for <span className="font-medium text-foreground">{adjustedServings}</span> servings
           </p>
         )}
       </div>

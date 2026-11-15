@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { shoppingListApi } from '@/services/api';
-import { CelebrationIcon } from '@/components/icons/MaterialIcon';
+import { ChevronDown, PartyPopper, Pencil, Trash2, X } from 'lucide-react';
 import { Pagination } from '@/components/Pagination';
 import type { ShoppingList, ShoppingListItem, ShoppingListSearchQuery } from '@nommable/shared';
 import { useConfirmStore } from '@/store/confirm.store';
@@ -174,20 +174,6 @@ function guessCategory(itemName: string): string {
   return bestCategory ?? 'Other';
 }
 
-function ChevronDown({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  );
-}
-
 // One dense item row (~44px): category dot, checkbox, name, hover-reveal delete.
 function ItemRow({
   item,
@@ -208,11 +194,11 @@ function ItemRow({
         type="checkbox"
         checked={item.checked}
         onChange={onToggle}
-        className="h-5 w-5 shrink-0 cursor-pointer rounded border-2 border-current focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="h-5 w-5 shrink-0 cursor-pointer rounded border border-current focus:ring-2 focus:ring-primary focus:ring-offset-2"
         aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
       />
       <span
-        className={`min-w-0 flex-1 cursor-pointer text-sm ${
+        className={`min-w-0 flex-1 cursor-pointer text-sm tabular-nums ${
           item.checked ? 'text-muted-foreground line-through' : 'text-foreground'
         }`}
         onClick={onToggle}
@@ -222,19 +208,17 @@ function ItemRow({
         {item.name}
       </span>
       {item.notes && (
-        <span className="hidden truncate text-xs italic text-muted-foreground sm:inline">
+        <span className="hidden truncate text-xs text-muted-foreground sm:inline">
           {item.notes}
         </span>
       )}
       <button
         onClick={onDelete}
-        className="shrink-0 p-1 text-muted-foreground opacity-60 transition-all hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+        className="shrink-0 p-1 text-muted-foreground opacity-60 transition-opacity hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
         title="Delete item"
         aria-label={`Delete ${item.name}`}
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
       </button>
     </div>
   );
@@ -600,7 +584,7 @@ export default function ShoppingListsPageEnhanced() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading shopping lists...</div>
+        <div className="text-muted-foreground">Loading shopping lists</div>
       </div>
     );
   }
@@ -611,37 +595,37 @@ export default function ShoppingListsPageEnhanced() {
         <div>
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Shopping Lists</h1>
-              <p className="text-muted-foreground mt-1">0 shopping lists</p>
+              <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Shopping lists</h1>
+              <p className="text-muted-foreground tabular-nums mt-1">0 shopping lists</p>
             </div>
             <button
               onClick={() => setShowCreateListModal(true)}
-              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               aria-label="Create new shopping list"
             >
-              Create List
+              Create list
             </button>
           </div>
-          <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
-            <p className="text-muted-foreground">No shopping lists yet. Create your first list!</p>
+          <div className="rounded-lg border border-dashed border-border bg-card p-12 text-center">
+            <p className="text-muted-foreground">No shopping lists yet. Create your first list.</p>
           </div>
         </div>
 
-        {/* Create List Modal */}
+        {/* Create list Modal */}
         {showCreateListModal && (
           <div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             onClick={() => setShowCreateListModal(false)}
           >
             <div
-              className="bg-card rounded-xl max-w-md w-full p-6 shadow-2xl"
+              className="bg-card rounded-xl max-w-md w-full p-6 shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-2xl font-bold text-foreground mb-4">Create Shopping List</h2>
+              <h2 className="text-2xl font-medium leading-tight text-balance text-foreground mb-4">Create shopping list</h2>
               <form onSubmit={handleCreateList} className="space-y-4">
                 <div>
                   <label htmlFor="listName" className="block text-sm font-medium text-foreground mb-2">
-                    List Name
+                    List name
                   </label>
                   <input
                     id="listName"
@@ -670,7 +654,7 @@ export default function ShoppingListsPageEnhanced() {
                     disabled={!newListName.trim()}
                     className="px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Create List
+                    Create list
                   </button>
                 </div>
               </form>
@@ -684,37 +668,37 @@ export default function ShoppingListsPageEnhanced() {
   const progress = selectedList ? getProgress(selectedList.items) : 0;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Shopping Lists</h1>
-          <p className="text-muted-foreground mt-1">{total}{' '}shopping list{total === 1 ? '' : 's'}</p>
+          <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Shopping lists</h1>
+          <p className="text-muted-foreground tabular-nums mt-1">{total}{' '}shopping list{total === 1 ? '' : 's'}</p>
         </div>
         <button
           onClick={() => setShowCreateListModal(true)}
-          className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label="Create new shopping list"
         >
-          Create List
+          Create list
         </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[220px_1fr]">
         {/* Shopping List Selector */}
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Your Lists
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            Your lists
           </h2>
           {shoppingLists.map(list => {
             const listProgress = getProgress(list.items);
             return (
               <div
                 key={list.id}
-                className={`relative group w-full text-left p-3 rounded-lg border transition-all ${
+                className={`relative group w-full text-left p-3 rounded-lg border transition-colors ${
                   selectedList?.id === list.id
                     ? 'border-primary bg-primary/5 shadow-sm'
-                    : 'border-border bg-card hover:border-primary/30 hover:bg-accent/5'
+                    : 'border-border bg-card hover:bg-accent'
                 }`}
               >
                 <button
@@ -729,7 +713,7 @@ export default function ShoppingListsPageEnhanced() {
                   </div>
                   <div className="w-full bg-background rounded-full h-1">
                     <div
-                      className="bg-secondary h-1 rounded-full transition-all"
+                      className="bg-secondary h-1 rounded-full transition-[width]"
                       style={{ width: `${listProgress}%` }}
                       role="progressbar"
                       aria-valuenow={listProgress}
@@ -744,13 +728,11 @@ export default function ShoppingListsPageEnhanced() {
                     e.stopPropagation();
                     handleDeleteList(list.id);
                   }}
-                  className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                  className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
                   title={`Delete list "${list.name}"`}
                   aria-label={`Delete shopping list ${list.name}`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
             );
@@ -786,7 +768,7 @@ export default function ShoppingListsPageEnhanced() {
                         }}
                         aria-invalid={!!renameError}
                         aria-describedby={renameError ? 'rename-error' : undefined}
-                        className="flex-1 text-xl font-bold px-2 py-1 border border-primary rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="flex-1 text-xl font-medium px-2 py-1 border border-primary rounded focus:outline-none focus:ring-2 focus:ring-primary"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleRenameList();
@@ -823,9 +805,9 @@ export default function ShoppingListsPageEnhanced() {
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-xl font-bold text-foreground">{selectedList.name}</h2>
+                    <h2 className="text-xl font-medium text-foreground">{selectedList.name}</h2>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-muted-foreground mr-2">
+                      <span className="text-sm font-medium tabular-nums text-muted-foreground mr-2">
                         {selectedList.items.filter(i => i.checked).length} / {selectedList.items.length}
                       </span>
                       <button
@@ -836,9 +818,7 @@ export default function ShoppingListsPageEnhanced() {
                         className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                         title="Rename list"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <Pencil className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => handleDeleteList(selectedList.id)}
@@ -846,9 +826,7 @@ export default function ShoppingListsPageEnhanced() {
                         title={`Delete list "${selectedList.name}"`}
                         aria-label={`Delete shopping list ${selectedList.name}`}
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Trash2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                     </div>
                   </>
@@ -858,7 +836,7 @@ export default function ShoppingListsPageEnhanced() {
               {/* Progress Bar */}
               <div className="w-full bg-background rounded-full h-2 mb-1.5">
                 <div
-                  className="bg-secondary h-2 rounded-full transition-all"
+                  className="bg-secondary h-2 rounded-full transition-[width]"
                   style={{ width: `${progress}%` }}
                   role="progressbar"
                   aria-valuenow={progress}
@@ -870,8 +848,8 @@ export default function ShoppingListsPageEnhanced() {
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 {progress === 100 ? (
                   <>
-                    <CelebrationIcon size={16} />
-                    All done!
+                    <PartyPopper className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    All done.
                   </>
                 ) : (
                   `${progress}% complete`
@@ -887,7 +865,7 @@ export default function ShoppingListsPageEnhanced() {
                   type="text"
                   value={newItemName}
                   onChange={handleItemNameChange}
-                  placeholder="Add an item…"
+                  placeholder="Add an item"
                   aria-label="Item name"
                   className="min-w-[10rem] flex-[1_1_12rem] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -951,7 +929,7 @@ export default function ShoppingListsPageEnhanced() {
             <div className="px-2 py-2 sm:px-3">
               {activeItems.length === 0 && completedItems.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  No items yet — add your first one above!
+                  No items yet — add your first one above.
                 </div>
               ) : (
                 <div className="lg:columns-2 lg:gap-4 [&>*]:lg:break-inside-avoid">
@@ -967,13 +945,14 @@ export default function ShoppingListsPageEnhanced() {
                         >
                           <ChevronDown
                             className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${collapsed ? '-rotate-90' : ''}`}
+                            strokeWidth={1.5}
                           />
                           <span
                             className={`h-2 w-2 shrink-0 rounded-full ${categoryDot(category)}`}
                             aria-hidden="true"
                           />
-                          <span className="text-sm font-semibold text-foreground">{category}</span>
-                          <span className="text-xs text-muted-foreground">({items.length})</span>
+                          <span className="text-sm font-medium text-foreground">{category}</span>
+                          <span className="font-mono text-xs tabular-nums text-muted-foreground">({items.length})</span>
                         </button>
                         {!collapsed && (
                           <div className="pl-1">
@@ -1002,9 +981,10 @@ export default function ShoppingListsPageEnhanced() {
                       >
                         <ChevronDown
                           className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${showCompleted ? '' : '-rotate-90'}`}
+                          strokeWidth={1.5}
                         />
-                        <span className="text-sm font-semibold text-muted-foreground">Completed</span>
-                        <span className="text-xs text-muted-foreground">({completedItems.length})</span>
+                        <span className="text-sm font-medium text-muted-foreground">Completed</span>
+                        <span className="font-mono text-xs tabular-nums text-muted-foreground">({completedItems.length})</span>
                       </button>
                       {showCompleted && (
                         <div className="pl-1">
@@ -1027,21 +1007,21 @@ export default function ShoppingListsPageEnhanced() {
         )}
       </div>
 
-      {/* Create List Modal */}
+      {/* Create list Modal */}
       {showCreateListModal && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowCreateListModal(false)}
         >
           <div
-            className="bg-card rounded-xl max-w-md w-full p-6 shadow-2xl"
+            className="bg-card rounded-xl max-w-md w-full p-6 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-foreground mb-4">Create Shopping List</h2>
+            <h2 className="text-2xl font-medium leading-tight text-balance text-foreground mb-4">Create shopping list</h2>
             <form onSubmit={handleCreateList} className="space-y-4">
               <div>
                 <label htmlFor="listName" className="block text-sm font-medium text-foreground mb-2">
-                  List Name
+                  List name
                 </label>
                 <input
                   id="listName"
@@ -1070,7 +1050,7 @@ export default function ShoppingListsPageEnhanced() {
                   disabled={!newListName.trim()}
                   className="px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Create List
+                  Create list
                 </button>
               </div>
             </form>

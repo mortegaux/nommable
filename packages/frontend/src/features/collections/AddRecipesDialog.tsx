@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { collectionApi, recipeApi } from '@/services/api';
 import type { Recipe } from '@nommable/shared';
 import { Dialog } from '@/components/Dialog';
-import { RestaurantIcon } from '@/components/icons/MaterialIcon';
+import { UtensilsCrossed } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToastStore } from '@/store/toast.store';
 
@@ -106,20 +106,19 @@ export function AddRecipesDialog({
     <Dialog
       title={`Add recipes to "${collectionName}"`}
       onClose={onClose}
-      panelClassName="max-w-2xl"
     >
       <div className="p-6 space-y-4">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search recipes..."
+          placeholder="Search recipes"
           aria-label="Search recipes"
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         />
 
         {loading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading recipes...</div>
+          <div className="py-8 text-center text-muted-foreground">Loading recipes</div>
         ) : available.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
             {recipes.length === 0
@@ -159,7 +158,7 @@ export function AddRecipesDialog({
                       />
                     ) : (
                       <span className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
-                        <RestaurantIcon size={20} className="text-muted-foreground" />
+                        <UtensilsCrossed className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </span>
                     )}
                     <span className="min-w-0">
@@ -184,7 +183,7 @@ export function AddRecipesDialog({
             type="button"
             onClick={onClose}
             disabled={adding}
-            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-all disabled:opacity-50"
+            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
@@ -192,10 +191,10 @@ export function AddRecipesDialog({
             type="button"
             onClick={handleAdd}
             disabled={selected.size === 0 || adding}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {adding
-              ? 'Adding...'
+              ? 'Adding'
               : `Add ${selected.size > 0 ? `${selected.size} ` : ''}recipe${selected.size === 1 ? '' : 's'}`}
           </button>
         </div>

@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Sparkles,
   RefreshCw,
 } from 'lucide-react';
 
@@ -167,7 +166,7 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
       setFeedback({
         type: 'success',
         text: res.data.isConfigured
-          ? 'SMTP settings saved and active! Invitation emails will now be sent automatically.'
+          ? 'SMTP settings saved and active. Invitation emails will now be sent automatically.'
           : 'SMTP settings saved.',
       });
       if (onSaved) {
@@ -225,7 +224,7 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
     return (
       <div className="p-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
         <RefreshCw className="w-4 h-4 animate-spin" />
-        Loading SMTP settings...
+        Loading SMTP settings
       </div>
     );
   }
@@ -235,9 +234,9 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
       {/* Header & Status Badge */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 className={`${compact ? 'text-base' : 'text-xl'} font-bold text-foreground flex items-center gap-2`}>
-            <Mail className="w-5 h-5 text-primary" />
-            Email &amp; SMTP Configuration
+          <h2 className={`${compact ? 'text-base' : 'text-xl'} font-medium text-foreground flex items-center gap-2`}>
+            <Mail className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+            Email &amp; SMTP configuration
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Configure outbound SMTP to automatically send user invitation emails.
@@ -246,14 +245,14 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
 
         <div className="flex items-center gap-2">
           {isConfigured ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              SMTP Configured ({source === 'env' ? 'Environment' : 'Database'})
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
+              <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+              SMTP configured ({source === 'env' ? 'Environment' : 'Database'})
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 dark:text-amber-400 border border-amber-500/20">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              SMTP Not Configured
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
+              <AlertCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+              SMTP not configured
             </span>
           )}
         </div>
@@ -277,11 +276,10 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
         </div>
       )}
 
-      {/* Quick Provider Presets */}
+      {/* Quick provider presets */}
       <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-          Quick Provider Presets
+        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+          Quick provider presets
         </div>
         <div className="flex flex-wrap gap-1.5">
           {SMTP_PRESETS.map((preset) => {
@@ -291,7 +289,7 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
                 key={preset.id}
                 type="button"
                 onClick={() => handleApplyPreset(preset)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   isSelected
                     ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                     : 'bg-background text-foreground border-input hover:bg-muted'
@@ -313,8 +311,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
       <form onSubmit={handleSave} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div className="sm:col-span-2">
-            <label htmlFor="smtp-host" className="block text-xs font-semibold text-foreground mb-1">
-              SMTP Host <span className="text-destructive">*</span>
+            <label htmlFor="smtp-host" className="block text-xs font-medium text-foreground mb-1">
+              SMTP host <span className="text-destructive">*</span>
             </label>
             <div className="relative">
               <Server className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -330,8 +328,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
           </div>
 
           <div>
-            <label htmlFor="smtp-port" className="block text-xs font-semibold text-foreground mb-1">
-              SMTP Port <span className="text-destructive">*</span>
+            <label htmlFor="smtp-port" className="block text-xs font-medium text-foreground mb-1">
+              SMTP port <span className="text-destructive">*</span>
             </label>
             <input
               id="smtp-port"
@@ -354,8 +352,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
         {/* Encryption Mode & Enable Toggle */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label htmlFor="smtp-security" className="block text-xs font-semibold text-foreground mb-1">
-              Encryption / TLS Mode
+            <label htmlFor="smtp-security" className="block text-xs font-medium text-foreground mb-1">
+              Encryption / TLS mode
             </label>
             <select
               id="smtp-security"
@@ -391,8 +389,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
         {/* Credentials */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label htmlFor="smtp-user" className="block text-xs font-semibold text-foreground mb-1">
-              SMTP Username
+            <label htmlFor="smtp-user" className="block text-xs font-medium text-foreground mb-1">
+              SMTP username
             </label>
             <input
               id="smtp-user"
@@ -416,8 +414,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label htmlFor="smtp-pass" className="block text-xs font-semibold text-foreground">
-                SMTP Password / App Password
+              <label htmlFor="smtp-pass" className="block text-xs font-medium text-foreground">
+                SMTP password / app password
               </label>
               {hasSavedPassword && !clearPassword && (
                 <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 dark:text-emerald-400">
@@ -458,8 +456,8 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
         {/* Sender Identity */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label htmlFor="smtp-from-email" className="block text-xs font-semibold text-foreground mb-1">
-              From Email Address
+            <label htmlFor="smtp-from-email" className="block text-xs font-medium text-foreground mb-1">
+              From email address
             </label>
             <input
               id="smtp-from-email"
@@ -470,13 +468,13 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
               className="w-full text-xs px-3 py-2 rounded-xl border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <p className="text-[10px] text-muted-foreground mt-1">
-              For Gmail/iCloud/Outlook, this should match your SMTP Username.
+              For Gmail/iCloud/Outlook, this should match your SMTP username.
             </p>
           </div>
 
           <div>
-            <label htmlFor="smtp-from-name" className="block text-xs font-semibold text-foreground mb-1">
-              From Display Name
+            <label htmlFor="smtp-from-name" className="block text-xs font-medium text-foreground mb-1">
+              From display name
             </label>
             <input
               id="smtp-from-name"
@@ -491,9 +489,9 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
 
         {/* Test SMTP Section */}
         <div className="p-3.5 rounded-xl border border-border bg-card/60 space-y-2.5">
-          <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <div className="text-xs font-medium text-foreground flex items-center gap-1.5">
             <Send className="w-3.5 h-3.5 text-primary" />
-            Send a Test Email
+            Send a test email
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
@@ -507,10 +505,10 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
               type="button"
               disabled={testing || !host.trim()}
               onClick={handleSendTestEmail}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-all disabled:opacity-50 whitespace-nowrap"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
             >
               <Send className="w-3.5 h-3.5" />
-              {testing ? 'Sending Test...' : 'Send Test Email'}
+              {testing ? 'Sending test' : 'Send test email'}
             </button>
           </div>
         </div>
@@ -520,10 +518,10 @@ export function EmailSettings({ onSaved, compact = false }: EmailSettingsProps) 
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
-            {saving ? 'Saving...' : 'Save SMTP Settings'}
+            {saving ? 'Saving' : 'Save SMTP settings'}
           </button>
         </div>
       </form>

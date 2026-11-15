@@ -1,3 +1,5 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 interface PaginationProps {
   page: number;
   totalPages: number;
@@ -31,7 +33,7 @@ export function Pagination({
           no layout shift or hydration mismatch on resize. */}
       {onLoadMore && (
         <div className="flex flex-col items-center gap-2 py-4 md:hidden">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm tabular-nums text-muted-foreground">
             Showing {itemCount} of {total}
           </p>
           {hasMore && (
@@ -40,7 +42,7 @@ export function Pagination({
               disabled={isLoading}
               className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
             >
-              {isLoading ? 'Loading...' : 'Load More'}
+              {isLoading ? 'Loading' : 'Load more'}
             </button>
           )}
         </div>
@@ -50,7 +52,7 @@ export function Pagination({
           variant takes over (display:none keeps it out of the a11y tree too). */}
       <nav
         aria-label="Pagination"
-        className={`items-center justify-center gap-1 py-4 ${
+        className={`items-center justify-center gap-1 py-4 tabular-nums ${
           onLoadMore ? 'hidden md:flex' : 'flex'
         }`}
       >
@@ -58,9 +60,9 @@ export function Pagination({
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1 || isLoading}
           aria-label="Previous page"
-          className="px-3 py-1 rounded border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-1 rounded border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          &lt;
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
 
         {pages.map((p, i) =>
@@ -75,7 +77,7 @@ export function Pagination({
               disabled={isLoading}
               aria-label={`Go to page ${p}`}
               aria-current={p === page ? 'page' : undefined}
-              className={`px-3 py-1 rounded border ${
+              className={`px-3 py-1 rounded border transition-colors ${
                 p === page
                   ? 'bg-primary text-primary-foreground'
                   : 'hover:bg-accent'
@@ -90,9 +92,9 @@ export function Pagination({
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages || isLoading}
           aria-label="Next page"
-          className="px-3 py-1 rounded border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-1 rounded border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          &gt;
+          <ChevronRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
       </nav>
     </>

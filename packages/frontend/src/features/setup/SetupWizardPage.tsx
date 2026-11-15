@@ -3,14 +3,16 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { setupApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
 import { SETUP_USERNAME_HINT, validateSetupUsername } from './username-validation';
+import { AlertTriangle, Check, Zap } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 
 type WizardStep = 1 | 2 | 3 | 4 | 5;
 
 const STEPS: { id: WizardStep; label: string }[] = [
-  { id: 1, label: 'Admin Account' },
+  { id: 1, label: 'Admin account' },
   { id: 2, label: 'Email / SMTP' },
-  { id: 3, label: 'Library Mode' },
-  { id: 4, label: 'AI Features' },
+  { id: 3, label: 'Library mode' },
+  { id: 4, label: 'AI features' },
   { id: 5, label: 'Done' },
 ];
 
@@ -72,7 +74,7 @@ export default function SetupWizardPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        Loading...
+        Loading
       </div>
     );
   }
@@ -197,7 +199,7 @@ export default function SetupWizardPage() {
               (e.currentTarget as HTMLImageElement).style.display = 'none';
             }}
           />
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-medium leading-tight text-balance text-foreground">
             Welcome to Nommable
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -216,13 +218,13 @@ export default function SetupWizardPage() {
                   key={s.id}
                   className={`flex flex-col items-center rounded-lg px-2 py-2 text-center border transition-colors ${
                     isActive
-                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      ? 'border-primary bg-primary/10 text-primary font-medium'
                       : isCompleted
-                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 dark:text-emerald-300'
+                        ? 'border-border bg-card text-foreground'
                         : 'border-border bg-card text-muted-foreground'
                   }`}
                 >
-                  <span className="text-xs uppercase tracking-wider">Step {s.id}</span>
+                  <span className="text-xs tabular-nums">Step {s.id}</span>
                   <span className="text-xs mt-0.5 truncate w-full">{s.label}</span>
                 </li>
               );
@@ -233,17 +235,17 @@ export default function SetupWizardPage() {
         {/* Card */}
         <div className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-6 sm:p-8">
           {error && (
-            <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <Callout tone="error" role="alert" className="mb-6">
               {error}
-            </div>
+            </Callout>
           )}
 
           {/* STEP 1: ADMIN ACCOUNT */}
           {step === 1 && (
             <form onSubmit={handleStep1Next} className="space-y-5">
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  1. Create Admin Account
+                <h2 className="text-xl font-medium text-foreground">
+                  1. Create admin account
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   This is the primary administrator account for your Nommable server.
@@ -294,7 +296,7 @@ export default function SetupWizardPage() {
 
               <div>
                 <label htmlFor="admin-confirm-password" className="block text-sm font-medium text-foreground mb-1">
-                  Confirm Password
+                  Confirm password
                 </label>
                 <input
                   id="admin-confirm-password"
@@ -313,7 +315,7 @@ export default function SetupWizardPage() {
                   type="submit"
                   className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                  Continue →
+                  Continue
                 </button>
               </div>
             </form>
@@ -323,8 +325,8 @@ export default function SetupWizardPage() {
           {step === 2 && (
             <form onSubmit={handleStep2Continue} className="space-y-5">
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  2. Email / SMTP Settings (Optional)
+                <h2 className="text-xl font-medium text-foreground">
+                  2. Email / SMTP settings (optional)
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Used for emailing user invitations. You can skip this and copy invite links directly, or configure it later in Settings.
@@ -334,7 +336,7 @@ export default function SetupWizardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
                   <label htmlFor="smtp-host" className="block text-sm font-medium text-foreground mb-1">
-                    SMTP Host
+                    SMTP host
                   </label>
                   <input
                     id="smtp-host"
@@ -363,7 +365,7 @@ export default function SetupWizardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="smtp-user" className="block text-sm font-medium text-foreground mb-1">
-                    SMTP Username
+                    SMTP username
                   </label>
                   <input
                     id="smtp-user"
@@ -376,7 +378,7 @@ export default function SetupWizardPage() {
                 </div>
                 <div>
                   <label htmlFor="smtp-pass" className="block text-sm font-medium text-foreground mb-1">
-                    SMTP Password
+                    SMTP password
                   </label>
                   <input
                     id="smtp-pass"
@@ -392,7 +394,7 @@ export default function SetupWizardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div>
                   <label htmlFor="smtp-from" className="block text-sm font-medium text-foreground mb-1">
-                    From Email Address
+                    From email address
                   </label>
                   <input
                     id="smtp-from"
@@ -422,7 +424,7 @@ export default function SetupWizardPage() {
                   onClick={() => setStep(1)}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                 >
-                  ← Back
+                  Back
                 </button>
                 <div className="flex items-center gap-3">
                   <button
@@ -436,7 +438,7 @@ export default function SetupWizardPage() {
                     type="submit"
                     className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
-                    Save &amp; Continue →
+                    Save &amp; continue
                   </button>
                 </div>
               </div>
@@ -447,11 +449,11 @@ export default function SetupWizardPage() {
           {step === 3 && (
             <form onSubmit={handleStep3Next} className="space-y-5">
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  3. Library Sharing Mode
+                <h2 className="text-xl font-medium text-foreground">
+                  3. Library sharing mode
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Choose whether users on this server share a household kitchen library or keep separate private libraries. You can change this anytime in Settings → Data Management.
+                  Choose whether users on this server share a household kitchen library or keep separate private libraries. You can change this anytime in Settings → Data management.
                 </p>
               </div>
 
@@ -471,7 +473,7 @@ export default function SetupWizardPage() {
                     className="mt-1 h-4 w-4 text-primary focus:ring-primary"
                   />
                   <div>
-                    <div className="font-medium text-foreground">Shared Household Library</div>
+                    <div className="font-medium text-foreground">Shared household library</div>
                     <p className="text-sm text-muted-foreground mt-0.5">
                       Everyone on this server shares recipes, meal plans, shopping lists, and pantry items together. Ideal for families, couples, and households.
                     </p>
@@ -493,7 +495,7 @@ export default function SetupWizardPage() {
                     className="mt-1 h-4 w-4 text-primary focus:ring-primary"
                   />
                   <div>
-                    <div className="font-medium text-foreground">Per-User Private Library</div>
+                    <div className="font-medium text-foreground">Per-user private library</div>
                     <p className="text-sm text-muted-foreground mt-0.5">
                       Every user has their own isolated recipes, meal plans, shopping lists, and pantry inventory.
                     </p>
@@ -516,7 +518,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Recipes &amp; Tags</strong> — Shared recipe book across all users
+                        <strong className="font-medium">Recipes &amp; tags</strong> — Shared recipe book across all users
                       </span>
                     </label>
 
@@ -540,7 +542,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Collections &amp; Favorites</strong> — Shared recipe collections and unified Favorites
+                        <strong className="font-medium">Collections &amp; favorites</strong> — Shared recipe collections and unified Favorites
                       </span>
                     </label>
 
@@ -552,7 +554,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Meal Plans &amp; Templates</strong> — Shared household meal calendar
+                        <strong className="font-medium">Meal plans &amp; templates</strong> — Shared household meal calendar
                       </span>
                     </label>
 
@@ -564,7 +566,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Shopping Lists</strong> — Shared grocery lists and live item check-offs
+                        <strong className="font-medium">Shopping lists</strong> — Shared grocery lists and live item check-offs
                       </span>
                     </label>
 
@@ -576,7 +578,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Pantry Inventory</strong> — Shared household pantry stock and suggestions
+                        <strong className="font-medium">Pantry inventory</strong> — Shared household pantry stock and suggestions
                       </span>
                     </label>
 
@@ -588,7 +590,7 @@ export default function SetupWizardPage() {
                         className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                       />
                       <span>
-                        <strong>Batch Cooking Plans</strong> — Shared prep timelines and sessions
+                        <strong className="font-medium">Batch cooking plans</strong> — Shared prep timelines and sessions
                       </span>
                     </label>
                   </div>
@@ -601,13 +603,13 @@ export default function SetupWizardPage() {
                   onClick={() => setStep(2)}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                 >
-                  ← Back
+                  Back
                 </button>
                 <button
                   type="submit"
                   className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                  Continue →
+                  Continue
                 </button>
               </div>
             </form>
@@ -617,8 +619,8 @@ export default function SetupWizardPage() {
           {step === 4 && (
             <form onSubmit={handleFinishSetup} className="space-y-5">
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  4. AI Features & Free Trial
+                <h2 className="text-xl font-medium text-foreground">
+                  4. AI features & free trial
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Do you want to enable AI features like recipe importing, smart meal planning, and AI food photography?
@@ -630,7 +632,7 @@ export default function SetupWizardPage() {
                 <div>
                   <div className="font-medium text-foreground">Enable AI features?</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Powered by the server operator's managed key, metered with AI credits. Includes 10 free trial credits out of the box.
+                    Powered by the server operator's managed key, metered with AI credits. Includes 10 free trial credits.
                   </p>
                 </div>
                 <div className="inline-flex rounded-lg border border-border p-1 bg-muted/40">
@@ -662,7 +664,7 @@ export default function SetupWizardPage() {
               {aiEnabled && managedKeyDetected === false && (
                 <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground space-y-2">
                   <div className="font-medium flex items-center gap-2">
-                    <span>⚠</span> No master key detected on this server
+                    <AlertTriangle className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> No master key detected on this server
                   </div>
                   <p className="text-xs text-muted-foreground">
                     This server's environment doesn't have a provider key yet, so AI
@@ -677,7 +679,7 @@ export default function SetupWizardPage() {
               {aiEnabled && (
                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-foreground space-y-2">
                   <div className="font-medium flex items-center gap-2">
-                    <span>⚡</span> Managed AI Enabled (10 Free Trial Credits)
+                    <Zap className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Managed AI enabled (10 free trial credits)
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Each user gets 10 free AI credits to test out recipe generation and photo creation. Managed AI runs on a master key in this server's environment — if the operator hasn't set one, AI features stay off until they do. You can track your balance or add your own API key anytime later in Settings.
@@ -692,14 +694,14 @@ export default function SetupWizardPage() {
                   disabled={submitting}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
                 >
-                  ← Back
+                  Back
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Completing Setup...' : 'Complete Setup →'}
+                  {submitting ? 'Completing setup' : 'Complete setup'}
                 </button>
               </div>
             </form>
@@ -708,21 +710,21 @@ export default function SetupWizardPage() {
           {/* STEP 5: COMPLETION SCREEN */}
           {step === 5 && (
             <div className="text-center py-6 space-y-5">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 text-2xl font-bold">
-                ✓
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 dark:text-emerald-400">
+                <Check className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Your Nommable Server is Ready!
+                <h2 className="text-2xl font-medium leading-tight text-balance text-foreground">
+                  Your Nommable server is ready
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Admin account <strong>@{username}</strong> has been created and your initial settings are saved.
+                  Admin account <strong className="font-medium">@{username}</strong> has been created and your initial settings are saved.
                 </p>
               </div>
 
               <div className="mx-auto max-w-md rounded-xl border border-border bg-muted/20 p-4 text-left text-sm space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Admin Account:</span>
+                  <span className="text-muted-foreground">Admin account:</span>
                   <span className="font-medium text-foreground">@{username}</span>
                 </div>
                 <div className="flex justify-between">
@@ -732,22 +734,22 @@ export default function SetupWizardPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Library Mode:</span>
+                  <span className="text-muted-foreground">Library mode:</span>
                   <span className="font-medium text-foreground">
-                    {libraryMode === 'shared' ? 'Shared Household Library' : 'Per-User Private Library'}
+                    {libraryMode === 'shared' ? 'Shared household library' : 'Per-user private library'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">AI Features:</span>
+                  <span className="text-muted-foreground">AI features:</span>
                   <span className="font-medium text-foreground">
-                    {aiEnabled ? 'Enabled (Managed AI Credits)' : 'Disabled'}
+                    {aiEnabled ? 'Enabled (managed AI credits)' : 'Disabled'}
                   </span>
                 </div>
               </div>
 
               {aiEnabled && managedKeyDetected === false && (
                 <div className="mx-auto max-w-md rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-left text-sm text-foreground">
-                  <p className="font-medium">⚠ No master key detected on this server</p>
+                  <p className="font-medium flex items-center gap-2"><AlertTriangle className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> No master key detected on this server</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Managed AI is enabled, but this server's environment doesn't have a
                     provider key yet, so AI features will remain off. The operator can set
@@ -762,9 +764,9 @@ export default function SetupWizardPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/recipes', { replace: true })}
-                  className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+                  className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
                 >
-                  Go to dashboard →
+                  Go to dashboard
                 </button>
               </div>
             </div>

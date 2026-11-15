@@ -3,6 +3,7 @@ import { feedbackApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 import { PageHeader } from '@/components/PageHeader';
+import { ChevronDown } from 'lucide-react';
 
 /**
  * Local minimal types for the feedback inbox.
@@ -33,14 +34,14 @@ type TypeFilter = 'all' | FeedbackType;
 type StatusFilter = 'all' | FeedbackStatus;
 
 const TYPE_BADGE: Record<FeedbackType, string> = {
-  bug: 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 border-red-300 dark:border-red-700',
-  feature: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700',
+  bug: 'bg-muted text-muted-foreground border-border',
+  feature: 'bg-muted text-muted-foreground border-border',
 };
 
 const STATUS_BADGE: Record<FeedbackStatus, string> = {
-  open: 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700',
-  'in-progress': 'bg-violet-100 dark:bg-violet-900/40 text-violet-800 dark:text-violet-200 border-violet-300 dark:border-violet-700',
-  resolved: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700',
+  open: 'bg-muted text-muted-foreground border-border',
+  'in-progress': 'bg-muted text-muted-foreground border-border',
+  resolved: 'bg-muted text-muted-foreground border-border',
 };
 
 const STATUS_LABEL: Record<FeedbackStatus, string> = {
@@ -155,8 +156,8 @@ export default function FeedbackInboxPage() {
   // if the page is ever rendered elsewhere).
   if (user?.role !== 'admin') {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-card-foreground">Not authorized</h1>
+      <div className="mx-auto max-w-7xl py-16 text-center">
+        <h1 className="text-xl font-medium text-card-foreground">Not authorized</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           The feedback inbox is only available to administrators.
         </p>
@@ -165,7 +166,7 @@ export default function FeedbackInboxPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="mx-auto max-w-7xl">
       <PageHeader
         title="Feedback inbox"
         subtitle="Bug reports and feature requests submitted by users. Click a report to see details."
@@ -197,7 +198,7 @@ export default function FeedbackInboxPage() {
 
       <div className="mt-6">
         {loading && (
-          <div className="py-16 text-center text-muted-foreground">Loading feedback…</div>
+          <div className="py-16 text-center text-muted-foreground">Loading feedback</div>
         )}
 
         {!loading && loadError && (
@@ -254,37 +255,29 @@ export default function FeedbackInboxPage() {
                       <p className="mt-1.5 text-sm font-medium text-card-foreground break-words">
                         {report.summary}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs tabular-nums text-muted-foreground">
                         {report.route ? `${report.route} · ` : ''}
                         {report.username || report.userId || 'Anonymous'} ·{' '}
                         {formatRelative(report.createdAt)}
                       </p>
                     </div>
-                    <svg
-                      className={`w-5 h-5 mt-1 shrink-0 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <ChevronDown className={`w-5 h-5 mt-1 shrink-0 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} strokeWidth={1.5} aria-hidden="true" />
                   </button>
 
                   {expanded && (
                     <div className="border-t border-border px-4 py-4">
                       {report.details && (
                         <div className="mb-4">
-                          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <h3 className="text-xs font-medium text-muted-foreground">
                             Details
                           </h3>
-                          <p className="mt-1 text-sm text-card-foreground whitespace-pre-wrap break-words">
+                          <p className="mt-1 text-sm leading-relaxed text-card-foreground whitespace-pre-wrap break-words">
                             {report.details}
                           </p>
                         </div>
                       )}
 
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <h3 className="text-xs font-medium text-muted-foreground">
                         Captured context
                       </h3>
                       <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
@@ -302,7 +295,7 @@ export default function FeedbackInboxPage() {
                         </div>
                         <div className="flex gap-2">
                           <dt className="text-muted-foreground shrink-0">Submitted:</dt>
-                          <dd className="text-card-foreground">{formatAbsolute(report.createdAt)}</dd>
+                          <dd className="tabular-nums text-card-foreground">{formatAbsolute(report.createdAt)}</dd>
                         </div>
                         <div className="sm:col-span-2 flex gap-2">
                           <dt className="text-muted-foreground shrink-0">User agent:</dt>
@@ -318,7 +311,7 @@ export default function FeedbackInboxPage() {
                             onClick={() => handleStatusChange(report, 'in-progress')}
                             className="px-3 py-1.5 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
                           >
-                            {updating ? 'Updating…' : 'Mark in progress'}
+                            {updating ? 'Updating' : 'Mark in progress'}
                           </button>
                         )}
                         {report.status !== 'resolved' && (
@@ -326,9 +319,9 @@ export default function FeedbackInboxPage() {
                             type="button"
                             disabled={updating}
                             onClick={() => handleStatusChange(report, 'resolved')}
-                            className="px-3 py-1.5 text-sm rounded-lg bg-emerald-700 text-white hover:opacity-90 disabled:opacity-50"
+                            className="px-3 py-1.5 text-sm rounded-lg border border-input bg-background hover:bg-muted disabled:opacity-50"
                           >
-                            {updating ? 'Updating…' : 'Mark resolved'}
+                            {updating ? 'Updating' : 'Mark resolved'}
                           </button>
                         )}
                         {report.status === 'resolved' && (
@@ -338,7 +331,7 @@ export default function FeedbackInboxPage() {
                             onClick={() => handleStatusChange(report, 'open')}
                             className={`${FILTER_BUTTON} ${FILTER_INACTIVE}`}
                           >
-                            {updating ? 'Updating…' : 'Reopen'}
+                            {updating ? 'Updating' : 'Reopen'}
                           </button>
                         )}
                       </div>

@@ -30,10 +30,10 @@ const COUNT_LABELS: Array<[keyof EntityCounts, string]> = [
   ['recipes', 'Recipes'],
   ['images', 'Images'],
   ['users', 'Users'],
-  ['mealPlans', 'Meal Plans'],
-  ['shoppingLists', 'Shopping Lists'],
-  ['pantryItems', 'Pantry Items'],
-  ['batchPlans', 'Batch Plans'],
+  ['mealPlans', 'Meal plans'],
+  ['shoppingLists', 'Shopping lists'],
+  ['pantryItems', 'Pantry items'],
+  ['batchPlans', 'Batch plans'],
 ];
 
 function filenameFromDisposition(header: string | undefined): string {
@@ -236,9 +236,9 @@ export function BackupRestoreSection() {
 
   return (
     <div id="backup" className="border border-border bg-card rounded-2xl p-5 mb-6 scroll-mt-4">
-      <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-        <Database className="w-4 h-4 text-primary" />
-        Backup &amp; Restore
+      <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+        <Database className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+        Backup &amp; restore
       </h3>
       <p className="text-xs text-muted-foreground mt-0.5 mb-4">
         A backup contains the full database (recipes, pantry, meal plans, shopping lists,
@@ -247,7 +247,7 @@ export function BackupRestoreSection() {
       </p>
 
       {(lastBackupAt || lastRestoreAt) && (
-        <p className="text-xs text-muted-foreground mb-4">
+        <p className="text-xs tabular-nums text-muted-foreground mb-4">
           {lastBackupAt && (
             <>
               Last backup: {new Date(lastBackupAt).toLocaleString()}
@@ -264,10 +264,10 @@ export function BackupRestoreSection() {
           type="button"
           onClick={handleExport}
           disabled={exporting}
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
-          {exporting ? 'Exporting…' : 'Download Backup'}
+          {exporting ? 'Exporting' : 'Download backup'}
         </button>
         {exportError && (
           <div className="mt-3">
@@ -286,18 +286,18 @@ export function BackupRestoreSection() {
       {/* Server backups (issue #74) */}
       <div className="border-t border-border pt-4 mb-5">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
-            <History className="w-4 h-4 text-primary" />
+          <h4 className="text-xs font-medium text-foreground flex items-center gap-2">
+            <History className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
             Backups on this server
           </h4>
           <button
             type="button"
             onClick={() => void refreshServerBackups()}
             disabled={listLoading}
-            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
           >
             <RefreshCw className="w-3 h-3" />
-            {listLoading ? 'Loading…' : 'Refresh'}
+            {listLoading ? 'Loading' : 'Refresh'}
           </button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
@@ -331,19 +331,19 @@ export function BackupRestoreSection() {
                 className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border rounded-xl px-3 py-2"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-foreground truncate" title={entry.name}>
+                  <p className="text-xs font-medium text-foreground truncate" title={entry.name}>
                     {entry.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs tabular-nums text-muted-foreground">
                     {entry.status === 'ok'
                       ? `${formatBytes(entry.sizeBytes)} · ${new Date(entry.createdAt).toLocaleString()}`
                       : `Unreadable · ${entry.error ?? 'Unknown error'}`}
                   </p>
                 </div>
                 <span
-                  className={`shrink-0 self-start sm:self-center text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  className={`shrink-0 self-start sm:self-center text-xs font-medium px-2 py-0.5 rounded-full ${
                     entry.kind === 'safety'
-                      ? 'bg-primary/10 text-primary'
+                      ? 'bg-muted text-muted-foreground'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
@@ -355,21 +355,21 @@ export function BackupRestoreSection() {
                       type="button"
                       onClick={() => void handleDownloadServerBackup(entry.name)}
                       disabled={downloadingName === entry.name}
-                      className="px-3 py-1.5 text-xs font-semibold border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-all disabled:opacity-50"
+                      className="px-3 py-1.5 text-xs font-medium border border-input bg-background text-foreground rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                     >
-                      {downloadingName === entry.name ? 'Downloading…' : 'Download'}
+                      {downloadingName === entry.name ? 'Downloading' : 'Download'}
                     </button>
                     <button
                       type="button"
                       onClick={() => void handlePreviewServerBackup(entry.name)}
                       disabled={previewing}
-                      className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50"
+                      className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
-                      {previewing ? 'Previewing…' : 'Restore'}
+                      {previewing ? 'Previewing' : 'Restore'}
                     </button>
                   </div>
                 ) : (
-                  <span className="shrink-0 text-xs font-semibold text-destructive">
+                  <span className="shrink-0 text-xs font-medium text-destructive">
                     Unreadable
                   </span>
                 )}
@@ -381,8 +381,8 @@ export function BackupRestoreSection() {
 
       {/* Restore */}
       <div className="border-t border-border pt-4">
-        <h4 className="text-xs font-bold text-foreground flex items-center gap-2 mb-2">
-          <Upload className="w-4 h-4 text-primary" />
+        <h4 className="text-xs font-medium text-foreground flex items-center gap-2 mb-2">
+          <Upload className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           Restore from an uploaded backup
         </h4>
         <p className="text-xs text-muted-foreground mb-3">
@@ -397,15 +397,15 @@ export function BackupRestoreSection() {
             accept=".zip"
             aria-label="Backup archive (.zip)"
             onChange={(e) => handleSelectFile(e.target.files?.[0] ?? null)}
-            className="text-xs text-foreground file:mr-3 file:px-3 file:py-2 file:text-xs file:font-semibold file:bg-muted file:text-foreground file:rounded-lg file:border file:border-input hover:file:bg-muted/80"
+            className="text-xs text-foreground file:mr-3 file:px-3 file:py-2 file:text-xs file:font-medium file:bg-muted file:text-foreground file:rounded-lg file:border file:border-input hover:file:bg-muted/80"
           />
           <button
             type="button"
             onClick={handlePreview}
             disabled={!restoreFile || previewing}
-            className="px-4 py-2 text-xs font-semibold border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-all disabled:opacity-50 shrink-0"
+            className="px-4 py-2 text-xs font-medium border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-colors disabled:opacity-50 shrink-0"
           >
-            {previewing ? 'Previewing…' : 'Preview Restore'}
+            {previewing ? 'Previewing' : 'Preview restore'}
           </button>
         </div>
 
@@ -423,39 +423,39 @@ export function BackupRestoreSection() {
               <dl className="space-y-1">
                 <div className="flex justify-between gap-4">
                   <dt>Created</dt>
-                  <dd className="font-semibold">
+                  <dd className="font-medium tabular-nums">
                     {new Date(preview.manifest.createdAt).toLocaleString()}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt>App version</dt>
-                  <dd className="font-semibold">{preview.manifest.appVersion}</dd>
+                  <dd className="font-medium">{preview.manifest.appVersion}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt>Format version</dt>
-                  <dd className="font-semibold">{preview.manifest.formatVersion}</dd>
+                  <dd className="font-medium tabular-nums">{preview.manifest.formatVersion}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt>Archive size</dt>
-                  <dd className="font-semibold">{formatBytes(preview.archiveSizeBytes)}</dd>
+                  <dd className="font-medium tabular-nums">{formatBytes(preview.archiveSizeBytes)}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt>Upload files</dt>
-                  <dd className="font-semibold">{preview.manifest.uploadFileCount}</dd>
+                  <dd className="font-medium tabular-nums">{preview.manifest.uploadFileCount}</dd>
                 </div>
               </dl>
               <div className="mt-3">
-                <p className="font-semibold mb-1">Contents (verified against the backup database):</p>
+                <p className="font-medium mb-1">Contents (verified against the backup database):</p>
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1">
                   {COUNT_LABELS.map(([key, label]) => (
                     <div key={key} className="flex justify-between gap-2">
                       <dt>{label}</dt>
-                      <dd className="font-semibold">{preview.counts[key]}</dd>
+                      <dd className="font-medium tabular-nums">{preview.counts[key]}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
-              <p className="mt-2 text-xs">
+              <p className="mt-2 text-xs tabular-nums">
                 Preview expires {new Date(preview.expiresAt).toLocaleString()}.
               </p>
             </Callout>
@@ -503,9 +503,9 @@ export function BackupRestoreSection() {
                     type="button"
                     onClick={handleConfirmRestore}
                     disabled={!confirmChecked || confirming}
-                    className="px-4 py-2 text-xs font-semibold bg-destructive text-destructive-foreground rounded-xl hover:bg-destructive/90 transition-all disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-medium bg-destructive text-destructive-foreground rounded-xl hover:bg-destructive/90 transition-colors disabled:opacity-50"
                   >
-                    {confirming ? 'Restoring…' : 'Restore Backup'}
+                    {confirming ? 'Restoring' : 'Restore backup'}
                   </button>
                   <button
                     type="button"
@@ -515,7 +515,7 @@ export function BackupRestoreSection() {
                       setConfirmChecked(false);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="px-4 py-2 text-xs font-semibold border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-all"
+                    className="px-4 py-2 text-xs font-medium border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-colors"
                   >
                     Cancel
                   </button>
@@ -546,9 +546,9 @@ export function BackupRestoreSection() {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="mt-3 px-4 py-2 text-xs font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all"
+                className="mt-3 px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
               >
-                Reload Page
+                Reload page
               </button>
             </Callout>
           </div>

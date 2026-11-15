@@ -68,7 +68,7 @@ function renderDetail() {
 
 async function openDeleteDialog(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'More actions' }));
-  await user.click(screen.getByRole('button', { name: 'Delete Recipe' }));
+  await user.click(screen.getByRole('button', { name: 'Delete recipe' }));
   expect(
     await screen.findByRole('dialog', { name: 'Delete recipe?' })
   ).toBeInTheDocument();

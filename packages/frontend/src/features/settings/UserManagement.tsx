@@ -340,7 +340,7 @@ export function UserManagement() {
       {/* Toast Alert */}
       {toastMessage && (
         <div
-          className={`flex items-center justify-between p-4 rounded-xl border text-sm font-medium transition-all shadow-sm ${
+          className={`flex items-center justify-between p-4 rounded-xl border text-sm font-medium transition-colors shadow-sm ${
             toastMessage.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400'
               : 'bg-destructive/10 border-destructive/20 text-destructive'
@@ -366,9 +366,9 @@ export function UserManagement() {
       {/* Header & Primary Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            User Management
+          <h2 className="text-xl font-medium text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+            User management
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Manage user accounts, roles, access permissions, and pending invitations.
@@ -381,10 +381,10 @@ export function UserManagement() {
               setCreatedInviteResult(null);
               setShowInviteModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
           >
             <MailPlus className="w-4 h-4" />
-            Invite User
+            Invite user
           </button>
 
           <button
@@ -392,15 +392,15 @@ export function UserManagement() {
               setCreatedUserPassword(null);
               setShowCreateModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
-            Add User Directly
+            Add user directly
           </button>
 
           <button
             onClick={() => setShowSmtpModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm"
             title={
               smtpSettings?.isConfigured
                 ? `SMTP configured (${smtpSettings.host})`
@@ -408,7 +408,7 @@ export function UserManagement() {
             }
           >
             <Settings className="w-4 h-4" />
-            <span>SMTP Settings</span>
+            <span>SMTP settings</span>
             <span
               className={`w-2 h-2 rounded-full ${
                 smtpSettings?.isConfigured ? 'bg-emerald-600' : 'bg-amber-600'
@@ -420,7 +420,7 @@ export function UserManagement() {
             type="button"
             disabled={togglingSharedRecipes}
             onClick={handleToggleSharedRecipes}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all shadow-sm disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm disabled:opacity-50"
             title={
               sharedRecipes
                 ? 'All users currently share the same recipe database. Click to switch to Per-User Private Recipes.'
@@ -428,7 +428,7 @@ export function UserManagement() {
             }
           >
             <Users className="w-4 h-4" />
-            <span>{sharedRecipes ? 'Shared Recipes: ON' : 'Shared Recipes: OFF'}</span>
+            <span>{sharedRecipes ? 'Shared recipes: on' : 'Shared recipes: off'}</span>
             <span
               className={`w-2 h-2 rounded-full ${
                 sharedRecipes ? 'bg-emerald-600' : 'bg-amber-600'
@@ -441,7 +441,7 @@ export function UserManagement() {
               type="button"
               disabled={togglingSharedRecipes}
               onClick={handleToggleShowRecipeAuthor}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all shadow-sm disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors shadow-sm disabled:opacity-50"
               title={
                 showRecipeAuthor
                   ? 'Recipe cards and detail views currently show who created each recipe. Click to hide author attribution.'
@@ -449,7 +449,7 @@ export function UserManagement() {
               }
             >
               <UserCheck className="w-4 h-4" />
-              <span>{showRecipeAuthor ? 'Show Author: ON' : 'Show Author: OFF'}</span>
+              <span>{showRecipeAuthor ? 'Show author: on' : 'Show author: off'}</span>
               <span
                 className={`w-2 h-2 rounded-full ${
                   showRecipeAuthor ? 'bg-emerald-600' : 'bg-muted-foreground/40'
@@ -464,34 +464,34 @@ export function UserManagement() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-3.5 rounded-xl border border-border bg-card/60">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-medium">Total Users</span>
-            <Users className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium">Total users</span>
+            <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-2xl font-bold text-foreground">{users.length}</div>
+          <div className="text-2xl font-medium text-foreground tabular-nums">{users.length}</div>
         </div>
 
         <div className="p-3.5 rounded-xl border border-border bg-card/60">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-medium">Administrators</span>
-            <Shield className="w-4 h-4 text-purple-500" />
+            <Shield className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 dark:text-purple-400">{adminCount}</div>
+          <div className="text-2xl font-medium text-foreground tabular-nums">{adminCount}</div>
         </div>
 
         <div className="p-3.5 rounded-xl border border-border bg-card/60">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-medium">Members</span>
-            <UserCheck className="w-4 h-4 text-blue-500" />
+            <UserCheck className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 dark:text-blue-400">{memberCount}</div>
+          <div className="text-2xl font-medium text-foreground tabular-nums">{memberCount}</div>
         </div>
 
         <div className="p-3.5 rounded-xl border border-border bg-card/60">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-medium">Pending Invites</span>
-            <Mail className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span className="text-xs font-medium">Pending invites</span>
+            <Mail className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 dark:text-amber-400">{invitations.length}</div>
+          <div className="text-2xl font-medium text-foreground tabular-nums">{invitations.length}</div>
         </div>
       </div>
 
@@ -500,23 +500,23 @@ export function UserManagement() {
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab('users')}
-            className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all ${
+            className={`pb-3 px-3 text-xs font-medium border-b transition-colors ${
               activeTab === 'users'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            Active Users ({users.length})
+            Active users ({users.length})
           </button>
           <button
             onClick={() => setActiveTab('invitations')}
-            className={`pb-3 px-3 text-xs font-semibold border-b-2 transition-all ${
+            className={`pb-3 px-3 text-xs font-medium border-b transition-colors ${
               activeTab === 'invitations'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            Pending Invitations ({invitations.length})
+            Pending invitations ({invitations.length})
           </button>
         </div>
       </div>
@@ -536,20 +536,20 @@ export function UserManagement() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, username, email..."
+                placeholder="Search by name, username, email"
                 className="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <label htmlFor="role-filter" className="text-xs text-muted-foreground whitespace-nowrap">Filter Role:</label>
+              <label htmlFor="role-filter" className="text-xs text-muted-foreground whitespace-nowrap">Filter role:</label>
               <select
                 id="role-filter"
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as any)}
                 className="text-xs rounded-xl border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="all">All Roles</option>
+                <option value="all">All roles</option>
                 <option value="admin">Administrators</option>
                 <option value="user">Members</option>
               </select>
@@ -558,7 +558,7 @@ export function UserManagement() {
 
           {/* Users Table */}
           {loading ? (
-            <div className="p-8 text-center text-xs text-muted-foreground">Loading users...</div>
+            <div className="p-8 text-center text-xs text-muted-foreground">Loading users</div>
           ) : filteredUsers.length === 0 ? (
             <div className="p-12 text-center rounded-2xl border border-dashed border-border text-muted-foreground">
               <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
@@ -569,19 +569,19 @@ export function UserManagement() {
               <table className="min-w-full divide-y divide-border text-left">
                 <thead className="bg-muted/40">
                   <tr>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       User
                     </th>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       Joined
                     </th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-[11px] font-medium text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -602,7 +602,7 @@ export function UserManagement() {
                       <tr key={user.id} className="hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs flex-shrink-0">
                               {user.profilePhotoUrl ? (
                                 <img
                                   src={user.profilePhotoUrl}
@@ -614,18 +614,18 @@ export function UserManagement() {
                               )}
                             </div>
                             <div>
-                              <div className="font-semibold text-foreground flex items-center gap-1.5">
+                              <div className="font-medium text-foreground flex items-center gap-1.5">
                                 {user.firstName || user.lastName
                                   ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                                   : user.username}
 
                                 {isRoot && (
                                   <span
-                                    title="System Administrator (Permanent root account)"
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 dark:text-amber-400 border border-amber-500/20"
+                                    title="System administrator (Permanent root account)"
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border"
                                   >
-                                    <ShieldCheck className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                                    System Admin
+                                    <ShieldCheck className="w-3 h-3" strokeWidth={1.5} />
+                                    System admin
                                   </span>
                                 )}
 
@@ -646,7 +646,7 @@ export function UserManagement() {
 
                         <td className="px-4 py-3 whitespace-nowrap">
                           {isRoot ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-300 dark:text-purple-400 border border-purple-500/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                               <Shield className="w-3 h-3" />
                               Admin
                             </span>
@@ -678,7 +678,7 @@ export function UserManagement() {
                           )}
                         </td>
 
-                        <td className="px-4 py-3 whitespace-nowrap text-muted-foreground text-[11px]">
+                        <td className="px-4 py-3 whitespace-nowrap tabular-nums text-muted-foreground text-[11px]">
                           {new Date(user.createdAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short',
@@ -696,16 +696,16 @@ export function UserManagement() {
                                 setResetPasswordTargetUser(user);
                               }}
                               title="Reset user password"
-                              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                             >
                               <KeyRound className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Delete User Button - Protected against self, root, and last admin */}
+                            {/* Delete user Button - Protected against self, root, and last admin */}
                             {isRoot ? (
                               <button
                                 disabled
-                                title="System Administrator cannot be deleted"
+                                title="System administrator cannot be deleted"
                                 aria-label="Delete user (disabled: system administrator cannot be deleted)"
                                 className="p-1.5 rounded-lg border border-transparent text-muted-foreground/30 cursor-not-allowed"
                               >
@@ -733,7 +733,7 @@ export function UserManagement() {
                               <button
                                 onClick={() => setDeleteTargetUser(user)}
                                 title="Delete user"
-                                className="p-1.5 rounded-lg border border-border text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-all"
+                                className="p-1.5 rounded-lg border border-border text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -762,21 +762,21 @@ export function UserManagement() {
                 setCreatedInviteResult(null);
                 setShowInviteModal(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <MailPlus className="w-3.5 h-3.5" />
-              New Invite
+              New invite
             </button>
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs text-muted-foreground">Loading invitations...</div>
+            <div className="p-8 text-center text-xs text-muted-foreground">Loading invitations</div>
           ) : invitations.length === 0 ? (
             <div className="p-12 text-center rounded-2xl border border-dashed border-border text-muted-foreground">
               <Mail className="w-8 h-8 mx-auto mb-2 opacity-40" />
               <p className="text-xs font-medium">No pending invitations.</p>
               <p className="text-[11px] text-muted-foreground mt-1">
-                Click "Invite User" above to invite members or administrators.
+                Click "Invite user" above to invite members or administrators.
               </p>
             </div>
           ) : (
@@ -784,16 +784,16 @@ export function UserManagement() {
               <table className="min-w-full divide-y divide-border text-left">
                 <thead className="bg-muted/40">
                   <tr>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      Invited Email
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
+                      Invited email
                     </th>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      Status / Expiry
+                    <th className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
+                      Status / expiry
                     </th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-[11px] font-medium text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -816,10 +816,10 @@ export function UserManagement() {
 
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
                               inv.role === 'admin'
-                                ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300 dark:text-purple-400 border border-purple-500/20'
-                                : 'bg-blue-500/10 text-blue-700 dark:text-blue-300 dark:text-blue-400 border border-blue-500/20'
+                                ? 'bg-muted text-muted-foreground border border-border'
+                                : 'bg-muted text-muted-foreground border border-border'
                             }`}
                           >
                             {inv.role === 'admin' ? 'Administrator' : 'Member'}
@@ -830,20 +830,20 @@ export function UserManagement() {
                           <div className="flex items-center gap-1.5 text-xs">
                             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                             {isExpired ? (
-                              <span className="text-destructive font-medium">Expired ({expiryDate})</span>
+                              <span className="text-destructive font-medium tabular-nums">Expired ({expiryDate})</span>
                             ) : (
-                              <span className="text-muted-foreground">Expires {expiryDate}</span>
+                              <span className="tabular-nums text-muted-foreground">Expires {expiryDate}</span>
                             )}
                           </div>
                         </td>
 
                         <td className="px-4 py-3 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* Copy Link Button */}
+                            {/* Copy link Button */}
                             <button
                               onClick={() => copyToClipboard(inv.inviteUrl, `inv-${inv.id}`)}
                               title="Copy invitation link"
-                              className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-input bg-background hover:bg-muted transition-all"
+                              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg border border-input bg-background hover:bg-muted transition-colors"
                             >
                               {copiedKey === `inv-${inv.id}` ? (
                                 <>
@@ -853,7 +853,7 @@ export function UserManagement() {
                               ) : (
                                 <>
                                   <Copy className="w-3.5 h-3.5" />
-                                  <span>Copy Link</span>
+                                  <span>Copy link</span>
                                 </>
                               )}
                             </button>
@@ -862,7 +862,7 @@ export function UserManagement() {
                             <button
                               onClick={() => handleResendInvitation(inv)}
                               title="Resend email and refresh expiration date"
-                              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                             >
                               <RotateCw className="w-3.5 h-3.5" />
                             </button>
@@ -871,7 +871,7 @@ export function UserManagement() {
                             <button
                               onClick={() => handleRevokeInvitation(inv.id)}
                               title="Revoke invitation"
-                              className="p-1.5 rounded-lg border border-border text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-all"
+                              className="p-1.5 rounded-lg border border-border text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -890,11 +890,11 @@ export function UserManagement() {
       {/* MODAL 1: SEND INVITATION */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-4">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-lg border border-border space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <MailPlus className="w-4 h-4 text-primary" />
-                Invite New User
+              <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                <MailPlus className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Invite new user
               </h3>
               <button
                 onClick={() => setShowInviteModal(false)}
@@ -921,10 +921,10 @@ export function UserManagement() {
                       <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1">
-                      <div className="font-bold">
+                      <div className="font-medium">
                         {createdInviteResult.emailSent
-                          ? 'Email Invitation Sent!'
-                          : 'Invitation Link Ready'}
+                          ? 'Email invitation sent'
+                          : 'Invitation link ready'}
                       </div>
                       <div className="mt-0.5">
                         {createdInviteResult.emailStatus ||
@@ -935,7 +935,7 @@ export function UserManagement() {
                           <button
                             type="button"
                             onClick={() => setShowSmtpModal(true)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-background text-foreground border border-border hover:bg-muted transition-all"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-background text-foreground border border-border hover:bg-muted transition-colors"
                           >
                             <Settings className="w-3 h-3" />
                             Configure SMTP
@@ -951,10 +951,10 @@ export function UserManagement() {
                                   showToast('error', err.response?.data?.error || 'Failed to resend invitation');
                                 }
                               }}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                             >
                               <RotateCw className="w-3 h-3" />
-                              Send Email Now
+                              Send email now
                             </button>
                           )}
                         </div>
@@ -964,8 +964,8 @@ export function UserManagement() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="invite-link" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Registration Link
+                  <label htmlFor="invite-link" className="text-[11px] font-medium text-muted-foreground">
+                    Registration link
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -979,7 +979,7 @@ export function UserManagement() {
                       onClick={() =>
                         copyToClipboard(createdInviteResult.inviteUrl, 'modal-invite-link')
                       }
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs whitespace-nowrap hover:bg-primary/90 transition-all flex-shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-xs whitespace-nowrap hover:bg-primary/90 transition-colors flex-shrink-0"
                     >
                       {copiedKey === 'modal-invite-link' ? (
                         <>
@@ -999,7 +999,7 @@ export function UserManagement() {
                 <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => setShowInviteModal(false)}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-all"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors"
                   >
                     Done
                   </button>
@@ -1009,8 +1009,8 @@ export function UserManagement() {
               /* Create Form */
               <form onSubmit={handleSendInvitation} className="space-y-4 pt-1">
                 <div>
-                  <label htmlFor="invite-email" className="block text-xs font-semibold text-foreground mb-1">
-                    Email Address <span className="text-destructive">*</span>
+                  <label htmlFor="invite-email" className="block text-xs font-medium text-foreground mb-1">
+                    Email address <span className="text-destructive">*</span>
                   </label>
                   <input
                     id="invite-email"
@@ -1024,8 +1024,8 @@ export function UserManagement() {
                 </div>
 
                 <div>
-                  <label htmlFor="invite-role" className="block text-xs font-semibold text-foreground mb-1">
-                    Assigned Role
+                  <label htmlFor="invite-role" className="block text-xs font-medium text-foreground mb-1">
+                    Assigned role
                   </label>
                   <select
                     id="invite-role"
@@ -1061,7 +1061,7 @@ export function UserManagement() {
                   <button
                     type="button"
                     onClick={() => setShowSmtpModal(true)}
-                    className="px-2.5 py-1 rounded-lg font-semibold bg-background text-foreground border border-border hover:bg-muted transition-all whitespace-nowrap flex-shrink-0"
+                    className="px-2.5 py-1 rounded-lg font-medium bg-background text-foreground border border-border hover:bg-muted transition-colors whitespace-nowrap flex-shrink-0"
                   >
                     {smtpSettings?.isConfigured ? 'Edit SMTP' : 'Configure SMTP'}
                   </button>
@@ -1071,16 +1071,16 @@ export function UserManagement() {
                   <button
                     type="button"
                     onClick={() => setShowInviteModal(false)}
-                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-all"
+                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={sendingInvite}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
-                    {sendingInvite ? 'Generating...' : 'Create Invitation'}
+                    {sendingInvite ? 'Generating' : 'Create invitation'}
                   </button>
                 </div>
               </form>
@@ -1092,11 +1092,11 @@ export function UserManagement() {
       {/* MODAL 2: ADD USER DIRECTLY */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-4">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-lg border border-border space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-primary" />
-                Add User Directly
+              <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Add user directly
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -1110,9 +1110,9 @@ export function UserManagement() {
               /* User Created Screen */
               <div className="space-y-4 pt-1">
                 <div className="p-3.5 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 text-xs">
-                  <div className="flex items-center gap-2 font-bold">
+                  <div className="flex items-center gap-2 font-medium">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    Account Created Successfully!
+                    Account created successfully
                   </div>
                   <div className="mt-1 text-[11px]">
                     Provide these credentials to the user. Make sure to copy the temporary password now, as it will not be shown again.
@@ -1120,8 +1120,8 @@ export function UserManagement() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="generated-password" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Generated Password
+                  <label htmlFor="generated-password" className="text-[11px] font-medium text-muted-foreground">
+                    Generated password
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -1133,7 +1133,7 @@ export function UserManagement() {
                     />
                     <button
                       onClick={() => copyToClipboard(createdUserPassword, 'modal-gen-password')}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs whitespace-nowrap hover:bg-primary/90 transition-all flex-shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-xs whitespace-nowrap hover:bg-primary/90 transition-colors flex-shrink-0"
                     >
                       {copiedKey === 'modal-gen-password' ? (
                         <>
@@ -1153,7 +1153,7 @@ export function UserManagement() {
                 <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-all"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors"
                   >
                     Done
                   </button>
@@ -1164,8 +1164,8 @@ export function UserManagement() {
               <form onSubmit={handleCreateUser} className="space-y-3.5 pt-1">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="create-first-name" className="block text-xs font-semibold text-foreground mb-1">
-                      First Name <span className="text-destructive">*</span>
+                    <label htmlFor="create-first-name" className="block text-xs font-medium text-foreground mb-1">
+                      First name <span className="text-destructive">*</span>
                     </label>
                     <input
                       id="create-first-name"
@@ -1178,8 +1178,8 @@ export function UserManagement() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="create-last-name" className="block text-xs font-semibold text-foreground mb-1">
-                      Last Name <span className="text-destructive">*</span>
+                    <label htmlFor="create-last-name" className="block text-xs font-medium text-foreground mb-1">
+                      Last name <span className="text-destructive">*</span>
                     </label>
                     <input
                       id="create-last-name"
@@ -1194,8 +1194,8 @@ export function UserManagement() {
                 </div>
 
                 <div>
-                  <label htmlFor="create-email" className="block text-xs font-semibold text-foreground mb-1">
-                    Email Address <span className="text-destructive">*</span>
+                  <label htmlFor="create-email" className="block text-xs font-medium text-foreground mb-1">
+                    Email address <span className="text-destructive">*</span>
                   </label>
                   <input
                     id="create-email"
@@ -1209,7 +1209,7 @@ export function UserManagement() {
                 </div>
 
                 <div>
-                  <label htmlFor="create-username" className="block text-xs font-semibold text-foreground mb-1">
+                  <label htmlFor="create-username" className="block text-xs font-medium text-foreground mb-1">
                     Username <span className="text-destructive">*</span>
                   </label>
                   <input
@@ -1231,7 +1231,7 @@ export function UserManagement() {
                           key={sug}
                           type="button"
                           onClick={() => setCreateUsername(sug)}
-                          className="px-2 py-0.5 rounded-md text-[11px] border border-input bg-muted/40 hover:bg-muted text-foreground transition-all"
+                          className="px-2 py-0.5 rounded-md text-[11px] border border-input bg-muted/40 hover:bg-muted text-foreground transition-colors"
                         >
                           {sug}
                         </button>
@@ -1241,7 +1241,7 @@ export function UserManagement() {
                 </div>
 
                 <div>
-                  <label htmlFor="create-role" className="block text-xs font-semibold text-foreground mb-1">Role</label>
+                  <label htmlFor="create-role" className="block text-xs font-medium text-foreground mb-1">Role</label>
                   <select
                     id="create-role"
                     value={createRole}
@@ -1257,16 +1257,16 @@ export function UserManagement() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-all"
+                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingUser}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
-                    {creatingUser ? 'Creating...' : 'Create Account'}
+                    {creatingUser ? 'Creating' : 'Create account'}
                   </button>
                 </div>
               </form>
@@ -1278,11 +1278,11 @@ export function UserManagement() {
       {/* MODAL 3: RESET PASSWORD */}
       {resetPasswordTargetUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-4">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-lg border border-border space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-primary" />
-                Reset Password: @{resetPasswordTargetUser.username}
+              <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Reset password: @{resetPasswordTargetUser.username}
               </h3>
               <button
                 onClick={() => setResetPasswordTargetUser(null)}
@@ -1295,9 +1295,9 @@ export function UserManagement() {
             {revealedResetPassword ? (
               <div className="space-y-4 pt-1">
                 <div className="p-3.5 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 text-xs">
-                  <div className="flex items-center gap-2 font-bold">
+                  <div className="flex items-center gap-2 font-medium">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    Password Successfully Reset
+                    Password reset
                   </div>
                   <div className="mt-1 text-[11px]">
                     Share this temporary password with @{resetPasswordTargetUser.username}.
@@ -1305,8 +1305,8 @@ export function UserManagement() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="reset-password" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    New Temporary Password
+                  <label htmlFor="reset-password" className="text-[11px] font-medium text-muted-foreground">
+                    New temporary password
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -1320,7 +1320,7 @@ export function UserManagement() {
                       onClick={() =>
                         copyToClipboard(revealedResetPassword, 'modal-reset-password')
                       }
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs whitespace-nowrap hover:bg-primary/90 transition-all flex-shrink-0"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-xs whitespace-nowrap hover:bg-primary/90 transition-colors flex-shrink-0"
                     >
                       {copiedKey === 'modal-reset-password' ? (
                         <>
@@ -1340,7 +1340,7 @@ export function UserManagement() {
                 <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => setResetPasswordTargetUser(null)}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-all"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors"
                   >
                     Done
                   </button>
@@ -1350,7 +1350,7 @@ export function UserManagement() {
               <form onSubmit={handleExecuteResetPassword} className="space-y-4 pt-1">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Reset credentials for{' '}
-                  <strong className="text-foreground">
+                  <strong className="text-foreground font-medium">
                     {resetPasswordTargetUser.firstName} {resetPasswordTargetUser.lastName} (
                     {resetPasswordTargetUser.email})
                   </strong>
@@ -1358,8 +1358,8 @@ export function UserManagement() {
                 </p>
 
                 <div>
-                  <label htmlFor="custom-reset-password" className="block text-xs font-semibold text-foreground mb-1">
-                    Custom Password (Optional)
+                  <label htmlFor="custom-reset-password" className="block text-xs font-medium text-foreground mb-1">
+                    Custom password (optional)
                   </label>
                   <input
                     id="custom-reset-password"
@@ -1378,16 +1378,16 @@ export function UserManagement() {
                   <button
                     type="button"
                     onClick={() => setResetPasswordTargetUser(null)}
-                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-all"
+                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={resettingPassword}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="px-4 py-2 text-xs font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
-                    {resettingPassword ? 'Resetting...' : 'Reset Password'}
+                    {resettingPassword ? 'Resetting' : 'Reset password'}
                   </button>
                 </div>
               </form>
@@ -1399,16 +1399,16 @@ export function UserManagement() {
       {/* MODAL 4: DELETE USER CONFIRMATION */}
       {deleteTargetUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-4">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-lg border border-border space-y-4">
             <div className="w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
               <AlertCircle className="w-5 h-5" />
             </div>
 
             <div className="text-center">
-              <h3 className="text-base font-bold text-foreground">Delete User Account</h3>
+              <h3 className="text-base font-medium text-foreground">Delete user account</h3>
               <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
                 Are you sure you want to permanently delete{' '}
-                <strong className="text-foreground">@{deleteTargetUser.username}</strong> (
+                <strong className="text-foreground font-medium">@{deleteTargetUser.username}</strong> (
                 {deleteTargetUser.email})? This action cannot be undone.
               </p>
             </div>
@@ -1417,16 +1417,16 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setDeleteTargetUser(null)}
-                className="px-4 py-2 text-xs font-semibold rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-all flex-1"
+                className="px-4 py-2 text-xs font-medium rounded-xl border border-input bg-background hover:bg-muted text-foreground transition-colors flex-1"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleExecuteDelete}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-all flex-1"
+                className="px-4 py-2 text-xs font-medium rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors flex-1"
               >
-                Delete User
+                Delete user
               </button>
             </div>
           </div>
@@ -1436,11 +1436,11 @@ export function UserManagement() {
       {/* MODAL 5: SMTP CONFIGURATION */}
       {showSmtpModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card p-6 shadow-2xl border border-border space-y-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card p-6 shadow-lg border border-border space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <Settings className="w-4 h-4 text-primary" />
-                Configure Outbound Email (SMTP)
+              <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                <Settings className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Configure outbound email (SMTP)
               </h3>
               <button
                 onClick={() => setShowSmtpModal(false)}
@@ -1461,7 +1461,7 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setShowSmtpModal(false)}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-all"
+                className="px-4 py-2 text-xs font-medium rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors"
               >
                 Close
               </button>

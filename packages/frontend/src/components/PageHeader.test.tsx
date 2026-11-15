@@ -8,7 +8,7 @@ describe('PageHeader (issue #27)', () => {
     const heading = screen.getByRole('heading', { name: 'Collections' });
     expect(heading.tagName).toBe('H1');
     expect(heading.className).toContain('text-3xl');
-    expect(heading.className).toContain('font-bold');
+    expect(heading.className).toContain('font-medium');
   });
 
   it('renders the subtitle (entity count / purpose) under the title', () => {

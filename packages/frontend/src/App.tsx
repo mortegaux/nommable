@@ -35,9 +35,9 @@ import SetupWizardPage from '@/features/setup/SetupWizardPage';
 function TransientAuthError() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   return (
-    <div className="flex h-screen items-center justify-center px-4">
-      <div className="max-w-sm text-center">
-        <h1 className="text-lg font-semibold">Connection issue</h1>
+    <div className="flex h-screen items-center justify-center px-8">
+      <div className="max-w-md text-center">
+        <h1 className="text-lg font-medium">Connection issue</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Couldn&apos;t reach the server to verify your session. Your session is safe —
           this is a temporary connection problem, not a logout.

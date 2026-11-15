@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
  * PageHeader — the one page-anatomy header (issue #27).
  *
  * Contract:
- * - Title: `text-3xl font-bold`, with an optional muted subtitle line
+ * - Title: `text-3xl font-medium leading-tight text-balance`, with an optional muted subtitle line
  *   under it (entity count, e.g. "12 collections", or a concise purpose).
  * - ONE primary action, at the upper right. Callers pass the primary
  *   action as `primaryAction`; it should be the default button style.
@@ -40,7 +40,7 @@ export function PageHeader({
       className={`mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${className}`}
     >
       <div className="min-w-0">
-        <h1 className="flex items-start gap-3 text-3xl font-bold text-foreground">
+        <h1 className="flex items-start gap-3 text-3xl font-medium leading-tight text-balance text-foreground">
           {title}
           {titleAdornment}
         </h1>
@@ -63,9 +63,11 @@ export function PageHeader({
  *
  * Widths come from the layout tokens (--page-max-width-*), so a future
  * branding override (#55) can adjust them in one place. The app shell
- * (DashboardLayout) already supplies px-4 / py-8, so this wrapper only
- * constrains width. `wide` is the default for list pages; `narrow` for
- * detail / form pages; `medium` in between.
+ * (DashboardLayout) already supplies px-8 / py-16, so this wrapper only
+ * constrains width. Every page uses `wide` (max-w-7xl) so all screens
+ * line up; `medium` / `narrow` are retained for future use, not for
+ * page shells. Centered flows (login, register) use their own narrow
+ * cards instead of this wrapper.
  */
 interface PageShellProps {
   width?: 'wide' | 'medium' | 'narrow';

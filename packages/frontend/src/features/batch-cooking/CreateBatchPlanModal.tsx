@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Package, Plus, Refrigerator, Snowflake, UtensilsCrossed } from 'lucide-react';
 import { batchCookingApi } from '@/services/api';
 import { RecipeBrowserModal } from '@/features/meal-plans/RecipeBrowserModal';
 import { PortionCalculator } from './PortionCalculator';
@@ -137,50 +138,50 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
 
   return (
     <>
-      <Dialog title="Create Batch Cooking Plan" onClose={onClose} panelClassName="max-w-3xl">
+      <Dialog title="Create batch cooking plan" onClose={onClose}>
         <div className="p-6">
             {/* Tabs */}
             <div className="flex gap-2 border-b border-border mb-4" role="tablist" aria-label="Plan sections">
               <button
                 onClick={() => setActiveTab('basic')}
-                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                className={`px-4 py-2 font-medium transition-colors border-b ${
                   activeTab === 'basic'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Basic Info
+                Basic info
               </button>
               <button
                 onClick={() => setActiveTab('recipe')}
-                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                className={`px-4 py-2 font-medium transition-colors border-b ${
                   activeTab === 'recipe'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Recipe & Portions
+                Recipe & portions
               </button>
               <button
                 onClick={() => setActiveTab('storage')}
-                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                className={`px-4 py-2 font-medium transition-colors border-b ${
                   activeTab === 'storage'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Storage & Prep
+                Storage & prep
               </button>
             </div>
 
           {/* Content */}
           <div>
-            {/* Basic Info Tab */}
+            {/* Basic info Tab */}
             {activeTab === 'basic' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Plan Name *
+                    Plan name *
                   </label>
                   <input
                     type="text"
@@ -209,7 +210,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Cooking Date *
+                    Cooking date *
                   </label>
                   <input
                     type="date"
@@ -225,7 +226,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
               </div>
             )}
 
-            {/* Recipe & Portions Tab */}
+            {/* Recipe & portions Tab */}
             {activeTab === 'recipe' && (
               <div className="space-y-4">
                 {/* Recipe Selection */}
@@ -234,7 +235,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                     Recipe *
                   </label>
                   {selectedRecipe ? (
-                    <div className="border border-border rounded-lg p-4 bg-accent/5">
+                    <div className="border border-border rounded-lg p-4 bg-muted">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           {selectedRecipe.imageUrl ? (
@@ -245,11 +246,11 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                             />
                           ) : (
                             <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                              <span className="text-2xl">🍽️</span>
+                              <UtensilsCrossed className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                             </div>
                           )}
                           <div>
-                            <h3 className="font-semibold text-foreground">{selectedRecipe.title}</h3>
+                            <h3 className="font-medium text-foreground">{selectedRecipe.title}</h3>
                             {selectedRecipe.servings && (
                               <p className="text-sm text-muted-foreground">
                                 Base recipe: {selectedRecipe.servings} servings
@@ -261,19 +262,19 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                           onClick={() => setShowRecipeBrowser(true)}
                           className="text-sm text-primary hover:underline"
                         >
-                          Change Recipe
+                          Change recipe
                         </button>
                       </div>
                     </div>
                   ) : (
                     <button
                       onClick={() => setShowRecipeBrowser(true)}
-                      className={`w-full py-4 rounded-lg border-2 border-dashed ${
+                      className={`w-full py-4 rounded-lg border border-dashed ${
                         errors.recipeId ? 'border-destructive' : 'border-border hover:border-primary'
-                      } bg-accent/5 hover:bg-accent/10 transition-all flex items-center justify-center gap-2 text-muted-foreground hover:text-primary`}
+                      } bg-muted hover:bg-accent transition-colors flex items-center justify-center gap-2 text-muted-foreground hover:text-primary`}
                     >
-                      <span className="text-2xl">+</span>
-                      Select a Recipe
+                      <Plus className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                      Select a recipe
                     </button>
                   )}
                   {errors.recipeId && <p className="text-xs text-destructive mt-1">{errors.recipeId}</p>}
@@ -281,7 +282,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
 
                 {/* Portion Calculator */}
                 <div>
-                  <h3 className="text-sm font-medium text-foreground mb-3">Calculate Portions</h3>
+                  <h3 className="text-sm font-medium text-foreground mb-3">Calculate portions</h3>
                   <PortionCalculator
                     batches={formData.batches}
                     servingsPerBatch={formData.servingsPerBatch}
@@ -296,13 +297,13 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
               </div>
             )}
 
-            {/* Storage & Prep Tab */}
+            {/* Storage & prep Tab */}
             {activeTab === 'storage' && (
               <div className="space-y-4">
-                {/* Storage Method */}
+                {/* Storage method */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Storage Method
+                    Storage method
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {(['refrigerate', 'freeze', 'pantry'] as const).map((method) => (
@@ -310,14 +311,20 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                         key={method}
                         type="button"
                         onClick={() => setFormData({ ...formData, storageMethod: method })}
-                        className={`p-4 rounded-lg border-2 transition-all ${
+                        className={`p-4 rounded-lg border transition-colors ${
                           formData.storageMethod === method
                             ? 'border-primary bg-primary/10'
                             : 'border-border hover:border-primary/50'
                         }`}
                       >
-                        <div className="text-2xl mb-2">
-                          {method === 'refrigerate' ? '❄️' : method === 'freeze' ? '🧊' : '📦'}
+                        <div className="flex justify-center mb-2">
+                          {method === 'refrigerate' ? (
+                            <Refrigerator className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                          ) : method === 'freeze' ? (
+                            <Snowflake className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                          ) : (
+                            <Package className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                          )}
                         </div>
                         <div className="text-sm font-medium capitalize">{method}</div>
                       </button>
@@ -328,7 +335,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                 {/* Storage Duration */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Storage Duration (days)
+                    Storage duration (days)
                   </label>
                   <input
                     type="number"
@@ -342,10 +349,10 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                   </p>
                 </div>
 
-                {/* Reheating Instructions */}
+                {/* Reheating instructions */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Reheating Instructions
+                    Reheating instructions
                   </label>
                   <textarea
                     value={formData.reheatingInstructions}
@@ -359,7 +366,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                 {/* Prep Notes */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Prep Notes (Optional)
+                    Prep notes (optional)
                   </label>
                   <textarea
                     value={formData.prepNotes}
@@ -403,7 +410,7 @@ export function CreateBatchPlanModal({ onClose, onSuccess, prefillData }: Create
                   disabled={loading}
                   className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Creating...' : 'Create Plan'}
+                  {loading ? 'Creating' : 'Create plan'}
                 </button>
               )}
             </div>

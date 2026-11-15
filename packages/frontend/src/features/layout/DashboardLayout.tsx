@@ -255,7 +255,7 @@ export default function DashboardLayout() {
           tabIndex={-1}
           className="flex-1 overflow-auto bg-background pb-24 focus:outline-none lg:pb-0"
         >
-          <div className="container mx-auto px-4 py-8">
+          <div className="container mx-auto px-8 py-16">
             <Outlet />
           </div>
         </main>

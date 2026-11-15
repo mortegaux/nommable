@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Check, RefreshCw, X } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 import { aiApi } from '@/services/api';
 import { invalidateAIStatus } from '@/hooks/useAIStatus';
 import type { AIProvider, AIModelInfo, AIMode } from '@nommable/shared';
@@ -288,18 +290,18 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading AI settings...</div>
+        <div className="text-muted-foreground">Loading AI settings</div>
       </div>
     );
   }
 
   if (managed) {
     return (
-      <div className={hideHeader ? '' : 'mx-auto max-w-2xl'}>
-        {!hideHeader && <h1 className="mb-6 text-3xl font-bold text-foreground">AI Settings</h1>}
+      <div className={hideHeader ? '' : 'mx-auto max-w-7xl'}>
+        {!hideHeader && <h1 className="mb-6 text-3xl font-medium leading-tight text-balance text-foreground">AI settings</h1>}
 
         <div className="rounded-lg bg-card border border-border p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-foreground">Managed AI</h2>
+          <h2 className="mb-3 text-xl font-medium text-foreground">Managed AI</h2>
           <div className="space-y-3 text-sm text-muted-foreground">
             <p>
               This instance uses a managed AI key provided by the operator, so AI
@@ -328,8 +330,8 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
   }
 
   return (
-    <div className={hideHeader ? '' : 'mx-auto max-w-2xl'}>
-      {!hideHeader && <h1 className="mb-6 text-3xl font-bold text-foreground">AI Settings</h1>}
+    <div className={hideHeader ? '' : 'mx-auto max-w-7xl'}>
+      {!hideHeader && <h1 className="mb-6 text-3xl font-medium leading-tight text-balance text-foreground">AI settings</h1>}
 
       <div className="rounded-lg bg-card border border-border p-6 shadow-sm">
         <p className="mb-6 text-muted-foreground">
@@ -338,35 +340,31 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
         </p>
 
         {message && (
-          <div
-            className={`mb-4 rounded p-3 ${
-              message.toLowerCase().includes('success')
-                ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-            }`}
+          <Callout
+            tone={message.toLowerCase().includes('success') ? 'success' : 'error'}
+            role={message.toLowerCase().includes('success') ? undefined : 'alert'}
+            className="mb-4"
           >
             {message}
-          </div>
+          </Callout>
         )}
 
         {testResult && (
-          <div
-            className={`mb-4 rounded p-3 ${
-              testResult.success
-                ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-            }`}
+          <Callout
+            tone={testResult.success ? 'success' : 'error'}
+            role={testResult.success ? undefined : 'alert'}
+            title={testResult.success ? 'Connection successful' : 'Connection failed'}
+            icon={
+              testResult.success ? (
+                <Check className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+              ) : (
+                <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+              )
+            }
+            className="mb-4"
           >
-            <div className="flex items-start gap-2">
-              <span className="text-lg">
-                {testResult.success ? '✓' : '✗'}
-              </span>
-              <div>
-                <strong>{testResult.success ? 'Connection Successful!' : 'Connection Failed'}</strong>
-                <p className="mt-1 text-sm">{testResult.message}</p>
-              </div>
-            </div>
-          </div>
+            {testResult.message}
+          </Callout>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -415,7 +413,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
           {/* Provider Selection */}
           <div>
             <label htmlFor="provider" className="block text-sm font-medium text-foreground mb-2">
-              AI Provider
+              AI provider
             </label>
             <select
               id="provider"
@@ -438,7 +436,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               {provider !== 'ollama' && (
                 <div>
                   <label htmlFor="apiKey" className="block text-sm font-medium text-foreground mb-2">
-                    API Key {!hasExisting && <span className="text-destructive">*</span>}
+                    API key {!hasExisting && <span className="text-destructive">*</span>}
                   </label>
                   <input
                     id="apiKey"
@@ -482,7 +480,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label htmlFor="model-select" className="block text-sm font-medium text-foreground">
-                    Text & Recipe Generation Model (Optional)
+                    Text & recipe generation model (optional)
                   </label>
                   <button
                     type="button"
@@ -491,21 +489,12 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                     className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 disabled:opacity-50 transition-colors"
                     title="Fetch latest models from provider"
                   >
-                    <svg
+                    <RefreshCw
                       className={`h-3.5 w-3.5 ${loadingModels ? 'animate-spin' : ''}`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                      <path d="M3 3v5h5" />
-                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                      <path d="M16 16h5v5" />
-                    </svg>
-                    <span>{loadingModels ? 'Fetching...' : 'Refresh models'}</span>
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                    <span>{loadingModels ? 'Fetching' : 'Refresh models'}</span>
                   </button>
                 </div>
 
@@ -531,7 +520,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                       {m.name}{m.description ? ` — ${m.description}` : ''}{m.isDefault ? ' (Default)' : ''}
                     </option>
                   ))}
-                  <option value="__custom__">Custom model (enter manually)...</option>
+                  <option value="__custom__">Custom model (enter manually)</option>
                 </select>
 
                 {isCustomModel && (
@@ -569,7 +558,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               {/* Image Generation Model */}
               <div>
                 <label htmlFor="image-model-select" className="block text-sm font-medium text-foreground mb-2">
-                  Image Generation Model (Optional)
+                  Image generation model (optional)
                 </label>
                 <select
                   id="image-model-select"
@@ -621,7 +610,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                       ))}
                     </optgroup>
                   )}
-                  <option value="__custom__">Custom model (enter manually)...</option>
+                  <option value="__custom__">Custom model (enter manually)</option>
                 </select>
 
                 {isCustomImageModel && (
@@ -646,8 +635,8 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                     with any other text provider) */}
                 {(needsOpenAIImageKey || needsOpenRouterImageKey) && (
                   <div className="mt-3 p-3 rounded-lg border border-border bg-muted/30">
-                    <label htmlFor="image-api-key" className="block text-xs font-semibold text-foreground mb-1">
-                      {needsOpenRouterImageKey ? 'OpenRouter API Key for Images (Optional)' : 'OpenAI API Key for Images (Optional)'}
+                    <label htmlFor="image-api-key" className="block text-xs font-medium text-foreground mb-1">
+                      {needsOpenRouterImageKey ? 'OpenRouter API key for images (optional)' : 'OpenAI API key for images (optional)'}
                     </label>
                     <input
                       id="image-api-key"
@@ -670,7 +659,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                 </p>
               </div>
 
-              {/* Enable AI Features */}
+              {/* Enable AI features */}
               <div className="flex items-center">
                 <input
                   id="enabled"
@@ -680,7 +669,7 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
                   className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-primary"
                 />
                 <label htmlFor="enabled" className="ml-2 text-sm font-medium text-foreground">
-                  Enable AI Features
+                  Enable AI features
                 </label>
               </div>
             </>
@@ -693,16 +682,16 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
               disabled={saving}
               className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground font-medium hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition-colors"
             >
-              {saving ? 'Saving...' : 'Save Settings'}
+              {saving ? 'Saving' : 'Save settings'}
             </button>
             {(hasExisting || apiKey || provider === 'ollama') && provider !== 'none' && (
               <button
                 type="button"
                 onClick={handleTestConnection}
                 disabled={testing}
-                className="flex-1 rounded-lg bg-green-700 px-4 py-2 text-white font-medium hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground font-medium hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {testing ? 'Testing...' : 'Test Connection'}
+                {testing ? 'Testing' : 'Test connection'}
               </button>
             )}
           </div>
@@ -710,13 +699,13 @@ export default function AISettingsPage({ hideHeader = false }: { hideHeader?: bo
 
         {/* Provider-specific help text */}
         {provider !== 'none' && (
-          <div className="mt-6 p-4 bg-accent/10 border border-accent/20 rounded-lg">
-            <h3 className="text-sm font-semibold text-foreground mb-2">
-              {provider === 'openai' && 'OpenAI Setup'}
-              {provider === 'anthropic' && 'Anthropic Setup'}
-              {provider === 'google' && 'Google AI Setup'}
-              {provider === 'openrouter' && 'OpenRouter Setup'}
-              {provider === 'ollama' && 'Ollama Setup'}
+          <div className="mt-6 p-4 bg-muted border border-border rounded-lg">
+            <h3 className="text-sm font-medium text-foreground mb-2">
+              {provider === 'openai' && 'OpenAI setup'}
+              {provider === 'anthropic' && 'Anthropic setup'}
+              {provider === 'google' && 'Google AI setup'}
+              {provider === 'openrouter' && 'OpenRouter setup'}
+              {provider === 'ollama' && 'Ollama setup'}
             </h3>
             <div className="text-xs text-muted-foreground space-y-1">
               {PROVIDER_COVERAGE[provider] && (

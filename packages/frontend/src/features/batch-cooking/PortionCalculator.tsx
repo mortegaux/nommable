@@ -22,7 +22,7 @@ export function PortionCalculator({
         {/* Batches Input */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Number of Batches
+            Number of batches
           </label>
           <input
             type="number"
@@ -35,10 +35,10 @@ export function PortionCalculator({
           <p className="text-xs text-muted-foreground mt-1">Min: 1, Max: 20</p>
         </div>
 
-        {/* Servings Per Batch Input */}
+        {/* Servings per batch Input */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Servings Per Batch
+            Servings per batch
           </label>
           <input
             type="number"
@@ -52,16 +52,16 @@ export function PortionCalculator({
       </div>
 
       {/* Calculation Display */}
-      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+      <div className="bg-muted border border-border rounded-lg p-4">
         <div className="grid grid-cols-2 gap-4 text-center">
           <div>
-            <div className="text-3xl font-bold text-primary">{totalServings}</div>
-            <div className="text-sm text-muted-foreground">Total Servings</div>
+            <div className="text-3xl font-medium tabular-nums text-foreground">{totalServings}</div>
+            <div className="text-sm text-muted-foreground">Total servings</div>
           </div>
           {ingredientMultiplier && (
             <div>
-              <div className="text-3xl font-bold text-primary">{ingredientMultiplier}x</div>
-              <div className="text-sm text-muted-foreground">Ingredient Multiplier</div>
+              <div className="text-3xl font-medium tabular-nums text-foreground">{ingredientMultiplier}x</div>
+              <div className="text-sm text-muted-foreground">Ingredient multiplier</div>
             </div>
           )}
         </div>
