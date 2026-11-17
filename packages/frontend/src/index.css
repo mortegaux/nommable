@@ -203,7 +203,7 @@
 /* Animations */
 @keyframes slide-up {
   from {
-    transform: translateY(100%);
+    transform: translateY(12px);
     opacity: 0;
   }
   to {

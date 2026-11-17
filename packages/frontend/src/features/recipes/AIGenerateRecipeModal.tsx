@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '@/store/toast.store';
 import { useAuthStore } from '@/store/auth.store';
 import { recipeApi } from '@/services/api';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
+import { Camera, Image as ImageIcon, Loader2, X } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
 import { compressImage } from '@/utils/compressImage';
 import type { AIGenerateRecipeRequest } from '@nommable/shared';
@@ -214,7 +214,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
   };
 
   return (
-    <Dialog title="Generate Recipe with AI" onClose={onClose} panelClassName="max-w-2xl">
+    <Dialog title="Generate recipe with AI" onClose={onClose}>
       <div className="p-6">
 
           {/* Tabs */}
@@ -222,28 +222,25 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
             <button
               type="button"
               onClick={() => setActiveTab('describe')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === 'describe'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/50'
               }`}
             >
-              Describe Recipe
+              Describe recipe
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('photo')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                 activeTab === 'photo'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/50'
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Use Photo
+              <Camera className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              Use photo
             </button>
           </div>
         </div>
@@ -281,29 +278,21 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
                     className="hidden"
                     id="photo-gallery"
                   />
-                  <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg bg-background">
-                    <svg className="w-12 h-12 text-muted-foreground mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                  <div className="flex flex-col items-center justify-center w-full h-64 border border-dashed border-border rounded-lg bg-background">
+                    <Camera className="h-12 w-12 text-muted-foreground mb-3" strokeWidth={1.5} aria-hidden="true" />
                     <div className="flex gap-3">
                       <label
                         htmlFor="photo-capture"
                         className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                        <Camera className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                         Take Photo
                       </label>
                       <label
                         htmlFor="photo-gallery"
                         className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-input bg-background text-foreground text-sm font-medium hover:bg-accent transition-colors"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <ImageIcon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                         Choose from Gallery
                       </label>
                     </div>
@@ -341,11 +330,8 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
 
                   {analyzing && (
                     <div className="flex items-center justify-center gap-3 p-4 bg-accent rounded-lg">
-                      <svg className="animate-spin h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span className="text-sm font-medium text-foreground">AI is detecting ingredients...</span>
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" strokeWidth={1.5} aria-hidden="true" />
+                      <span className="text-sm font-medium text-foreground">AI is detecting ingredients</span>
                     </div>
                   )}
 
@@ -353,7 +339,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-medium text-foreground">
-                          Detected Ingredients ({detectedIngredients.length})
+                          Detected ingredients ({detectedIngredients.length})
                         </label>
                         <button
                           type="button"
@@ -376,9 +362,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
                               onClick={() => handleRemoveIngredient(ingredient)}
                               className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
                             >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
+                              <X className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
                             </button>
                           </div>
                         ))}
@@ -390,7 +374,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
                           value={newIngredient}
                           onChange={(e) => setNewIngredient(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddIngredient())}
-                          placeholder="Add ingredient manually..."
+                          placeholder="Add ingredient manually"
                           className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                         <button
@@ -420,12 +404,12 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
               onChange={(e) => setPrompt(e.target.value)}
               rows={activeTab === 'describe' ? 3 : 2}
               className="w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder={activeTab === 'photo' ? "E.g., Stir-fry, pasta dish, salad..." : "E.g., A healthy chicken stir-fry with vegetables, or Creamy pasta with mushrooms and spinach..."}
+              placeholder={activeTab === 'photo' ? "E.g., Stir-fry, pasta dish, salad" : "E.g., A healthy chicken stir-fry with vegetables, or creamy pasta with mushrooms and spinach"}
               required
             />
             {activeTab === 'describe' && (
               <p className="text-xs text-muted-foreground mt-1">
-                Describe the type of recipe you want - be as specific or general as you like!
+                Describe the type of recipe you want — be as specific or general as you like.
               </p>
             )}
           </div>
@@ -477,7 +461,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
                   key={option}
                   type="button"
                   onClick={() => toggleDietary(option)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     dietary.includes(option)
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'bg-background border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
@@ -517,8 +501,7 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
               className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-primary cursor-pointer"
             />
             <label htmlFor="generate-image-checkbox" className="text-sm font-medium text-foreground flex items-center gap-1.5 cursor-pointer">
-              <AutoAwesomeIcon size={14} className="text-primary" />
-              Generate an AI culinary photograph for this recipe
+              Generate an AI photo for this recipe
             </label>
           </div>
         </form>
@@ -536,20 +519,16 @@ export function AIGenerateRecipeModal({ onClose }: AIGenerateRecipeModalProps) {
           <button
             onClick={handleSubmit}
             disabled={loading || !prompt.trim()}
-            className="px-6 py-2 rounded-lg border border-border bg-background font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
+                <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+                Generating
               </>
             ) : (
               <>
-                <AutoAwesomeIcon size={18} />
-                Generate Recipe
+                Generate recipe
               </>
             )}
           </button>

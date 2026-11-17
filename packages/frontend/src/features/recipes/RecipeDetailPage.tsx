@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Camera, X, Heart, Sparkles, Plus, Tag as TagIcon } from 'lucide-react';
+import { Camera, Check, ChevronLeft, Clock, Download, FileText, Flame, Heart, Lightbulb, List, MoreVertical, Pencil, Printer, RefreshCw, Share2, Trash2, Users, UtensilsCrossed, ChefHat, Wand2, X, Plus, Tag as TagIcon } from 'lucide-react';
 import { recipeApi, ratingApi, collectionApi, taxonomyApi } from '@/services/api';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
@@ -13,16 +13,6 @@ import { AIConfigAlert } from '@/components/AIConfigAlert';
 import { checkAIConfiguration, aiUnavailableMessage } from '@/utils/aiValidation';
 import { useAIStatus, AISetupBadge } from '@/hooks/useAIStatus';
 import { StarRating } from '@/components/StarRating';
-import {
-  AccessTimeIcon,
-  AutoAwesomeIcon,
-  GroupIcon,
-  RestaurantIcon,
-  KitchenIcon,
-  LocalFireDepartmentIcon,
-  ListIcon,
-  DescriptionIcon
-} from '@/components/icons/MaterialIcon';
 import type { Recipe, Taxonomy } from '@nommable/shared';
 
 const DIETARY_BADGES = {
@@ -356,10 +346,10 @@ export default function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className="max-w-4xl mx-auto text-center py-12">
+      <div className="max-w-7xl mx-auto text-center py-12">
         <p className="text-destructive mb-4">Recipe not found</p>
         <Link to="/recipes" className="text-primary hover:underline">
-          Back to Recipes
+          Back to recipes
         </Link>
       </div>
     );
@@ -418,17 +408,15 @@ export default function RecipeDetailPage() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto pb-12">
+      <div className="max-w-7xl mx-auto pb-12">
       {/* Breadcrumb & Actions */}
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link
           to="/recipes"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Recipes
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          Back to recipes
         </Link>
 
         <div className="flex gap-2">
@@ -439,9 +427,7 @@ export default function RecipeDetailPage() {
             className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2"
             aria-label="Enter cooking mode"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             Cook
           </button>
           <button
@@ -450,9 +436,7 @@ export default function RecipeDetailPage() {
             aria-label="Copy share link"
             title="Copy share link"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
+            <Share2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             Share
           </button>
 
@@ -464,9 +448,7 @@ export default function RecipeDetailPage() {
               aria-label="More actions"
               aria-expanded={showMenu}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
+              <MoreVertical className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             </button>
 
             {showMenu && (
@@ -478,7 +460,7 @@ export default function RecipeDetailPage() {
                 />
 
                 {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg border border-border shadow-lg z-20 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-56 bg-card rounded-lg border border-border shadow-lg z-20 overflow-hidden">
                   <button
                     onClick={() => {
                       navigate(`/recipes/${id}/edit`);
@@ -486,10 +468,8 @@ export default function RecipeDetailPage() {
                     }}
                     className="w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Recipe
+                    <Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Edit recipe
                   </button>
 
                   <button
@@ -499,9 +479,7 @@ export default function RecipeDetailPage() {
                     }}
                     className="w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
+                    <Download className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     Export as JSON
                   </button>
 
@@ -512,19 +490,16 @@ export default function RecipeDetailPage() {
                     }}
                     className="w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Print Recipe
+                    <Printer className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Print recipe
                   </button>
 
                   <div className="border-t border-border"></div>
 
                   {/* AI Enhancement Options */}
                   <div className="px-4 py-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      <AutoAwesomeIcon size={12} />
-                      AI Enhancements
+                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                      AI enhancements
                       {aiNeedsSetup && <AISetupBadge />}
                     </div>
                   </div>
@@ -533,38 +508,32 @@ export default function RecipeDetailPage() {
                     onClick={() => handleAIEnhanceClick('improve_instructions')}
                     className={`w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3 ${aiNeedsSetup ? 'opacity-60' : ''}`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Improve Instructions
+                    <FileText className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Improve instructions
                   </button>
 
                   <button
                     onClick={() => handleAIEnhanceClick('add_tips')}
                     className={`w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3 ${aiNeedsSetup ? 'opacity-60' : ''}`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    Add Cooking Tips
+                    <Lightbulb className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Add cooking tips
                   </button>
 
                   <button
                     onClick={() => handleAIEnhanceClick('optimize_ingredients')}
                     className={`w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3 ${aiNeedsSetup ? 'opacity-60' : ''}`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Optimize Ingredients
+                    <RefreshCw className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Optimize ingredients
                   </button>
 
                   <button
                     onClick={handleOpenGenerateImage}
                     className={`w-full px-4 py-3 text-left text-foreground hover:bg-accent transition-colors flex items-center gap-3 ${aiNeedsSetup ? 'opacity-60' : ''}`}
                   >
-                    <Sparkles className={`w-4 h-4 ${aiNeedsSetup ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`} />
-                    Generate Image with AI
+                    <Wand2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Generate image
                   </button>
 
                   <div className="border-t border-border"></div>
@@ -576,10 +545,8 @@ export default function RecipeDetailPage() {
                     }}
                     className="w-full px-4 py-3 text-left text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Delete Recipe
+                    <Trash2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                    Delete recipe
                   </button>
                 </div>
               </>
@@ -615,7 +582,7 @@ export default function RecipeDetailPage() {
       {/* Hero Image */}
       {recipe.imageUrl && (
         <div className="print:hidden">
-          <div className="recipe-hero group relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-xl mb-2">
+          <div className="recipe-hero group relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-2">
             <img
               src={recipe.imageUrl}
               alt={recipe.title}
@@ -625,13 +592,13 @@ export default function RecipeDetailPage() {
 
             {/* Title overlay on image */}
             <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 text-white">
-              <h1 className="text-3xl md:text-5xl font-bold mb-2 drop-shadow-lg">{recipe.title}</h1>
+              <h1 className="text-3xl md:text-5xl font-bold leading-tight text-balance mb-2 drop-shadow-lg">{recipe.title}</h1>
               {recipe.description && (
                 <p className="text-base md:text-lg text-white/90 drop-shadow max-w-3xl">{recipe.description}</p>
               )}
               {recipe.author && (
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-black/50 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white/95 border border-white/15">
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/80 text-[10px] font-bold text-primary-foreground flex-shrink-0 overflow-hidden">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/80 text-[10px] font-medium text-primary-foreground flex-shrink-0 overflow-hidden">
                     {recipe.author.profilePhotoUrl ? (
                       <img
                         src={recipe.author.profilePhotoUrl}
@@ -647,7 +614,7 @@ export default function RecipeDetailPage() {
                   </span>
                   <span>
                     Added by{' '}
-                    <span className="font-semibold">
+                    <span className="font-medium">
                       {recipe.author.firstName || recipe.author.lastName
                         ? `${recipe.author.firstName || ''} ${recipe.author.lastName || ''}`.trim()
                         : `@${recipe.author.username}`}
@@ -659,8 +626,7 @@ export default function RecipeDetailPage() {
 
             {/* AI Badge */}
             {recipe.isAiGenerated && (
-              <div className="absolute top-4 right-4 bg-accent/95 backdrop-blur-sm text-accent-foreground px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg flex items-center gap-2">
-                <AutoAwesomeIcon size={16} />
+              <div className="absolute top-4 right-4 bg-accent/95 backdrop-blur-sm text-accent-foreground px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg">
                 AI Generated
               </div>
             )}
@@ -669,14 +635,13 @@ export default function RecipeDetailPage() {
             <div className="absolute top-4 left-4 md:top-4 md:left-auto md:right-4 flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
               <button
                 onClick={handleOpenGenerateImage}
-                className={`bg-black/60 hover:bg-black/80 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium ${aiNeedsSetup ? 'ring-1 ring-amber-400/70' : ''}`}
+                className="bg-black/60 hover:bg-black/80 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium"
                 aria-label="Generate new image with AI"
-                title={aiNeedsSetup ? 'Set up AI to unlock AI photo generation' : 'Generate new image with AI'}
+                title={aiNeedsSetup ? 'Set up AI to generate photos' : 'Generate new image with AI'}
               >
-                <Sparkles className={`w-4 h-4 ${aiNeedsSetup ? 'text-amber-400' : 'text-primary'}`} />
                 <span className="hidden sm:inline">AI Photo</span>
                 {aiNeedsSetup && (
-                  <span className="rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-300">
+                  <span className="text-white/70">
                     Setup
                   </span>
                 )}
@@ -687,7 +652,7 @@ export default function RecipeDetailPage() {
                 aria-label="Change recipe image"
                 title="Change recipe image"
               >
-                <Camera className="w-5 h-5" />
+                <Camera className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -695,9 +660,9 @@ export default function RecipeDetailPage() {
           {showImageUpload && (
             <div className="mt-2 p-4 border rounded-lg bg-card">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Change Recipe Image</span>
+                <span className="text-sm font-medium">Change recipe image</span>
                 <button onClick={() => setShowImageUpload(false)} className="text-muted-foreground hover:text-foreground">
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
               <input
@@ -709,7 +674,7 @@ export default function RecipeDetailPage() {
                 }}
                 disabled={uploadingImage}
               />
-              {uploadingImage && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+              {uploadingImage && <p className="text-sm text-muted-foreground mt-2">Uploading</p>}
               <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Or generate photo with AI:</span>
                 <button
@@ -720,7 +685,6 @@ export default function RecipeDetailPage() {
                   }}
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
                   Generate with AI
                 </button>
               </div>
@@ -736,13 +700,13 @@ export default function RecipeDetailPage() {
         <div className="mb-8 print:hidden">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3">{recipe.title}</h1>
+              <h1 className="text-3xl md:text-5xl font-medium leading-tight text-balance text-foreground mb-3">{recipe.title}</h1>
               {recipe.description && (
-                <p className="text-lg md:text-xl text-muted-foreground">{recipe.description}</p>
+                <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">{recipe.description}</p>
               )}
               {recipe.author && (
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground border border-border">
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-medium text-primary flex-shrink-0 overflow-hidden">
                     {recipe.author.profilePhotoUrl ? (
                       <img
                         src={recipe.author.profilePhotoUrl}
@@ -758,7 +722,7 @@ export default function RecipeDetailPage() {
                   </span>
                   <span>
                     Added by{' '}
-                    <span className="font-semibold text-foreground">
+                    <span className="font-medium text-foreground">
                       {recipe.author.firstName || recipe.author.lastName
                         ? `${recipe.author.firstName || ''} ${recipe.author.lastName || ''}`.trim()
                         : `@${recipe.author.username}`}
@@ -774,7 +738,6 @@ export default function RecipeDetailPage() {
                 aria-label="Generate image with AI"
                 title="Generate image with AI"
               >
-                <Sparkles className="w-4 h-4" />
                 <span>AI Photo</span>
               </button>
               <button
@@ -783,7 +746,7 @@ export default function RecipeDetailPage() {
                 aria-label="Upload recipe image"
                 title="Upload recipe image"
               >
-                <Camera className="w-5 h-5" />
+                <Camera className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -791,9 +754,9 @@ export default function RecipeDetailPage() {
           {showImageUpload && (
             <div className="mt-4 p-4 border rounded-lg bg-card">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Add Recipe Image</span>
+                <span className="text-sm font-medium">Add recipe image</span>
                 <button onClick={() => setShowImageUpload(false)} className="text-muted-foreground hover:text-foreground">
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
               <input
@@ -805,7 +768,7 @@ export default function RecipeDetailPage() {
                 }}
                 disabled={uploadingImage}
               />
-              {uploadingImage && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+              {uploadingImage && <p className="text-sm text-muted-foreground mt-2">Uploading</p>}
               <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Or generate photo with AI:</span>
                 <button
@@ -816,7 +779,6 @@ export default function RecipeDetailPage() {
                   }}
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
                   Generate with AI
                 </button>
               </div>
@@ -828,39 +790,39 @@ export default function RecipeDetailPage() {
       {/* Meta Info Cards */}
       <div className="recipe-meta-cards grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 print:hidden">
         {recipe.servings && (
-          <div className="bg-card rounded-xl border border-border p-4 text-center hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
             <div className="mb-2 flex justify-center">
-              <GroupIcon size={32} className="text-primary" />
+              <Users className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             </div>
-            <div className="text-2xl font-bold text-foreground">{recipe.servings}</div>
+            <div className="text-2xl font-medium font-mono tabular-nums text-foreground">{recipe.servings}</div>
             <div className="text-sm text-muted-foreground">Servings</div>
           </div>
         )}
         {recipe.prepTime && recipe.prepTime > 0 && (
-          <div className="bg-card rounded-xl border border-border p-4 text-center hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
             <div className="mb-2 flex justify-center">
-              <KitchenIcon size={32} className="text-primary" />
+              <ChefHat className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             </div>
-            <div className="text-2xl font-bold text-foreground">{recipe.prepTime}m</div>
-            <div className="text-sm text-muted-foreground">Prep Time</div>
+            <div className="text-2xl font-medium font-mono tabular-nums text-foreground">{recipe.prepTime}m</div>
+            <div className="text-sm text-muted-foreground">Prep time</div>
           </div>
         )}
         {recipe.cookTime && recipe.cookTime > 0 && (
-          <div className="bg-card rounded-xl border border-border p-4 text-center hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
             <div className="mb-2 flex justify-center">
-              <LocalFireDepartmentIcon size={32} className="text-primary" />
+              <Flame className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             </div>
-            <div className="text-2xl font-bold text-foreground">{recipe.cookTime}m</div>
-            <div className="text-sm text-muted-foreground">Cook Time</div>
+            <div className="text-2xl font-medium font-mono tabular-nums text-foreground">{recipe.cookTime}m</div>
+            <div className="text-sm text-muted-foreground">Cook time</div>
           </div>
         )}
         {totalTime > 0 && (
-          <div className="bg-primary/5 rounded-xl border-2 border-primary/20 p-4 text-center hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
             <div className="mb-2 flex justify-center">
-              <AccessTimeIcon size={32} className="text-primary" />
+              <Clock className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             </div>
-            <div className="text-2xl font-bold text-primary">{totalTime}m</div>
-            <div className="text-sm text-muted-foreground">Total Time</div>
+            <div className="text-2xl font-medium font-mono tabular-nums text-foreground">{totalTime}m</div>
+            <div className="text-sm text-muted-foreground">Total time</div>
           </div>
         )}
       </div>
@@ -869,14 +831,14 @@ export default function RecipeDetailPage() {
       <div className="mb-4">
         <div className="flex flex-wrap items-center gap-2">
           {difficulty && (
-            <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold border-2 ${difficulty.color}`}>
+            <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium border ${difficulty.color}`}>
               {difficulty.label}
             </span>
           )}
           {recipe.categories?.map(cat => (
             <span
               key={`cat-${cat}`}
-              className="group inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-primary/15 text-primary border border-primary/30"
+              className="group inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-primary/15 text-primary border border-primary/30"
             >
               <span>{cat}</span>
               <button
@@ -940,10 +902,10 @@ export default function RecipeDetailPage() {
           <button
             type="button"
             onClick={() => setShowTagEditor(prev => !prev)}
-            className="print:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-accent/50 transition-colors"
+            className="print:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-accent/50 transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>{showTagEditor ? 'Done' : 'Add Tag'}</span>
+            <Plus className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+            <span>{showTagEditor ? 'Done' : 'Add tag'}</span>
           </button>
         </div>
 
@@ -952,9 +914,9 @@ export default function RecipeDetailPage() {
           <div className="mt-3 p-4 rounded-xl border border-border bg-card shadow-sm print:hidden space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <TagIcon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground">Quick Add Tags & Categories</span>
-                {savingTags && <span className="text-xs text-muted-foreground">(Saving...)</span>}
+                <TagIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                <span className="text-sm font-medium text-foreground">Quick add tags & categories</span>
+                {savingTags && <span className="text-xs text-muted-foreground">(Saving)</span>}
               </div>
               <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/40">
                 <button
@@ -993,7 +955,7 @@ export default function RecipeDetailPage() {
                     handleAddInlineTagOrCategory();
                   }
                 }}
-                placeholder={tagMode === 'tag' ? 'Type a custom tag and press Enter...' : 'Type a category (e.g. Appetizers) and press Enter...'}
+                placeholder={tagMode === 'tag' ? 'Type a custom tag, press Enter' : 'Type a category, press Enter'}
                 className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button
@@ -1024,7 +986,7 @@ export default function RecipeDetailPage() {
                             : 'bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
                         }`}
                       >
-                        {isSelected ? `✓ ${tag}` : `+ ${tag}`}
+                        {tag}
                       </button>
                     );
                   })}
@@ -1044,11 +1006,11 @@ export default function RecipeDetailPage() {
                         onClick={() => handleToggleQuickItem(cat, 'category')}
                         className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                           isSelected
-                            ? 'bg-secondary text-secondary-foreground border-secondary'
+                            ? 'bg-primary text-primary-foreground border-primary'
                             : 'bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
                         }`}
                       >
-                        {isSelected ? `✓ ${cat}` : `+ ${cat}`}
+                        {cat}
                       </button>
                     );
                   })}
@@ -1064,11 +1026,11 @@ export default function RecipeDetailPage() {
         <StarRating rating={userRating} onChange={handleRatingChange} />
         <button
           onClick={handleToggleFavorite}
-          className="p-2.5 -m-1 hover:text-red-500 transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+          className="p-2.5 -m-1 hover:text-primary transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-pressed={isFavorite}
         >
-          <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+          <Heart className={`h-6 w-6 ${isFavorite ? 'fill-primary text-primary' : ''}`} strokeWidth={1.5} aria-hidden="true" />
         </button>
       </div>
 
@@ -1077,8 +1039,8 @@ export default function RecipeDetailPage() {
         {/* Ingredients Section */}
         <div className="lg:col-span-1">
           <div className="recipe-ingredients bg-card rounded-2xl border border-border p-6 shadow-sm sticky top-4">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-4">
-              <RestaurantIcon size={24} />
+            <h2 className="text-xl font-medium text-foreground flex items-center gap-2 mb-4">
+              <UtensilsCrossed className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               Ingredients
             </h2>
             {/* Scaler is its own block inside the ingredients section
@@ -1103,17 +1065,17 @@ export default function RecipeDetailPage() {
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleIngredient(ing.id)}
-                        className="mt-1 w-5 h-5 rounded border-2 border-border cursor-pointer focus:ring-2 focus:ring-primary"
+                        className="mt-1 h-5 w-5 rounded border border-border cursor-pointer focus:ring-2 focus:ring-primary"
                       />
                       <span className={`flex-1 ${isChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                        <span className="font-semibold text-primary">
+                        <span className="font-semibold tabular-nums text-primary">
                           {formatQuantity(adjustedQuantity, ing.unit)}
                           {adjustedQuantity && ' '}
                           {ing.unit && `${ing.unit} `}
                         </span>
                         <span className="font-medium">{ing.name}</span>
                         {ing.notes && (
-                          <span className="block text-sm text-muted-foreground italic mt-0.5">
+                          <span className="block text-sm text-muted-foreground mt-0.5">
                             {ing.notes}
                           </span>
                         )}
@@ -1129,8 +1091,8 @@ export default function RecipeDetailPage() {
         {/* Instructions Section */}
         <div className="lg:col-span-2">
           <div className="recipe-instructions bg-card rounded-2xl border border-border p-6 md:p-8 shadow-sm">
-            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-              <ListIcon size={24} />
+            <h2 className="text-xl font-medium text-foreground mb-6 flex items-center gap-2">
+              <List className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               Instructions
             </h2>
 
@@ -1144,14 +1106,14 @@ export default function RecipeDetailPage() {
                       <span className="step-number-print hidden font-bold mr-1">{index + 1}.</span>
                       <button
                         onClick={() => toggleStep(index)}
-                        className={`step-circle w-10 h-10 rounded-full font-bold text-lg flex items-center justify-center transition-all ${
+                        className={`step-circle h-10 w-10 rounded-full font-medium text-lg flex items-center justify-center transition-colors ${
                           isChecked
                             ? 'bg-secondary text-secondary-foreground'
-                            : 'bg-primary text-primary-foreground hover:shadow-lg'
+                            : 'bg-primary text-primary-foreground'
                         }`}
                         aria-label={`Mark step ${index + 1} as ${isChecked ? 'incomplete' : 'complete'}`}
                       >
-                        {isChecked ? '✓' : index + 1}
+                        {isChecked ? <Check className="h-5 w-5" strokeWidth={2} aria-hidden="true" /> : index + 1}
                       </button>
                     </div>
                     <div className="flex-1 pt-1.5">
@@ -1167,19 +1129,19 @@ export default function RecipeDetailPage() {
 
           {/* Additional Info */}
           {(recipe.notes || recipe.sourceUrl) && (
-            <div className="mt-6 bg-accent/10 rounded-2xl border border-accent/20 p-6">
+            <div className="mt-6 bg-muted rounded-2xl border border-border p-6">
               {recipe.notes && (
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <DescriptionIcon size={20} />
+                  <h3 className="text-base font-medium text-foreground mb-2 flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                     Notes
                   </h3>
-                  <p className="text-muted-foreground">{recipe.notes}</p>
+                  <p className="leading-relaxed text-muted-foreground">{recipe.notes}</p>
                 </div>
               )}
               {recipe.sourceUrl && (
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Source</h3>
+                  <h3 className="text-base font-medium text-foreground mb-2">Source</h3>
                   <a
                     href={recipe.sourceUrl}
                     target="_blank"

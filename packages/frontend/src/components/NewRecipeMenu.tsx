@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, PenLine, Link2, Sparkles } from 'lucide-react';
+import { Plus, PenLine, Link2, Wand2 } from 'lucide-react';
 import { useRecipeCreateStore } from '@/store/recipeCreate.store';
 import { useAIStatus, AISetupBadge } from '@/hooks/useAIStatus';
 
@@ -85,8 +85,8 @@ export function NewRecipeMenu({
     },
     {
       label: 'Generate with AI',
-      hint: aiReady || aiLoading ? 'Describe it and let AI draft it' : 'Set up AI to unlock',
-      Icon: Sparkles,
+      hint: aiReady || aiLoading ? 'Describe it and let AI draft it' : 'Set up AI first',
+      Icon: Wand2,
       onSelect: closeAnd(() => void openAIGenerate()),
       needsSetup: !aiReady && !aiLoading,
     },
@@ -112,6 +112,7 @@ export function NewRecipeMenu({
       >
         <Plus
           className={variant === 'nav' ? 'h-5 w-5 shrink-0' : 'h-4 w-4'}
+          strokeWidth={1.5}
           aria-hidden="true"
         />
         {variant === 'nav' ? (
@@ -125,7 +126,7 @@ export function NewRecipeMenu({
         <div
           role="menu"
           aria-label="Add a new recipe"
-          className={`absolute z-50 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-xl ${
+          className={`absolute z-50 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-lg ${
             variant === 'nav' ? 'left-0' : 'right-0'
           }`}
         >
@@ -138,7 +139,7 @@ export function NewRecipeMenu({
               className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent focus:bg-accent focus:outline-none focus:ring-2 focus:ring-primary ${needsSetup ? 'opacity-70' : ''}`}
             >
               <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${needsSetup ? 'bg-warning/15 text-warning' : 'bg-primary/10 text-primary'}`}>
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </span>
               <span>
                 <span className="block text-sm font-medium text-foreground">

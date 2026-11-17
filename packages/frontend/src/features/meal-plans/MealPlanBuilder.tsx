@@ -179,7 +179,7 @@ export default function MealPlanBuilder() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Create Meal Plan</h1>
+          <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Create meal plan</h1>
           <p className="text-muted-foreground mt-1">Add as many recipes as you like to each day</p>
         </div>
         <button
@@ -199,11 +199,11 @@ export default function MealPlanBuilder() {
 
       {/* Meal Plan Info Form */}
       <div className="mb-6 bg-card rounded-lg border border-border p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Meal Plan Details</h2>
+        <h2 className="text-xl font-medium text-foreground mb-4">Meal plan details</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
-              Plan Name <span className="text-destructive">*</span>
+              Plan name <span className="text-destructive">*</span>
             </label>
             <input
               id="name"
@@ -217,7 +217,7 @@ export default function MealPlanBuilder() {
           </div>
           <div>
             <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-1">
-              Start Date
+              Start date
             </label>
             <input
               id="startDate"
@@ -246,7 +246,7 @@ export default function MealPlanBuilder() {
       {/* Days: vertical list, multiple recipes per day */}
       <div className="mb-6 bg-card rounded-lg border border-border p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Days</h2>
+          <h2 className="text-xl font-medium text-foreground">Days</h2>
           <p className="text-xs text-muted-foreground" aria-live="polite">
             {entries.length} {entries.length === 1 ? 'meal' : 'meals'} planned
           </p>
@@ -260,16 +260,16 @@ export default function MealPlanBuilder() {
               <div key={key} className="rounded-lg border border-border bg-background overflow-hidden">
                 <div className="flex items-center justify-between gap-2 bg-muted/40 px-4 py-2.5">
                   <div>
-                    <span className="font-semibold text-foreground">
+                    <span className="font-medium text-foreground">
                       {date.toLocaleDateString('en-US', { weekday: 'long' })}
                     </span>
-                    <span className="ml-2 text-sm text-muted-foreground">
+                    <span className="ml-2 text-sm tabular-nums text-muted-foreground">
                       {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {dayEntries.length > 0 && (
-                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium tabular-nums text-primary">
                         {dayEntries.length} {dayEntries.length === 1 ? 'meal' : 'meals'}
                       </span>
                     )}
@@ -399,18 +399,18 @@ export default function MealPlanBuilder() {
           aria-labelledby="recipe-selector-title"
         >
           <div
-            className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-xl"
+            className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-border">
-              <h3 id="recipe-selector-title" className="text-lg font-semibold text-foreground mb-4">
+              <h3 id="recipe-selector-title" className="text-2xl font-medium leading-tight text-balance tabular-nums text-foreground mb-4">
                 Add recipe — {selectedDateLabel}
               </h3>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search recipes..."
+                placeholder="Search recipes"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 autoFocus
                 aria-label="Search recipes"
@@ -427,7 +427,7 @@ export default function MealPlanBuilder() {
                     <button
                       key={recipe.id}
                       onClick={() => handleAddRecipe(recipe)}
-                      className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background hover:bg-accent hover:border-primary/30 transition-all text-left focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-left focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {recipe.imageUrl && (
                         <img
@@ -443,7 +443,7 @@ export default function MealPlanBuilder() {
                             {recipe.description}
                           </div>
                         )}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                        <div className="flex items-center gap-3 font-mono text-xs tabular-nums text-muted-foreground mt-1">
                           {recipe.prepTime && <span>{recipe.prepTime}m prep</span>}
                           {recipe.cookTime && <span>{recipe.cookTime}m cook</span>}
                           {recipe.difficulty && (
@@ -472,9 +472,9 @@ export default function MealPlanBuilder() {
         <button
           onClick={handleSubmit}
           disabled={loading || !name.trim() || entries.length === 0}
-          className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
-          {loading ? 'Creating...' : 'Create Meal Plan'}
+          {loading ? 'Creating' : 'Create meal plan'}
         </button>
       </div>
     </div>

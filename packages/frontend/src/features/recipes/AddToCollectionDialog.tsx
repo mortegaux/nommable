@@ -89,7 +89,7 @@ export function AddToCollectionDialog({ recipeIds, onClose, onAdded }: AddToColl
     <Dialog
       title={`Add ${recipeIds.length} recipe${recipeIds.length === 1 ? '' : 's'} to collection`}
       onClose={onClose}
-      panelClassName="max-w-md"
+      size="small"
     >
       <div className="p-6 space-y-4">
         {loading ? (
@@ -183,7 +183,7 @@ export function AddToCollectionDialog({ recipeIds, onClose, onAdded }: AddToColl
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-all disabled:opacity-50"
+            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
@@ -191,9 +191,9 @@ export function AddToCollectionDialog({ recipeIds, onClose, onAdded }: AddToColl
             type="button"
             onClick={handleAdd}
             disabled={!canConfirm || saving || loading}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Adding...' : 'Add to collection'}
+            {saving ? 'Adding' : 'Add to collection'}
           </button>
         </div>
       </div>

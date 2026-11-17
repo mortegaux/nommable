@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { preferencesApi } from '@/services/api';
-import { WarningIcon, FavoriteIcon } from '@/components/icons/MaterialIcon';
+import { AlertTriangle, Heart, X } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 
 interface UserPreferences {
   id?: string;
@@ -94,7 +95,7 @@ export default function PreferencesPage() {
       setSaving(true);
       setMessage('');
       await preferencesApi.updatePreferences(preferences);
-      setMessage('Preferences saved successfully!');
+      setMessage('Preferences saved.');
       if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current);
       messageTimeoutRef.current = setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -144,36 +145,34 @@ export default function PreferencesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading preferences...</div>
+        <div className="text-muted-foreground">Loading preferences</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="mx-auto w-full max-w-7xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Family Preferences</h1>
+        <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Family preferences</h1>
         <p className="text-muted-foreground mt-1">
           Customize your cooking experience based on your family's needs and preferences
         </p>
       </div>
 
       {message && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.includes('success')
-              ? 'bg-secondary/10 border border-secondary/20 text-secondary-foreground'
-              : 'bg-destructive/10 border border-destructive/20 text-destructive'
-          }`}
+        <Callout
+          tone={message.includes('saved') ? 'success' : 'error'}
+          role={message.includes('saved') ? undefined : 'alert'}
+          className="mb-6"
         >
           {message}
-        </div>
+        </Callout>
       )}
 
       <div className="space-y-8">
         {/* Dietary Restrictions */}
         <section className="bg-card rounded-xl border border-border p-6">
-          <h2 className="text-xl font-bold text-foreground mb-2">Dietary Restrictions</h2>
+          <h2 className="text-xl font-medium text-foreground mb-2">Dietary restrictions</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Select any dietary restrictions your family follows
           </p>
@@ -184,7 +183,7 @@ export default function PreferencesPage() {
                 <button
                   key={restriction}
                   onClick={() => toggleArrayItem('dietaryRestrictions', restriction)}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full font-medium transition-colors ${
                     isSelected
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'bg-background border border-border text-foreground hover:bg-accent'
@@ -198,10 +197,10 @@ export default function PreferencesPage() {
         </section>
 
         {/* Allergies */}
-        <section className="bg-card rounded-xl border border-destructive/30 p-6">
+        <section className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center gap-2 mb-2">
-            <WarningIcon size={24} className="text-destructive" />
-            <h2 className="text-xl font-bold text-foreground">Food Allergies</h2>
+            <AlertTriangle className="h-6 w-6 text-destructive" strokeWidth={1.5} aria-hidden="true" />
+            <h2 className="text-xl font-medium text-foreground">Food allergies</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
             Select any allergens to receive warnings when they appear in recipes
@@ -213,7 +212,7 @@ export default function PreferencesPage() {
                 <button
                   key={allergen}
                   onClick={() => toggleArrayItem('allergies', allergen)}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full font-medium transition-colors ${
                     isSelected
                       ? 'bg-destructive text-destructive-foreground shadow-sm'
                       : 'bg-background border border-border text-foreground hover:bg-destructive/10'
@@ -228,7 +227,7 @@ export default function PreferencesPage() {
 
         {/* Dislikes */}
         <section className="bg-card rounded-xl border border-border p-6">
-          <h2 className="text-xl font-bold text-foreground mb-2">Disliked Ingredients</h2>
+          <h2 className="text-xl font-medium text-foreground mb-2">Disliked ingredients</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Add ingredients your family doesn't enjoy
           </p>
@@ -248,7 +247,7 @@ export default function PreferencesPage() {
                   setCustomDislikes('');
                 }
               }}
-              placeholder="E.g., mushrooms, cilantro, olives..."
+              placeholder="E.g., mushrooms, cilantro, olives"
               className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
@@ -272,8 +271,9 @@ export default function PreferencesPage() {
                 <button
                   onClick={() => removeCustomItem('dislikes', item)}
                   className="text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label={`Remove ${item}`}
                 >
-                  ×
+                  <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
             ))}
@@ -281,10 +281,10 @@ export default function PreferencesPage() {
         </section>
 
         {/* Favorites */}
-        <section className="bg-card rounded-xl border border-secondary/30 p-6">
+        <section className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center gap-2 mb-2">
-            <FavoriteIcon size={24} className="text-secondary" />
-            <h2 className="text-xl font-bold text-foreground">Favorite Ingredients</h2>
+            <Heart className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+            <h2 className="text-xl font-medium text-foreground">Favorite ingredients</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
             Add ingredients your family loves
@@ -305,7 +305,7 @@ export default function PreferencesPage() {
                   setCustomFavorites('');
                 }
               }}
-              placeholder="E.g., chicken, pasta, chocolate..."
+              placeholder="E.g., chicken, pasta, chocolate"
               className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
@@ -329,8 +329,9 @@ export default function PreferencesPage() {
                 <button
                   onClick={() => removeCustomItem('favorites', item)}
                   className="text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label={`Remove ${item}`}
                 >
-                  ×
+                  <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                 </button>
               </div>
             ))}
@@ -339,7 +340,7 @@ export default function PreferencesPage() {
 
         {/* Preferred Cuisines */}
         <section className="bg-card rounded-xl border border-border p-6">
-          <h2 className="text-xl font-bold text-foreground mb-2">Preferred Cuisines</h2>
+          <h2 className="text-xl font-medium text-foreground mb-2">Preferred cuisines</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Select your favorite types of cuisine
           </p>
@@ -350,7 +351,7 @@ export default function PreferencesPage() {
                 <button
                   key={cuisine}
                   onClick={() => toggleArrayItem('preferredCuisines', cuisine)}
-                  className={`px-4 py-2 rounded-full font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full font-medium transition-colors ${
                     isSelected
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'bg-background border border-border text-foreground hover:bg-accent'
@@ -365,13 +366,13 @@ export default function PreferencesPage() {
 
         {/* Cooking Profile */}
         <section className="bg-card rounded-xl border border-border p-6">
-          <h2 className="text-xl font-bold text-foreground mb-4">Cooking Profile</h2>
+          <h2 className="text-xl font-medium text-foreground mb-4">Cooking profile</h2>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Skill Level */}
             <div>
               <label htmlFor="pref-skill-level" className="block text-sm font-medium text-foreground mb-2">
-                Cooking Skill Level
+                Cooking skill level
               </label>
               <select
                 id="pref-skill-level"
@@ -384,7 +385,7 @@ export default function PreferencesPage() {
                 }
                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">Select...</option>
+                <option value="">Select</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
@@ -394,7 +395,7 @@ export default function PreferencesPage() {
             {/* Max Cooking Time */}
             <div>
               <label htmlFor="pref-max-time" className="block text-sm font-medium text-foreground mb-2">
-                Maximum Cooking Time (minutes)
+                Maximum cooking time (minutes)
               </label>
               <input
                 id="pref-max-time"
@@ -411,10 +412,10 @@ export default function PreferencesPage() {
               />
             </div>
 
-            {/* Household Size */}
+            {/* Household size */}
             <div>
               <label htmlFor="pref-household-size" className="block text-sm font-medium text-foreground mb-2">
-                Household Size
+                Household size
               </label>
               <input
                 id="pref-household-size"
@@ -431,10 +432,10 @@ export default function PreferencesPage() {
               />
             </div>
 
-            {/* Spice Tolerance */}
+            {/* Spice tolerance */}
             <div>
               <label htmlFor="pref-spice-tolerance" className="block text-sm font-medium text-foreground mb-2">
-                Spice Tolerance
+                Spice tolerance
               </label>
               <select
                 id="pref-spice-tolerance"
@@ -447,19 +448,19 @@ export default function PreferencesPage() {
                 }
                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">Select...</option>
-                <option value="none">No Spice</option>
+                <option value="">Select</option>
+                <option value="none">No spice</option>
                 <option value="mild">Mild</option>
                 <option value="medium">Medium</option>
                 <option value="hot">Hot</option>
-                <option value="very-hot">Very Hot</option>
+                <option value="very-hot">Very hot</option>
               </select>
             </div>
 
             {/* Budget Level */}
             <div className="md:col-span-2">
               <label htmlFor="pref-budget-level" className="block text-sm font-medium text-foreground mb-2">
-                Budget Consciousness
+                Budget consciousness
               </label>
               <select
                 id="pref-budget-level"
@@ -472,8 +473,8 @@ export default function PreferencesPage() {
                 }
                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">Select...</option>
-                <option value="budget">Budget-Friendly</option>
+                <option value="">Select</option>
+                <option value="budget">Budget-friendly</option>
                 <option value="moderate">Moderate</option>
                 <option value="splurge">Splurge</option>
               </select>
@@ -486,9 +487,9 @@ export default function PreferencesPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {saving ? 'Saving...' : 'Save Preferences'}
+            {saving ? 'Saving' : 'Save preferences'}
           </button>
         </div>
       </div>

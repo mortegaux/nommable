@@ -26,16 +26,16 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'account' as Tab, label: 'Account', visible: true },
     { id: 'preferences' as Tab, label: 'Preferences', visible: true },
-    { id: 'ai' as Tab, label: 'AI Settings', visible: true },
-    { id: 'users' as Tab, label: 'User Management', visible: isAdmin },
+    { id: 'ai' as Tab, label: 'AI settings', visible: true },
+    { id: 'users' as Tab, label: 'User management', visible: isAdmin },
     { id: 'email' as Tab, label: 'Email / SMTP', visible: isAdmin },
-    { id: 'data' as Tab, label: 'Data Management', visible: isAdmin },
+    { id: 'data' as Tab, label: 'Data management', visible: isAdmin },
     { id: 'system' as Tab, label: 'System', visible: isAdmin },
   ];
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="mx-auto w-full max-w-7xl">
+      <h1 className="text-3xl font-medium leading-tight text-balance mb-6">Settings</h1>
 
       <div className="bg-card border border-border rounded-lg shadow">
         {/* Tabs */}
@@ -47,7 +47,7 @@ export default function SettingsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`px-4 sm:px-6 py-3 text-sm font-medium border-b transition-colors whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-primary text-primary'
                       : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
@@ -64,18 +64,18 @@ export default function SettingsPage() {
           {activeTab === 'account' && <AccountSettings />}
           {activeTab === 'preferences' && <PreferencesPage />}
           {activeTab === 'ai' && (
-            <div className="mx-auto max-w-2xl space-y-10">
+            <div className="space-y-10">
               {isAdmin && (
                 <section>
-                  <h2 className="mb-4 text-xl font-semibold text-foreground">
-                    Instance AI Settings
+                  <h2 className="mb-4 text-xl font-medium text-foreground">
+                    Instance AI settings
                   </h2>
                   <AISettingsPage hideHeader />
                 </section>
               )}
               <section>
-                <h2 className="mb-4 text-xl font-semibold text-foreground">
-                  {isAdmin ? 'Your Personal AI Key' : 'Your AI Key'}
+                <h2 className="mb-4 text-xl font-medium text-foreground">
+                  {isAdmin ? 'Your personal AI key' : 'Your AI key'}
                 </h2>
                 <UserAIKeySettings hideHeader />
               </section>

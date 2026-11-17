@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Clock, UtensilsCrossed } from 'lucide-react';
 import { recipeApi } from '@/services/api';
 import type { Recipe } from '@nommable/shared';
 import { Dialog } from '@/components/Dialog';
@@ -60,9 +61,9 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
 
   return (
     <Dialog
-      title={`Choose a Recipe for ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`}
+      title={`Choose a recipe for ${mealType}`}
       onClose={onClose}
-      panelClassName="max-w-4xl"
+      size="wide"
     >
       <div className="p-6">
           {/* Search */}
@@ -70,7 +71,7 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search recipes..."
+            placeholder="Search recipes"
             aria-label="Search recipes"
             className="w-full rounded-lg border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -84,7 +85,7 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
                   type="button"
                   onClick={() => toggleTag(tag)}
                   aria-pressed={selectedTags.includes(tag)}
-                  className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
                     selectedTags.includes(tag)
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-accent text-accent-foreground hover:bg-accent/80'
@@ -99,7 +100,7 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
         {/* Recipe List */}
         <div className="mt-4">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading recipes...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading recipes</div>
           ) : filteredRecipes.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No recipes found. Try adjusting your search or filters.
@@ -110,26 +111,30 @@ export function RecipeBrowserModal({ onClose, onSelect, mealType }: RecipeBrowse
                 <button
                   key={recipe.id}
                   onClick={() => onSelect(recipe)}
-                  className="text-left bg-accent/10 border border-border rounded-lg p-4 hover:border-primary hover:bg-accent/20 transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="text-left bg-card border border-border rounded-lg p-4 hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <h3 className="font-semibold text-foreground mb-1">{recipe.title}</h3>
+                  <h3 className="font-medium text-foreground mb-1">{recipe.title}</h3>
                   {recipe.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                       {recipe.description}
                     </p>
                   )}
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    {recipe.servings && <span>🍽️ {recipe.servings} servings</span>}
-                    {recipe.cookTime && <span>⏱️ {recipe.cookTime} min</span>}
+                    {recipe.servings && (
+                      <span className="inline-flex items-center gap-1">
+                        <UtensilsCrossed className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
+                        {recipe.servings} servings
+                      </span>
+                    )}
+                    {recipe.cookTime && (
+                      <span className="inline-flex items-center gap-1 font-mono tabular-nums">
+                        <Clock className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
+                        {recipe.cookTime} min
+                      </span>
+                    )}
                     {recipe.difficulty && (
                       <span
-                        className={`px-2 py-0.5 rounded-full ${
-                          recipe.difficulty === 'easy'
-                            ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
-                            : recipe.difficulty === 'medium'
-                            ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'
-                            : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'
-                        }`}
+                        className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground capitalize" 
                       >
                         {recipe.difficulty}
                       </span>

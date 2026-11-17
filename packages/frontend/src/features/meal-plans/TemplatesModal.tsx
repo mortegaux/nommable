@@ -4,6 +4,7 @@ import { mealPlanTemplateApi } from '@/services/api';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { Dialog } from '@/components/Dialog';
+import { Bookmark } from 'lucide-react';
 
 interface Template {
   id: string;
@@ -93,16 +94,16 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
 
   if (loading) {
     return (
-      <Dialog title="Meal Plan Templates" onClose={onClose} panelClassName="max-w-4xl">
+      <Dialog title="Meal plan templates" onClose={onClose} size="wide">
         <div className="p-6 text-center">
-          <div className="text-muted-foreground">Loading templates...</div>
+          <div className="text-muted-foreground">Loading templates</div>
         </div>
       </Dialog>
     );
   }
 
   return (
-    <Dialog title="Meal Plan Templates" onClose={onClose} panelClassName="max-w-4xl">
+    <Dialog title="Meal plan templates" onClose={onClose} size="wide">
       <div className="p-6">
         <p className="text-sm text-muted-foreground mb-4">
           Reusable meal plans you can apply to any date
@@ -118,20 +119,8 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
 
           {templates.length === 0 ? (
             <div className="text-center py-12">
-              <svg
-                className="w-16 h-16 mx-auto text-muted-foreground mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Templates Yet</h3>
+              <Bookmark className="h-16 w-16 mx-auto text-muted-foreground mb-4" strokeWidth={1.5} aria-hidden="true" />
+              <h3 className="text-base font-medium text-foreground mb-2">No templates yet</h3>
               <p className="text-muted-foreground">
                 Save a meal plan as a template to reuse it later.
               </p>
@@ -141,11 +130,11 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
               {templates.map((template) => (
                 <div
                   key={template.id}
-                  className="bg-accent/10 rounded-lg border border-border p-4"
+                  className="bg-muted rounded-lg border border-border p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                      <h3 className="text-base font-medium text-foreground mb-1">
                         {template.name}
                       </h3>
                       {template.description && (
@@ -195,7 +184,7 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
                     <div className="mt-4 pt-4 border-t border-border space-y-3">
                       <div>
                         <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-2">
-                          Start Date
+                          Start date
                         </label>
                         <input
                           id="startDate"
@@ -208,7 +197,7 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
                       </div>
                       <div>
                         <label htmlFor="planName" className="block text-sm font-medium text-foreground mb-2">
-                          Meal Plan Name (Optional)
+                          Meal plan name (optional)
                         </label>
                         <input
                           id="planName"
@@ -231,7 +220,7 @@ export function TemplatesModal({ onClose }: TemplatesModalProps) {
                           disabled={!startDate}
                           className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          Create Meal Plan
+                          Create meal plan
                         </button>
                       </div>
                     </div>

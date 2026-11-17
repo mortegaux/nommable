@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { collectionApi } from '@/services/api';
 import type { RecipeCollection, RecipeCollectionItem } from '@nommable/shared';
-import { RestaurantIcon } from '@/components/icons/MaterialIcon';
+import { ChevronLeft, Clock, Heart, UtensilsCrossed } from 'lucide-react';
 import { useConfirmStore } from '@/store/confirm.store';
 import { useToastStore } from '@/store/toast.store';
 import { AddRecipesDialog } from './AddRecipesDialog';
@@ -128,7 +128,7 @@ export default function CollectionDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading collection...</div>
+        <div className="text-muted-foreground">Loading collection</div>
       </div>
     );
   }
@@ -138,7 +138,7 @@ export default function CollectionDetailPage() {
       <div className="text-center py-16">
         <p className="text-muted-foreground text-lg">Collection not found.</p>
         <Link to="/collections" className="mt-4 inline-block text-primary hover:underline">
-          Back to Collections
+          Back to collections
         </Link>
       </div>
     );
@@ -148,20 +148,14 @@ export default function CollectionDetailPage() {
   const existingRecipeIds = new Set((collection.items ?? []).map((item) => item.recipeId));
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl">
       {/* Header */}
       <div className="mb-6">
         <Link
           to="/collections"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           Collections
         </Link>
 
@@ -171,7 +165,7 @@ export default function CollectionDetailPage() {
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full text-3xl font-bold rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full text-3xl font-medium rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Collection name"
               autoFocus
             />
@@ -186,16 +180,16 @@ export default function CollectionDetailPage() {
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-all"
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? 'Saving' : 'Save'}
               </button>
             </div>
           </form>
@@ -216,7 +210,7 @@ export default function CollectionDetailPage() {
                 {!collection.isFavorites && (
                   <button
                     onClick={handleStartEdit}
-                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-all"
+                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                   >
                     Edit
                   </button>
@@ -224,9 +218,9 @@ export default function CollectionDetailPage() {
                 {!collection.isFavorites && (
                   <button
                     onClick={handleDelete}
-                    className="rounded-lg border border-destructive/30 bg-background px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+                    className="rounded-lg border border-destructive/30 bg-background px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                   >
-                    Delete Collection
+                    Delete collection
                   </button>
                 )}
               </>
@@ -234,17 +228,15 @@ export default function CollectionDetailPage() {
             primaryAction={
               <button
                 onClick={() => setShowAddRecipes(true)}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Add Recipes
+                Add recipes
               </button>
             }
           />
           {collection.isFavorites && (
             <p className="mb-4 text-sm text-muted-foreground">
-              <span className="text-red-500 text-base" aria-hidden="true">
-                &#10084;{' '}
-              </span>
+              <Heart className="inline h-4 w-4 fill-primary text-primary align-[-2px]" strokeWidth={1.5} aria-hidden="true" />{' '}
               Favorites collection
             </p>
           )}
@@ -260,7 +252,7 @@ export default function CollectionDetailPage() {
             <button
               type="button"
               onClick={() => setShowAddRecipes(true)}
-              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Add recipes
             </button>
@@ -276,7 +268,7 @@ export default function CollectionDetailPage() {
             return (
               <div
                 key={item.id}
-                className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-lg hover:border-primary/30"
+                className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/30"
               >
                 <Link
                   to={`/recipes/${recipe.id}`}
@@ -290,25 +282,18 @@ export default function CollectionDetailPage() {
                         <img
                           src={recipe.imageUrl}
                           alt={recipe.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <RestaurantIcon size={64} className="text-muted-foreground" />
+                        <UtensilsCrossed className="h-16 w-16 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </div>
                     )}
                     {totalTime > 0 && (
-                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium font-mono tabular-nums flex items-center gap-1">
+                        <Clock className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                         {totalTime}m
                       </div>
                     )}
@@ -316,7 +301,7 @@ export default function CollectionDetailPage() {
 
                   {/* Card content */}
                   <div className="p-4">
-                    <h3 className="text-xl font-bold text-foreground mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+                    <h3 className="text-base font-medium text-foreground mb-1 line-clamp-2 group-hover:text-primary transition-colors">
                       {recipe.title}
                     </h3>
                     {recipe.description && (
@@ -329,7 +314,7 @@ export default function CollectionDetailPage() {
                 <div className="px-4 pb-4">
                   <button
                     onClick={() => handleRemoveRecipe(recipe.id)}
-                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
+                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
                   >
                     Remove from collection
                   </button>
@@ -340,7 +325,7 @@ export default function CollectionDetailPage() {
         </div>
       )}
 
-      {/* Add Recipes Dialog */}
+      {/* Add recipes Dialog */}
       {showAddRecipes && (
         <AddRecipesDialog
           collectionId={collection.id}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { batchCookingApi } from '@/services/api';
-import { AcUnitIcon, StorageIcon, RestaurantIcon, CalendarIcon } from '@/components/icons/MaterialIcon';
+import { Calendar, Package, Pencil, Refrigerator, Snowflake, Trash2, UtensilsCrossed } from 'lucide-react';
 import { CreateBatchPlanModal } from './CreateBatchPlanModal';
 import { CreateBatchSessionModal } from './CreateBatchSessionModal';
 import { EditBatchPlanModal } from './EditBatchPlanModal';
@@ -51,15 +51,15 @@ interface BatchCookingPlan {
 }
 
 const STORAGE_ICONS = {
-  refrigerate: AcUnitIcon,
-  freeze: AcUnitIcon,
-  pantry: StorageIcon,
+  refrigerate: Refrigerator,
+  freeze: Snowflake,
+  pantry: Package,
 };
 
 const STATUS_COLORS = {
-  planned: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700',
-  'in-progress': 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700',
-  completed: 'bg-secondary/10 text-secondary-foreground border-secondary/20',
+  planned: 'bg-muted text-muted-foreground border-border',
+  'in-progress': 'bg-muted text-muted-foreground border-border',
+  completed: 'bg-muted text-muted-foreground border-border',
 };
 
 export default function BatchCookingPage() {
@@ -229,31 +229,31 @@ export default function BatchCookingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading batch cooking plans...</div>
+        <div className="text-muted-foreground">Loading batch cooking plans</div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl">
       <SectionTabs
         label="Meal plans sections"
         tabs={[
-          { path: '/meal-plans', label: 'Meal Plans' },
-          { path: '/batch-cooking', label: 'Batch Cooking' },
+          { path: '/meal-plans', label: 'Meal plans' },
+          { path: '/batch-cooking', label: 'Batch cooking' },
         ]}
       />
       {/* Header — matches Recipes / Meal Plans / Shopping Lists */}
       <PageHeader
-        title="Batch Cooking & Meal Prep"
+        title="Batch cooking & meal prep"
         subtitle={`${plans.length} batch cook${plans.length === 1 ? '' : 's'} — Cook once, eat multiple times`}
         primaryAction={
           <button
             onClick={() => setShowSessionModal(true)}
-            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             aria-label="Create a batch cook"
           >
-            Create a Batch Cook
+            Create a batch cook
           </button>
         }
       />
@@ -263,17 +263,17 @@ export default function BatchCookingPage() {
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('plans')}
-            className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+            className={`px-4 py-2 font-medium tabular-nums transition-colors border-b ${
               activeTab === 'plans'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            My Plans ({plans.length})
+            My plans ({plans.length})
           </button>
           <button
             onClick={() => setActiveTab('suggestions')}
-            className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+            className={`px-4 py-2 font-medium tabular-nums transition-colors border-b ${
               activeTab === 'suggestions'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -283,7 +283,7 @@ export default function BatchCookingPage() {
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+            className={`px-4 py-2 font-medium tabular-nums transition-colors border-b ${
               activeTab === 'analytics'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -300,7 +300,7 @@ export default function BatchCookingPage() {
 
           {/* Bulk Actions Bar */}
           {plans.length > 0 && (
-            <div className="flex items-center justify-between p-4 bg-accent/10 rounded-lg border border-border">
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => {
@@ -313,11 +313,11 @@ export default function BatchCookingPage() {
                       : 'bg-background text-foreground border border-border hover:bg-accent'
                   }`}
                 >
-                  {bulkActionMode ? 'Cancel Bulk Mode' : 'Bulk Actions'}
+                  {bulkActionMode ? 'Cancel bulk mode' : 'Bulk actions'}
                 </button>
                 {bulkActionMode && selectedPlans.size > 0 && (
                   <span className="text-sm text-muted-foreground">
-                    {selectedPlans.size} plan(s) selected
+                    {selectedPlans.size} plan{selectedPlans.size !== 1 ? 's' : ''} selected
                   </span>
                 )}
               </div>
@@ -327,7 +327,7 @@ export default function BatchCookingPage() {
                     onClick={handleBulkMarkComplete}
                     className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors"
                   >
-                    Mark Complete
+                    Mark complete
                   </button>
                   <button
                     onClick={handleBulkDelete}
@@ -345,14 +345,14 @@ export default function BatchCookingPage() {
             <div className="text-center py-12">
               <p className="text-muted-foreground">No batch cooking plans yet.</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Check out the suggestions tab for recipes perfect for batch cooking!
+                Check out the suggestions tab for recipes perfect for batch cooking.
               </p>
               <button
                 type="button"
                 onClick={() => setActiveTab('suggestions')}
                 className="mt-4 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               >
-                View Suggestions
+                View suggestions
               </button>
             </div>
           ) : (
@@ -375,7 +375,7 @@ export default function BatchCookingPage() {
                       )}
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+                          <h3 className="text-base font-medium text-foreground">{plan.name}</h3>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium border ${
                               STATUS_COLORS[plan.status]
@@ -395,51 +395,48 @@ export default function BatchCookingPage() {
                         className="text-muted-foreground hover:text-primary transition-colors p-2"
                         title="Edit plan"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <Pencil className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => handleDeletePlan(plan.id)}
                         className="text-muted-foreground hover:text-destructive transition-colors p-2"
                         title="Delete plan"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Trash2 className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                       </button>
                     </div>
                   </div>
 
                   {/* Plan Details */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center p-3 rounded-lg bg-accent/10">
-                      <div className="text-2xl font-bold text-primary">{plan.batches}</div>
+                    <div className="text-center p-3 rounded-lg bg-muted">
+                      <div className="text-2xl font-medium tabular-nums text-foreground">{plan.batches}</div>
                       <div className="text-xs text-muted-foreground">Batches</div>
                     </div>
-                    <div className="text-center p-3 rounded-lg bg-accent/10">
-                      <div className="text-2xl font-bold text-primary">{plan.servingsPerBatch}</div>
-                      <div className="text-xs text-muted-foreground">Servings Each</div>
+                    <div className="text-center p-3 rounded-lg bg-muted">
+                      <div className="text-2xl font-medium tabular-nums text-foreground">{plan.servingsPerBatch}</div>
+                      <div className="text-xs text-muted-foreground">Servings each</div>
                     </div>
-                    <div className="text-center p-3 rounded-lg bg-accent/10">
+                    <div className="text-center p-3 rounded-lg bg-muted">
                       <div className="flex justify-center mb-1">
                         {(() => {
                           const IconComponent = STORAGE_ICONS[plan.storageMethod];
-                          return <IconComponent size={24} className="text-primary" />;
+                          return <IconComponent className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />;
                         })()}
                       </div>
                       <div className="text-xs text-muted-foreground capitalize">{plan.storageMethod}</div>
                     </div>
-                    <div className="text-center p-3 rounded-lg bg-accent/10">
-                      <div className="text-2xl font-bold text-primary">{plan.storageDuration}</div>
-                      <div className="text-xs text-muted-foreground">Days Storage</div>
+                    <div className="text-center p-3 rounded-lg bg-muted">
+                      <div className="text-2xl font-medium tabular-nums text-foreground">{plan.storageDuration}</div>
+                      <div className="text-xs text-muted-foreground">Days storage</div>
                     </div>
                   </div>
 
                   {/* Cooking Date */}
-                  <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <span className="text-sm font-medium text-foreground">
-                      <CalendarIcon size={14} className="inline" /> Cooking Date: {formatDate(plan.cookingDate)}
+                  <div className="mb-4 p-3 rounded-lg bg-muted border border-border">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                      Cooking date: <span className="font-mono tabular-nums">{formatDate(plan.cookingDate)}</span>
                     </span>
                   </div>
 
@@ -456,7 +453,7 @@ export default function BatchCookingPage() {
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                        <RestaurantIcon size={32} className="text-muted-foreground" />
+                        <UtensilsCrossed className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </div>
                     )}
                     <div>
@@ -476,7 +473,7 @@ export default function BatchCookingPage() {
                         onClick={() => handleStatusUpdate(plan.id, 'in-progress')}
                         className="flex-1 py-2 px-4 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
                       >
-                        Start Cooking
+                        Start cooking
                       </button>
                     )}
                     {plan.status === 'in-progress' && (
@@ -484,21 +481,21 @@ export default function BatchCookingPage() {
                         onClick={() => handleStatusUpdate(plan.id, 'completed')}
                         className="flex-1 py-2 px-4 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors"
                       >
-                        Mark Complete
+                        Mark complete
                       </button>
                     )}
                     <button
                       onClick={() => handleCreateShoppingList(plan.id)}
-                      className="px-4 py-2 rounded-lg bg-accent text-accent-foreground font-medium hover:bg-accent/80 transition-colors"
+                      className="px-4 py-2 rounded-lg border border-border bg-background font-medium text-foreground hover:bg-accent transition-colors"
                       title="Create shopping list from this plan"
                     >
-                      Shopping List
+                      Shopping list
                     </button>
                     <button
                       onClick={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
                       className="px-4 py-2 rounded-lg border border-border hover:bg-accent transition-colors"
                     >
-                      {expandedPlan === plan.id ? 'Hide Details' : 'Show Details'}
+                      {expandedPlan === plan.id ? 'Hide details' : 'Show details'}
                     </button>
                   </div>
 
@@ -508,7 +505,7 @@ export default function BatchCookingPage() {
                       {/* Prep Checklist */}
                       {plan.prepChecklist && plan.prepChecklist.length > 0 && (
                         <div>
-                          <h4 className="font-semibold text-foreground mb-2">Prep Checklist</h4>
+                          <h4 className="font-medium text-foreground mb-2">Prep checklist</h4>
                           <div className="space-y-2">
                             {plan.prepChecklist.map((item, index) => (
                               <label
@@ -539,8 +536,8 @@ export default function BatchCookingPage() {
                       {/* Reheating Instructions */}
                       {plan.reheatingInstructions && (
                         <div>
-                          <h4 className="font-semibold text-foreground mb-2">Reheating Instructions</h4>
-                          <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
+                          <h4 className="font-medium text-foreground mb-2">Reheating instructions</h4>
+                          <div className="p-4 rounded-lg bg-muted border border-border">
                             <pre className="text-sm text-foreground whitespace-pre-wrap font-sans">
                               {plan.reheatingInstructions}
                             </pre>
@@ -551,8 +548,8 @@ export default function BatchCookingPage() {
                       {/* Prep Notes */}
                       {plan.prepNotes && (
                         <div>
-                          <h4 className="font-semibold text-foreground mb-2">Prep Notes</h4>
-                          <div className="p-4 rounded-lg bg-secondary/5 border border-secondary/20">
+                          <h4 className="font-medium text-foreground mb-2">Prep notes</h4>
+                          <div className="p-4 rounded-lg bg-muted border border-border">
                             <p className="text-sm text-foreground">{plan.prepNotes}</p>
                           </div>
                         </div>
@@ -573,14 +570,14 @@ export default function BatchCookingPage() {
             <div className="text-center py-12">
               <p className="text-muted-foreground">No batch cooking suggestions available.</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Add more recipes with tags like "Freezer-Friendly" or "One-Pot" to get suggestions!
+                Add more recipes with tags like "Freezer-Friendly" or "One-Pot" to get suggestions.
               </p>
             </div>
           ) : (
             suggestions.map((suggestion) => (
               <div
                 key={suggestion.recipe.id}
-                className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow"
+                className="bg-card rounded-xl border border-border p-6 transition-colors"
               >
                 <div className="flex items-start gap-4">
                   {/* Recipe Image */}
@@ -592,7 +589,7 @@ export default function BatchCookingPage() {
                     />
                   ) : (
                     <div className="w-32 h-32 rounded-lg bg-muted flex items-center justify-center">
-                      <RestaurantIcon size={48} className="text-muted-foreground" />
+                      <UtensilsCrossed className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                     </div>
                   )}
 
@@ -602,7 +599,7 @@ export default function BatchCookingPage() {
                       <div>
                         <Link
                           to={`/recipes/${suggestion.recipe.id}`}
-                          className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+                          className="text-base font-medium text-foreground hover:text-primary transition-colors"
                         >
                           {suggestion.recipe.title}
                         </Link>
@@ -613,22 +610,22 @@ export default function BatchCookingPage() {
                         )}
                       </div>
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-primary">
+                        <div className="text-3xl font-medium tabular-nums text-foreground">
                           {suggestion.batchFriendlyScore}
                         </div>
-                        <div className="text-xs text-muted-foreground">Batch Score</div>
+                        <div className="text-xs text-muted-foreground">Batch score</div>
                       </div>
                     </div>
 
                     {/* Reasons */}
                     <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-foreground mb-2">
+                      <h4 className="text-sm font-medium text-foreground mb-2">
                         Why this is great for batch cooking:
                       </h4>
                       <ul className="space-y-1">
                         {suggestion.reasons.map((reason, index) => (
                           <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                            <span className="text-primary">•</span>
+                            <span className="text-muted-foreground">•</span>
                             <span>{reason}</span>
                           </li>
                         ))}
@@ -637,24 +634,24 @@ export default function BatchCookingPage() {
 
                     {/* Recommendations */}
                     <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="text-center p-2 rounded-lg bg-accent/10">
-                        <div className="text-xl font-bold text-primary">{suggestion.suggestedBatches}</div>
-                        <div className="text-xs text-muted-foreground">Suggested Batches</div>
+                      <div className="text-center p-2 rounded-lg bg-muted">
+                        <div className="text-xl font-medium tabular-nums text-foreground">{suggestion.suggestedBatches}</div>
+                        <div className="text-xs text-muted-foreground">Suggested batches</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-accent/10">
+                      <div className="text-center p-2 rounded-lg bg-muted">
                         <div className="flex justify-center mb-1">
                           {(() => {
                             const IconComponent = STORAGE_ICONS[suggestion.storageRecommendation];
-                            return <IconComponent size={20} className="text-primary" />;
+                            return <IconComponent className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />;
                           })()}
                         </div>
                         <div className="text-xs text-muted-foreground capitalize">
                           {suggestion.storageRecommendation}
                         </div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-accent/10">
-                        <div className="text-xl font-bold text-primary">{suggestion.storageDuration}</div>
-                        <div className="text-xs text-muted-foreground">Days Storage</div>
+                      <div className="text-center p-2 rounded-lg bg-muted">
+                        <div className="text-xl font-medium tabular-nums text-foreground">{suggestion.storageDuration}</div>
+                        <div className="text-xs text-muted-foreground">Days storage</div>
                       </div>
                     </div>
 
@@ -663,7 +660,7 @@ export default function BatchCookingPage() {
                       onClick={() => handleCreateFromSuggestion(suggestion)}
                       className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
                     >
-                      Create Batch Cooking Plan
+                      Create batch cooking plan
                     </button>
                   </div>
                 </div>

@@ -86,7 +86,7 @@ export function FeedbackWidget() {
         onClick={() => setOpen(true)}
         title="Report a bug or request a feature"
         aria-label="Report a bug or request a feature"
-        className="fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition-colors hover:text-foreground hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        className="fixed bottom-4 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <Bug className="h-5 w-5" aria-hidden="true" />
       </button>
@@ -95,7 +95,7 @@ export function FeedbackWidget() {
         <Dialog
           title="Report a bug / Request a feature"
           onClose={handleClose}
-          panelClassName="max-w-md"
+          size="small"
         >
           <form onSubmit={handleSubmit} className="space-y-4 p-6">
             {/* Type selector */}
@@ -186,9 +186,9 @@ export function FeedbackWidget() {
               <button
                 type="submit"
                 disabled={submitting || !summary.trim()}
-                className="rounded-lg bg-primary px-6 py-2 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {submitting ? 'Sending…' : 'Send feedback'}
+                {submitting ? 'Sending' : 'Send feedback'}
               </button>
             </div>
           </form>

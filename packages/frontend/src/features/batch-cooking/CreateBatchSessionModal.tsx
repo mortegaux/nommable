@@ -4,8 +4,7 @@ import { PortionCalculator } from './PortionCalculator';
 import type { Recipe } from '@nommable/shared';
 import { useToastStore } from '@/store/toast.store';
 import { Dialog } from '@/components/Dialog';
-import { RestaurantIcon } from '@/components/icons/MaterialIcon';
-import { Check, Search, Tag, ChevronLeft, ChevronRight, X, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Package, Refrigerator, Search, Snowflake, Tag, UtensilsCrossed, X } from 'lucide-react';
 import { todayLocalDateKey, parseLocalDate, isTodayOrFuture } from './batchCookingDates';
 
 interface CreateBatchSessionModalProps {
@@ -237,14 +236,14 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
         type="button"
         onClick={() => toggleSelect(recipe)}
         aria-pressed={isSelected}
-        className={`text-left w-full flex items-center gap-3 border rounded-lg p-3 transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
+        className={`text-left w-full flex items-center gap-3 border rounded-lg p-3 transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${
           isSelected
             ? 'border-primary bg-primary/5'
-            : 'border-border bg-accent/5 hover:border-primary/50 hover:bg-accent/10'
+            : 'border-border bg-muted hover:border-primary/50 hover:bg-accent'
         }`}
       >
         <span
-          className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+          className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
             isSelected ? 'bg-primary border-primary' : 'border-border bg-background'
           }`}
         >
@@ -258,7 +257,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
           />
         ) : (
           <span className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-            <RestaurantIcon size={24} className="text-muted-foreground" />
+            <UtensilsCrossed className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           </span>
         )}
         <span className="flex-1 min-w-0">
@@ -278,7 +277,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
   };
 
   return (
-    <Dialog title="New Batch Cook" onClose={onClose} panelClassName="max-w-3xl">
+    <Dialog title="New batch cook" onClose={onClose}>
       <div className="p-6">
         {/* Step indicator */}
         <div className="flex items-center gap-2 mb-6" aria-label="Session setup progress">
@@ -286,7 +285,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
             <div key={s.id} className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <span
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold ${
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium tabular-nums ${
                     i < stepIndex
                       ? 'bg-primary text-primary-foreground'
                       : i === stepIndex
@@ -316,9 +315,9 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
             <div className="space-y-4">
               {/* Tag bootstrapping: one-time setup when nothing is tagged */}
               {!loading && taggedCount === 0 && (
-                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 dark:bg-amber-950/30 dark:border-amber-800">
+                <div className="p-4 rounded-lg bg-muted border border-border">
                   <div className="flex items-start gap-3">
-                    <Tag className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <Tag className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
                     <div className="flex-1">
                       <p className="font-medium text-foreground">
                         No recipes tagged for batch cooking yet — select recipes to tag
@@ -334,7 +333,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                         className="mt-3 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                       >
                         {tagging
-                          ? 'Applying tag...'
+                          ? 'Applying tag'
                           : selected.size === 0
                           ? `Apply "${BOOTSTRAP_TAG}" tag`
                           : `Apply "${BOOTSTRAP_TAG}" tag to ${selected.size} selected`}
@@ -346,9 +345,8 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
 
               {/* Tag suggestions as a secondary aid */}
               {!loading && taggedCount > 0 && suggestions.length > 0 && (
-                <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="p-4 rounded-lg bg-muted border border-border">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
                     <p className="text-sm font-medium text-foreground">
                       Suggested for batch cooking ({suggestions.length})
                     </p>
@@ -363,7 +361,6 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                         className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-background border border-border hover:border-primary disabled:opacity-50 disabled:cursor-default"
                         title={suggestion.reasons.slice(0, 2).join(' · ')}
                       >
-                        {selected.has(suggestion.recipe.id) ? '✓ ' : '+ '}
                         {suggestion.recipe.title}
                       </button>
                     ))}
@@ -378,7 +375,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search recipes..."
+                  placeholder="Search recipes"
                   aria-label="Search recipes"
                   className="w-full rounded-lg border border-input bg-background pl-9 pr-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -393,7 +390,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
 
               {/* Recipe list */}
               {loading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading recipes...</div>
+                <div className="text-center py-8 text-muted-foreground">Loading recipes</div>
               ) : filteredRecipes.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No recipes found. Try adjusting your search.
@@ -410,7 +407,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Session Name *
+                    Session name *
                   </label>
                   <input
                     type="text"
@@ -427,7 +424,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Cooking Date *
+                    Cooking date *
                   </label>
                   <input
                     type="date"
@@ -447,7 +444,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
               {/* Storage method */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Storage Method
+                  Storage method
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {(['refrigerate', 'freeze', 'pantry'] as const).map((method) => (
@@ -456,14 +453,20 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                       type="button"
                       onClick={() => setStorageMethod(method)}
                       aria-pressed={storageMethod === method}
-                      className={`p-3 rounded-lg border-2 transition-all ${
+                      className={`p-3 rounded-lg border transition-colors ${
                         storageMethod === method
                           ? 'border-primary bg-primary/10'
                           : 'border-border hover:border-primary/50'
                       }`}
                     >
-                      <div className="text-xl mb-1">
-                        {method === 'refrigerate' ? '❄️' : method === 'freeze' ? '🧊' : '📦'}
+                      <div className="flex justify-center mb-1">
+                        {method === 'refrigerate' ? (
+                          <Refrigerator className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        ) : method === 'freeze' ? (
+                          <Snowflake className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        ) : (
+                          <Package className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        )}
                       </div>
                       <div className="text-sm font-medium capitalize">{STORAGE_LABELS[method]}</div>
                     </button>
@@ -482,7 +485,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                     onClick={() => setStep('pick')}
                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
                   >
-                    Pick Recipes
+                    Pick recipes
                   </button>
                 </div>
               ) : (
@@ -498,10 +501,10 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                           />
                         ) : (
                           <span className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                            <RestaurantIcon size={20} className="text-muted-foreground" />
+                            <UtensilsCrossed className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                           </span>
                         )}
-                        <h4 className="font-semibold text-foreground">{recipe.title}</h4>
+                        <h4 className="font-medium text-foreground">{recipe.title}</h4>
                       </div>
                       <button
                         type="button"
@@ -529,14 +532,14 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
           {/* STEP 3: SAVE / CONFIRM */}
           {step === 'save' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-accent/10 border border-border space-y-2">
+              <div className="p-4 rounded-lg bg-muted border border-border space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Session</span>
                   <span className="font-medium text-foreground">{sessionName.trim()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Cooking date</span>
-                  <span className="font-medium text-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
                     {parseLocalDate(cookingDate).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -570,7 +573,7 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                       />
                     ) : (
                       <span className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                        <RestaurantIcon size={24} className="text-muted-foreground" />
+                        <UtensilsCrossed className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </span>
                     )}
                     <div className="flex-1 min-w-0">
@@ -632,10 +635,10 @@ export function CreateBatchSessionModal({ onClose, onSuccess }: CreateBatchSessi
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {saving
-                  ? 'Creating...'
+                  ? 'Creating'
                   : selectedRecipes.length > 1
-                  ? `Create ${selectedRecipes.length} Plans`
-                  : 'Create Plan'}
+                  ? `Create ${selectedRecipes.length} plans`
+                  : 'Create plan'}
               </button>
             )}
           </div>

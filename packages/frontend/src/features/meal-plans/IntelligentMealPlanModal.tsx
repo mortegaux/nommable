@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
+import { Apple, Moon, Sun, Sunrise } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
 import type { MealSelection } from '@nommable/shared';
 import { useToastStore } from '@/store/toast.store';
@@ -33,10 +33,10 @@ const CUISINE_OPTIONS = [
 ];
 
 const MEAL_TYPES = [
-  { value: 'breakfast', label: 'Breakfast', icon: '🌅' },
-  { value: 'lunch', label: 'Lunch', icon: '☀️' },
-  { value: 'dinner', label: 'Dinner', icon: '🌙' },
-  { value: 'snack', label: 'Snack', icon: '🍎' },
+  { value: 'breakfast', label: 'Breakfast', Icon: Sunrise },
+  { value: 'lunch', label: 'Lunch', Icon: Sun },
+  { value: 'dinner', label: 'Dinner', Icon: Moon },
+  { value: 'snack', label: 'Snack', Icon: Apple },
 ];
 
 export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMealPlanModalProps) {
@@ -142,10 +142,10 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
   );
 
   return (
-    <Dialog title="Intelligent Meal Plan Generator" onClose={onClose} panelClassName="max-w-4xl">
+    <Dialog title="Smart generate" onClose={onClose} size="wide">
       <div className="p-6">
         <p className="text-sm text-muted-foreground mb-4">
-          Select days and meals - we'll use recipes you have and ingredients on hand
+          Select days and meals. We will use recipes you have and ingredients on hand.
         </p>
 
         {/* Content */}
@@ -153,7 +153,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
           {/* Day Selection */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
-              Select Days <span className="text-destructive">*</span>
+              Select days <span className="text-destructive">*</span>
             </label>
             <div className="grid grid-cols-7 gap-2">
               {availableDates.map((date) => (
@@ -161,7 +161,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
                   key={date}
                   type="button"
                   onClick={() => toggleDate(date)}
-                  className={`p-2 rounded-lg text-xs font-medium transition-all border ${
+                  className={`p-2 rounded-lg text-xs font-medium tabular-nums transition-colors border ${
                     selectedDates.includes(date)
                       ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                       : 'bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
@@ -177,12 +177,12 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
           {selectedDates.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-foreground mb-3">
-                Select Meal Types for Each Day <span className="text-destructive">*</span>
+                Select meal types for each day <span className="text-destructive">*</span>
               </label>
               <div className="space-y-3">
                 {selectedDates.map((date) => (
-                  <div key={date} className="bg-accent/10 rounded-lg p-4">
-                    <div className="text-sm font-medium text-foreground mb-2">
+                  <div key={date} className="bg-muted rounded-lg p-4">
+                    <div className="text-sm font-medium tabular-nums text-foreground mb-2">
                       {formatDate(date)}
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -191,13 +191,13 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
                           key={mealType.value}
                           type="button"
                           onClick={() => toggleMealType(date, mealType.value)}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
                             mealTypesByDate[date]?.includes(mealType.value)
                               ? 'bg-secondary text-secondary-foreground shadow-sm'
                               : 'bg-background border border-border text-muted-foreground hover:border-secondary/50 hover:text-foreground'
                           }`}
                         >
-                          <span>{mealType.icon}</span>
+                          <mealType.Icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                           {mealType.label}
                         </button>
                       ))}
@@ -205,7 +205,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-sm text-muted-foreground">
+              <div className="mt-2 text-sm tabular-nums text-muted-foreground">
                 Total meals: {totalMeals}
               </div>
             </div>
@@ -213,7 +213,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
 
           {/* Preferences */}
           <div className="border-t border-border pt-6">
-            <h3 className="text-sm font-medium text-foreground mb-3">Preferences (Optional)</h3>
+            <h3 className="text-sm font-medium text-foreground mb-3">Preferences (optional)</h3>
 
             {/* Dietary Requirements */}
             <div className="mb-4">
@@ -226,7 +226,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
                     key={option}
                     type="button"
                     onClick={() => toggleDietary(option)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       dietary.includes(option)
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'bg-background border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
@@ -249,7 +249,7 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
                     key={option}
                     type="button"
                     onClick={() => toggleCuisine(option)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       cuisines.includes(option)
                         ? 'bg-secondary text-secondary-foreground shadow-sm'
                         : 'bg-background border border-border text-muted-foreground hover:border-secondary/50 hover:text-foreground'
@@ -320,10 +320,9 @@ export function IntelligentMealPlanModal({ onClose, onGenerate }: IntelligentMea
           <button
             onClick={handleGenerate}
             disabled={totalMeals === 0}
-            className="px-6 py-2 rounded-lg border border-border bg-background font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            <AutoAwesomeIcon size={18} />
-            Generate Plan ({totalMeals} meals)
+            Generate plan ({totalMeals} meal{totalMeals !== 1 ? 's' : ''})
           </button>
         </div>
       </div>

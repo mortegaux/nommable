@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
 import { mealPlanApi } from '@/services/api';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
+import { Loader2 } from 'lucide-react';
 import { Dialog } from '@/components/Dialog';
 import { Callout } from '@/components/Callout';
 import type { AIMealPlanRequest } from '@nommable/shared';
@@ -110,7 +110,7 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
   };
 
   return (
-    <Dialog title="Generate Meal Plan with AI" onClose={onClose} panelClassName="max-w-2xl">
+    <Dialog title="Generate meal plan with AI" onClose={onClose}>
       <div className="p-6">
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -167,7 +167,7 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
                   key={option}
                   type="button"
                   onClick={() => toggleDietary(option)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     dietary.includes(option)
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'bg-background border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
@@ -190,7 +190,7 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
                   key={option}
                   type="button"
                   onClick={() => toggleCuisine(option)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     cuisines.includes(option)
                       ? 'bg-secondary text-secondary-foreground shadow-sm'
                       : 'bg-background border border-border text-muted-foreground hover:border-secondary/50 hover:text-foreground'
@@ -251,20 +251,16 @@ export function AIMealPlanGenerateModal({ onClose }: AIMealPlanGenerateModalProp
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-6 py-2 rounded-lg border border-border bg-background font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
+                <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+                Generating
               </>
             ) : (
               <>
-                <AutoAwesomeIcon size={18} />
-                Generate Meal Plan
+                Generate meal plan
               </>
             )}
           </button>

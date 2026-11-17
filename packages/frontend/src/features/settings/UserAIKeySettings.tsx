@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Check, Key, X } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 import { aiApi } from '@/services/api';
 import { invalidateAIStatus } from '@/hooks/useAIStatus';
 import type { AIProvider, UserAIKeyConfig, AIMode } from '@nommable/shared';
@@ -126,19 +128,19 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading your AI key settings...</div>
+        <div className="text-muted-foreground">Loading your AI key settings</div>
       </div>
     );
   }
 
   return (
-    <div className={hideHeader ? '' : 'mx-auto max-w-2xl'}>
-      {!hideHeader && <h1 className="mb-6 text-3xl font-bold text-foreground">Your AI key</h1>}
+    <div className={hideHeader ? '' : 'mx-auto max-w-7xl'}>
+      {!hideHeader && <h1 className="mb-6 text-3xl font-medium leading-tight text-balance text-foreground">Your AI key</h1>}
 
       {mode === 'shared' ? (
         <div className="rounded-lg bg-card border border-border p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">🔑</span>
+            <Key className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
             <div>
               <p className="font-medium text-foreground">Using the instance shared key</p>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -166,57 +168,56 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
           )}
 
           {/* Status line */}
-          <div
-            className={`mb-6 rounded p-3 border ${
-              hasKey
-                ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
-                : 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800'
-            }`}
+          <Callout
+            tone={hasKey ? 'success' : 'warning'}
+            icon={hasKey ? <Check className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" /> : undefined}
+            className="mb-6"
           >
             {hasKey ? (
               <span>
-                ✓ Using your own {PROVIDER_LABELS[provider] ?? provider} key
+                Using your own {PROVIDER_LABELS[provider] ?? provider} key
                 {maskedKey ? ` (${maskedKey})` : ''}
               </span>
             ) : (
               <span>Add your API key below to enable AI features.</span>
             )}
-          </div>
+          </Callout>
 
           {message && (
-            <div
-              className={`mb-4 rounded p-3 ${
+            <Callout
+              tone={
                 message.toLowerCase().includes('success') || message.toLowerCase().includes('saved') || message.toLowerCase().includes('removed')
-                  ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                  : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-              }`}
+                  ? 'success'
+                  : 'error'
+              }
+              className="mb-4"
             >
               {message}
-            </div>
+            </Callout>
           )}
 
           {testResult && (
-            <div
-              className={`mb-4 rounded p-3 ${
-                testResult.success
-                  ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                  : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-              }`}
+            <Callout
+              tone={testResult.success ? 'success' : 'error'}
+              role={testResult.success ? undefined : 'alert'}
+              title={testResult.success ? 'Connection successful' : 'Connection failed'}
+              icon={
+                testResult.success ? (
+                  <Check className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                ) : (
+                  <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                )
+              }
+              className="mb-4"
             >
-              <div className="flex items-start gap-2">
-                <span className="text-lg">{testResult.success ? '✓' : '✗'}</span>
-                <div>
-                  <strong>{testResult.success ? 'Connection Successful!' : 'Connection Failed'}</strong>
-                  <p className="mt-1 text-sm">{testResult.message}</p>
-                </div>
-              </div>
-            </div>
+              {testResult.message}
+            </Callout>
           )}
 
           <form onSubmit={handleSave} className="space-y-6">
             <div>
               <label htmlFor="user-ai-provider" className={labelClassName}>
-                AI Provider
+                AI provider
               </label>
               <select
                 id="user-ai-provider"
@@ -239,7 +240,7 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
             {provider !== 'ollama' ? (
               <div>
                 <label htmlFor="user-ai-key" className={labelClassName}>
-                  API Key {!hasKey && <span className="text-destructive">*</span>}
+                  API key {!hasKey && <span className="text-destructive">*</span>}
                 </label>
                 <input
                   id="user-ai-key"
@@ -296,7 +297,7 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
                 disabled={saving}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
-                {saving ? 'Saving...' : 'Save key'}
+                {saving ? 'Saving' : 'Save key'}
               </button>
               <button
                 type="button"
@@ -304,7 +305,7 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
                 disabled={testing}
                 className="rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
               >
-                {testing ? 'Testing...' : 'Test connection'}
+                {testing ? 'Testing' : 'Test connection'}
               </button>
               {hasKey && (
                 <button
@@ -313,7 +314,7 @@ export default function UserAIKeySettings({ hideHeader = false }: { hideHeader?:
                   disabled={clearing}
                   className="rounded-lg border border-destructive/50 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
                 >
-                  {clearing ? 'Removing...' : 'Remove key'}
+                  {clearing ? 'Removing' : 'Remove key'}
                 </button>
               )}
             </div>

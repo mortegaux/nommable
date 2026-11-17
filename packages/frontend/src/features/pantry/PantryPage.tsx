@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { pantryApi } from '@/services/api';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
-import { AlertTriangle, Pencil, Trash2, Plus, MapPin, Check, X } from 'lucide-react';
+import { AlertTriangle, Check, Clock, MapPin, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Callout } from '@/components/Callout';
 import { Dialog } from '@/components/Dialog';
 import { PantryScanModal } from './PantryScanModal';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
@@ -42,7 +42,7 @@ export default function PantryPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Add Item form state
+  // Add item form state
   const [formData, setFormData] = useState({
     name: '',
     quantity: '',
@@ -316,37 +316,36 @@ export default function PantryPage() {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Pantry Management</h1>
-          <p className="text-muted-foreground mt-1">{items.length} items in your pantry</p>
+          <h1 className="text-3xl font-medium leading-tight text-balance text-foreground">Pantry</h1>
+          <p className="text-muted-foreground tabular-nums mt-1">{items.length} item{items.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setShowLocationManager(true)}
-            className="rounded-lg border border-border bg-background px-3 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary inline-flex items-center gap-1.5"
+            className="rounded-lg border border-border bg-background px-3 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary inline-flex items-center gap-1.5"
             aria-label="Manage storage locations"
             title="Manage storage locations"
           >
-            <MapPin size={18} />
+            <MapPin size={18} strokeWidth={1.5} />
             Locations
           </button>
           <button
             type="button"
             onClick={() => setShowScanModal(true)}
-            className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
+            className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
             aria-label="Scan pantry with AI"
-            title={!aiReady && !aiLoading ? 'Set up AI to unlock this feature' : undefined}
+            title={!aiReady && !aiLoading ? 'Set up AI to use this feature' : undefined}
           >
-            <AutoAwesomeIcon size={18} />
             Scan with AI
             {!aiReady && !aiLoading && <AISetupBadge />}
           </button>
           <button
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            {showAddForm ? 'Cancel' : 'Add Item'}
+            {showAddForm ? 'Cancel' : 'Add item'}
           </button>
         </div>
       </div>
@@ -365,65 +364,57 @@ export default function PantryPage() {
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           {/* Expiring Items Alert */}
           {expiringItems.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl" aria-hidden="true">⏰</span>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">
-                    {expiringItems.length} items expiring soon
-                  </h3>
-                  <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
-                    {expiringItems.slice(0, 3).map((item) => {
-                      const days = getDaysUntilExpiration(item.expirationDate);
-                      return (
-                        <li key={item.id}>
-                          {item.name} - {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
-                        </li>
-                      );
-                    })}
-                    {expiringItems.length > 3 && (
-                      <li className="font-medium">...and {expiringItems.length - 3} more</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <Callout
+              tone="warning"
+              icon={<Clock size={24} strokeWidth={1.5} aria-hidden="true" />}
+              title={`${expiringItems.length} item${expiringItems.length !== 1 ? 's' : ''} expiring soon`}
+            >
+              <ul className="space-y-1">
+                {expiringItems.slice(0, 3).map((item) => {
+                  const days = getDaysUntilExpiration(item.expirationDate);
+                  return (
+                    <li key={item.id}>
+                      {item.name} - {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`}
+                    </li>
+                  );
+                })}
+                {expiringItems.length > 3 && (
+                  <li className="font-medium">and {expiringItems.length - 3} more</li>
+                )}
+              </ul>
+            </Callout>
           )}
 
           {/* Low Stock Alert (#31: replaced BarChartIcon with AlertTriangle) */}
           {lowStockItems.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle size={24} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-red-900 dark:text-red-200 mb-1">
-                    {lowStockItems.length} items running low
-                  </h3>
-                  <ul className="text-sm text-red-800 dark:text-red-200 space-y-1">
-                    {lowStockItems.slice(0, 3).map((item) => (
-                      <li key={item.id}>
-                        {item.name} - {item.quantity} {item.unit}
-                      </li>
-                    ))}
-                    {lowStockItems.length > 3 && (
-                      <li className="font-medium">...and {lowStockItems.length - 3} more</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <Callout
+              tone="warning"
+              icon={<AlertTriangle size={24} strokeWidth={1.5} aria-hidden="true" />}
+              title={`${lowStockItems.length} item${lowStockItems.length !== 1 ? 's' : ''} running low`}
+            >
+              <ul className="space-y-1">
+                {lowStockItems.slice(0, 3).map((item) => (
+                  <li key={item.id}>
+                    {item.name} - {item.quantity} {item.unit}
+                  </li>
+                ))}
+                {lowStockItems.length > 3 && (
+                  <li className="font-medium">and {lowStockItems.length - 3} more</li>
+                )}
+              </ul>
+            </Callout>
           )}
         </div>
       )}
 
-      {/* Add Item Form */}
+      {/* Add item Form */}
       {showAddForm && (
         <div className="bg-card rounded-lg border border-border p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Add New Item</h2>
+          <h2 className="text-base font-medium text-foreground mb-4">Add new item</h2>
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div>
               <label htmlFor="add-name" className="block text-sm font-medium text-foreground mb-1">
-                Item Name *
+                Item name *
               </label>
               <input
                 id="add-name"
@@ -498,7 +489,7 @@ export default function PantryPage() {
             </div>
             <div>
               <label htmlFor="add-expiration" className="block text-sm font-medium text-foreground mb-1">
-                Expiration Date
+                Expiration date
               </label>
               <input
                 id="add-expiration"
@@ -533,7 +524,7 @@ export default function PantryPage() {
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
               >
-                Add Item
+                Add item
               </button>
             </div>
           </form>
@@ -545,12 +536,11 @@ export default function PantryPage() {
         <Dialog
           title={`Edit "${editingItem.name}"`}
           onClose={() => setEditingItem(null)}
-          panelClassName="max-w-lg"
         >
           <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
             <div>
               <label htmlFor="edit-name" className="block text-sm font-medium text-foreground mb-1">
-                Item Name *
+                Item name *
               </label>
               <input
                 id="edit-name"
@@ -632,7 +622,7 @@ export default function PantryPage() {
 
             <div>
               <label htmlFor="edit-expiration" className="block text-sm font-medium text-foreground mb-1">
-                Expiration Date
+                Expiration date
               </label>
               <input
                 id="edit-expiration"
@@ -666,7 +656,7 @@ export default function PantryPage() {
                 className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
               />
               <label htmlFor="edit-is-low-stock" className="text-sm font-medium text-foreground flex items-center gap-1.5 cursor-pointer">
-                <AlertTriangle size={15} className="text-amber-500" />
+                <AlertTriangle size={15} className="text-amber-500" strokeWidth={1.5} />
                 Mark as low stock
               </label>
             </div>
@@ -683,7 +673,7 @@ export default function PantryPage() {
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-sm"
               >
-                Save Changes
+                Save changes
               </button>
             </div>
           </form>
@@ -693,13 +683,12 @@ export default function PantryPage() {
       {/* Manage Storage Locations Modal (#33) */}
       {showLocationManager && (
         <Dialog
-          title="Manage Storage Locations"
+          title="Manage storage locations"
           onClose={() => {
             setShowLocationManager(false);
             setEditingLocationName(null);
             setDeletingLocation(null);
           }}
-          panelClassName="max-w-lg"
         >
           <div className="p-6 space-y-5">
             {/* Add new location */}
@@ -708,7 +697,7 @@ export default function PantryPage() {
                 type="text"
                 value={newLocationName}
                 onChange={(e) => setNewLocationName(e.target.value)}
-                placeholder="New storage zone / location..."
+                placeholder="New storage zone / location"
                 className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -717,24 +706,22 @@ export default function PantryPage() {
                 disabled={!newLocationName.trim() || isSubmittingLocation}
                 className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
               >
-                <Plus size={16} />
+                <Plus size={16} strokeWidth={1.5} />
                 Add
               </button>
             </form>
 
             {/* Delete confirmation with transfer option */}
             {deletingLocation && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 space-y-3">
-                <p className="text-sm font-semibold text-destructive">
-                  Delete location "{deletingLocation.name}"?
-                </p>
+              <Callout tone="error" title={`Delete location "${deletingLocation.name}"?`} className="space-y-3">
+                <div className="space-y-3">
                 {deletingLocation.itemCount > 0 ? (
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">
                       This location currently contains{' '}
-                      <strong className="text-foreground">
+                      <span className="font-medium text-foreground">
                         {deletingLocation.itemCount} {deletingLocation.itemCount === 1 ? 'item' : 'items'}
-                      </strong>
+                      </span>
                       . Select where to transfer them:
                     </p>
                     <select
@@ -770,16 +757,17 @@ export default function PantryPage() {
                     disabled={isSubmittingLocation}
                     className="px-3 py-1.5 rounded text-xs bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90"
                   >
-                    Delete Location
+                    Delete location
                   </button>
                 </div>
-              </div>
+                </div>
+              </Callout>
             )}
 
             {/* List of locations */}
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Configured Locations ({locations.length})
+              <h3 className="text-xs font-medium tabular-nums text-muted-foreground">
+                Configured locations ({locations.length})
               </h3>
               <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden bg-background">
                 {locations.map((loc) => (
@@ -801,7 +789,7 @@ export default function PantryPage() {
                           title="Save rename"
                           aria-label="Save rename"
                         >
-                          <Check size={16} />
+                          <Check size={16} strokeWidth={1.5} />
                         </button>
                         <button
                           type="button"
@@ -810,7 +798,7 @@ export default function PantryPage() {
                           title="Cancel"
                           aria-label="Cancel"
                         >
-                          <X size={16} />
+                          <X size={16} strokeWidth={1.5} />
                         </button>
                       </form>
                     ) : (
@@ -821,7 +809,7 @@ export default function PantryPage() {
                             {loc.itemCount} {loc.itemCount === 1 ? 'item' : 'items'}
                           </span>
                           {loc.isDefault && (
-                            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                               Built-in
                             </span>
                           )}
@@ -837,7 +825,7 @@ export default function PantryPage() {
                             aria-label={`Rename ${loc.name}`}
                             title="Rename location"
                           >
-                            <Pencil size={15} />
+                            <Pencil size={15} strokeWidth={1.5} />
                           </button>
                           <button
                             type="button"
@@ -850,7 +838,7 @@ export default function PantryPage() {
                             aria-label={`Delete ${loc.name}`}
                             title="Delete location"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={15} strokeWidth={1.5} />
                           </button>
                         </div>
                       </>
@@ -880,16 +868,16 @@ export default function PantryPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search pantry items..."
+            placeholder="Search pantry items"
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <div>
-          <h3 className="text-sm font-medium text-foreground mb-2">Filter by Category</h3>
+          <h3 className="text-sm font-medium text-foreground mb-2">Filter by category</h3>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === null
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-background border border-border text-muted-foreground hover:border-primary/50'
@@ -901,7 +889,7 @@ export default function PantryPage() {
               <button
                 key={cat.name}
                 onClick={() => setSelectedCategory(cat.name)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === cat.name
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'bg-background border border-border text-muted-foreground hover:border-primary/50'
@@ -916,19 +904,19 @@ export default function PantryPage() {
 
       {/* Pantry Items by Category (#30: responsive two-column grid on md+ screens) */}
       {Object.keys(groupedItems).length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-card p-12 text-center">
           <p className="text-muted-foreground">
             {searchQuery || selectedCategory
               ? 'No items match your filters.'
-              : 'Your pantry is empty. Add your first item!'}
+              : 'Your pantry is empty. Add your first item.'}
           </p>
           {!searchQuery && !selectedCategory && (
             <button
               type="button"
               onClick={() => setShowAddForm(true)}
-              className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-4 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
-              Add Item
+              Add item
             </button>
           )}
         </div>
@@ -936,9 +924,9 @@ export default function PantryPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {Object.entries(groupedItems).map(([category, categoryItems]) => (
             <div key={category} className="bg-card rounded-lg border border-border p-4 shadow-sm">
-              <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+              <h2 className="text-base font-medium text-foreground mb-3 flex items-center gap-2">
                 {category}
-                <span className="text-sm text-muted-foreground font-normal">
+                <span className="font-mono text-[13px] tabular-nums text-muted-foreground font-normal">
                   ({categoryItems.length})
                 </span>
               </h2>
@@ -967,7 +955,7 @@ export default function PantryPage() {
                           : isExpiringSoon
                           ? 'bg-amber-50 dark:bg-amber-900/20'
                           : item.isLowStock
-                          ? 'bg-red-50/80 dark:bg-red-950/30 border-l-4 border-l-red-500'
+                          ? 'bg-red-50/80 dark:bg-red-950/30 border-l border-l-red-500'
                           : 'bg-background hover:bg-accent/30'
                       }`}
                     >
@@ -982,20 +970,20 @@ export default function PantryPage() {
                         }
                         aria-pressed={item.isLowStock}
                         title={item.isLowStock ? 'Low stock — tap to clear flag' : 'Mark as low stock'}
-                        className={`w-10 h-10 flex-shrink-0 inline-flex items-center justify-center rounded-md border transition-all ${
+                        className={`w-10 h-10 flex-shrink-0 inline-flex items-center justify-center rounded-md border transition-colors ${
                           item.isLowStock
                             ? 'bg-red-600 border-red-600 text-white shadow-sm hover:bg-red-700'
                             : 'border-border text-muted-foreground hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 dark:hover:bg-amber-950/30'
                         }`}
                       >
-                        <AlertTriangle size={18} className={item.isLowStock ? 'text-white' : ''} />
+                        <AlertTriangle size={18} className={item.isLowStock ? 'text-white' : ''} strokeWidth={1.5} />
                       </button>
 
                       {/* Name + quantity + meta (#30: high visibility low-stock badge, non-clipped info) */}
                       <div className="flex-1 min-w-0" title={item.notes || undefined}>
                         <div className="flex items-baseline gap-2 min-w-0">
                           <span className="font-medium text-foreground truncate">{item.name}</span>
-                          <span className="flex-shrink-0 text-sm text-muted-foreground whitespace-nowrap font-medium">
+                          <span className="flex-shrink-0 text-sm tabular-nums text-muted-foreground whitespace-nowrap font-medium">
                             {item.quantity} {item.unit}
                           </span>
                         </div>
@@ -1020,15 +1008,15 @@ export default function PantryPage() {
                             </>
                           )}
                           {item.isLowStock && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border border-red-300 dark:border-red-800">
-                              <AlertTriangle size={10} className="text-red-600 dark:text-red-400" />
-                              LOW STOCK
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border border-red-300 dark:border-red-800">
+                              <AlertTriangle size={10} className="text-red-600 dark:text-red-400" strokeWidth={1.5} />
+                              Low stock
                             </span>
                           )}
                           {item.notes && (
                             <>
                               <span aria-hidden="true">·</span>
-                              <span className="italic truncate min-w-0">{item.notes}</span>
+                              <span className="truncate min-w-0">{item.notes}</span>
                             </>
                           )}
                         </div>
@@ -1063,7 +1051,7 @@ export default function PantryPage() {
                           aria-label={`Edit ${item.name}`}
                           title="Edit item"
                         >
-                          <Pencil size={16} />
+                          <Pencil size={16} strokeWidth={1.5} />
                         </button>
                         <button
                           type="button"
@@ -1072,7 +1060,7 @@ export default function PantryPage() {
                           aria-label={`Delete ${item.name}`}
                           title="Delete item"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={16} strokeWidth={1.5} />
                         </button>
                       </div>
                     </li>

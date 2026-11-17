@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Package, Refrigerator, Snowflake, UtensilsCrossed } from 'lucide-react';
 import { batchCookingApi } from '@/services/api';
 import { PortionCalculator } from './PortionCalculator';
 import { useToastStore } from '@/store/toast.store';
@@ -103,23 +104,23 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
   };
 
   return (
-    <Dialog title="Edit Batch Cooking Plan" onClose={onClose} panelClassName="max-w-3xl">
+    <Dialog title="Edit batch cooking plan" onClose={onClose}>
       <div className="p-6">
             {/* Tabs */}
             <div className="flex gap-2 border-b border-border mb-4" role="tablist" aria-label="Plan sections">
             <button
               onClick={() => setActiveTab('basic')}
-              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+              className={`px-4 py-2 font-medium transition-colors border-b ${
                 activeTab === 'basic'
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
-              Basic Info
+              Basic info
             </button>
             <button
               onClick={() => setActiveTab('portions')}
-              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+              className={`px-4 py-2 font-medium transition-colors border-b ${
                 activeTab === 'portions'
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -129,13 +130,13 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
             </button>
             <button
               onClick={() => setActiveTab('storage')}
-              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+              className={`px-4 py-2 font-medium transition-colors border-b ${
                 activeTab === 'storage'
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
-              Storage & Prep
+              Storage & prep
             </button>
           </div>
 
@@ -149,7 +150,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Recipe (cannot be changed)
                 </label>
-                <div className="border border-border rounded-lg p-4 bg-accent/5">
+                <div className="border border-border rounded-lg p-4 bg-muted">
                   <div className="flex items-center gap-3">
                     {plan.recipe.imageUrl ? (
                       <img
@@ -159,11 +160,11 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                        <span className="text-2xl">🍽️</span>
+                        <UtensilsCrossed className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </div>
                     )}
                     <div>
-                      <h3 className="font-semibold text-foreground">{plan.recipe.title}</h3>
+                      <h3 className="font-medium text-foreground">{plan.recipe.title}</h3>
                       {plan.recipe.servings && (
                         <p className="text-sm text-muted-foreground">
                           Base recipe: {plan.recipe.servings} servings
@@ -176,7 +177,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Plan Name *
+                  Plan name *
                 </label>
                 <input
                   type="text"
@@ -205,7 +206,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Cooking Date *
+                  Cooking date *
                 </label>
                 <input
                   type="date"
@@ -224,7 +225,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
           {activeTab === 'portions' && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-foreground mb-3">Adjust Portions</h3>
+                <h3 className="text-sm font-medium text-foreground mb-3">Adjust portions</h3>
                 <PortionCalculator
                   batches={formData.batches}
                   servingsPerBatch={formData.servingsPerBatch}
@@ -242,10 +243,10 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
           {/* Storage & Prep Tab */}
           {activeTab === 'storage' && (
             <div className="space-y-4">
-              {/* Storage Method */}
+              {/* Storage method */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Storage Method
+                  Storage method
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {(['refrigerate', 'freeze', 'pantry'] as const).map((method) => (
@@ -253,14 +254,20 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
                       key={method}
                       type="button"
                       onClick={() => setFormData({ ...formData, storageMethod: method })}
-                      className={`p-4 rounded-lg border-2 transition-all ${
+                      className={`p-4 rounded-lg border transition-colors ${
                         formData.storageMethod === method
                           ? 'border-primary bg-primary/10'
                           : 'border-border hover:border-primary/50'
                       }`}
                     >
-                      <div className="text-2xl mb-2">
-                        {method === 'refrigerate' ? '❄️' : method === 'freeze' ? '🧊' : '📦'}
+                      <div className="flex justify-center mb-2">
+                        {method === 'refrigerate' ? (
+                          <Refrigerator className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        ) : method === 'freeze' ? (
+                          <Snowflake className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        ) : (
+                          <Package className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                        )}
                       </div>
                       <div className="text-sm font-medium capitalize">{method}</div>
                     </button>
@@ -271,7 +278,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
               {/* Storage Duration */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Storage Duration (days)
+                  Storage duration (days)
                 </label>
                 <input
                   type="number"
@@ -282,10 +289,10 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
                 />
               </div>
 
-              {/* Reheating Instructions */}
+              {/* Reheating instructions */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Reheating Instructions
+                  Reheating instructions
                 </label>
                 <textarea
                   value={formData.reheatingInstructions}
@@ -299,7 +306,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
               {/* Prep Notes */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Prep Notes (Optional)
+                  Prep notes (optional)
                 </label>
                 <textarea
                   value={formData.prepNotes}
@@ -326,7 +333,7 @@ export function EditBatchPlanModal({ plan, onClose, onSuccess }: EditBatchPlanMo
             disabled={loading}
             className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Saving' : 'Save changes'}
           </button>
         </div>
       </div>

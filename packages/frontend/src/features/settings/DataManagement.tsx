@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { settingsApi, GeneralSystemSettings } from '@/services/api';
 import { BookOpen, Users, Lock, UserCheck, CheckCircle2, AlertCircle, Trash2, MessageSquareShare } from 'lucide-react';
 import { BackupRestoreSection } from './BackupRestoreSection';
+import { Callout } from '@/components/Callout';
 
 const DEFAULT_GENERAL_SETTINGS: GeneralSystemSettings = {
   sharedRecipes: true,
@@ -96,7 +97,7 @@ export function DataManagement() {
           sharedPantry: true,
           sharedBatchCooking: true,
         },
-        'Shared Library enabled — selected library elements are now shared across all users.'
+        'Shared library enabled — selected library elements are now shared across all users.'
       );
     }
   };
@@ -111,7 +112,7 @@ export function DataManagement() {
         sharedPantry: false,
         sharedBatchCooking: false,
       },
-      'Per-User Private Mode enabled — all library elements are now private to each user.'
+      'Per-user private mode enabled — all library elements are now private to each user.'
     );
   };
 
@@ -175,62 +176,60 @@ export function DataManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1">Data &amp; Catalog Management</h2>
+        <h2 className="text-xl font-medium text-foreground mb-1">Data &amp; catalog management</h2>
         <p className="text-xs text-muted-foreground mb-4">
           Configure which library elements are shared across users and manage database storage.
         </p>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 p-3.5 bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium rounded-xl">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
+          <Callout tone="error" role="alert" icon={<AlertCircle className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />} className="mb-4">
+            {error}
+          </Callout>
         )}
 
         {success && (
-          <div className="mb-4 flex items-center gap-2 p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 text-xs font-medium rounded-xl">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-            <span>{success}</span>
-          </div>
+          <Callout tone="success" icon={<CheckCircle2 className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />} className="mb-4">
+            {success}
+          </Callout>
         )}
 
-        {/* Library Sharing Mode Card */}
+        {/* Library sharing mode Card */}
         <div className="border border-border bg-card rounded-2xl p-5 mb-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-primary" />
-                Library Sharing Mode
+              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Library sharing mode
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Choose which parts of the library are shared across all users or keep accounts isolated.
               </p>
             </div>
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold self-start sm:self-auto ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
                 anySharedEnabled
-                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 dark:text-emerald-400 border border-emerald-500/20'
-                  : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 dark:text-amber-400 border border-amber-500/20'
+                  ? 'bg-muted text-muted-foreground border border-border'
+                  : 'bg-muted text-muted-foreground border border-border'
               }`}
             >
               {anySharedEnabled ? (
                 <>
                   <Users className="w-3.5 h-3.5" />
-                  Shared Library ({enabledCount}/{sharedKeys.length} Shared)
+                  Shared library ({enabledCount}/{sharedKeys.length} shared)
                 </>
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5" />
-                  Per-User Private Mode
+                  Per-user private mode
                 </>
               )}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-            {/* Left Card: Shared Library + Granular Options */}
+            {/* Left Card: Shared library + Granular Options */}
             <div
-              className={`p-4 rounded-xl border transition-all ${
+              className={`p-4 rounded-xl border transition-colors ${
                 anySharedEnabled
                   ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
                   : 'border-border bg-background hover:bg-muted/40'
@@ -241,10 +240,10 @@ export function DataManagement() {
                   type="button"
                   disabled={loadingSettings || savingSharingMode}
                   onClick={handleEnableSharedLibrary}
-                  className="text-xs font-bold text-foreground flex items-center gap-1.5 text-left"
+                  className="text-xs font-medium text-foreground flex items-center gap-1.5 text-left"
                 >
-                  <Users className="w-4 h-4 text-primary" />
-                  Shared Library
+                  <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                  Shared library
                 </button>
                 <div className="flex items-center gap-2">
                   <button
@@ -267,7 +266,7 @@ export function DataManagement() {
                     }
                     className="text-[11px] font-medium text-primary hover:underline disabled:opacity-50"
                   >
-                    {allSharedEnabled ? 'Deselect All' : 'Select All'}
+                    {allSharedEnabled ? 'Deselect all' : 'Select all'}
                   </button>
                   {anySharedEnabled && (
                     <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
@@ -302,7 +301,7 @@ export function DataManagement() {
                           }`}
                         >
                           <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${
                               isChecked ? 'translate-x-4' : 'translate-x-0'
                             }`}
                           />
@@ -318,7 +317,7 @@ export function DataManagement() {
                             }
                           }}
                         >
-                          <div className="text-xs font-semibold text-foreground">{opt.label}</div>
+                          <div className="text-xs font-medium text-foreground">{opt.label}</div>
                           <p className="text-[11px] text-muted-foreground leading-snug">
                             {opt.description}
                           </p>
@@ -328,7 +327,7 @@ export function DataManagement() {
                       {/* Sub-option under Shared recipes and tags: Show creator/author */}
                       {opt.key === 'sharedRecipes' && (
                         <div
-                          className={`ml-7 mt-2 pl-3 border-l-2 border-primary/20 ${
+                          className={`ml-7 mt-2 pl-3 border-l border-primary/20 ${
                             !settings.sharedRecipes ? 'opacity-50' : ''
                           }`}
                         >
@@ -356,7 +355,7 @@ export function DataManagement() {
                               }`}
                             >
                               <span
-                                className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${
                                   settings.sharedRecipes && settings.showRecipeAuthor
                                     ? 'translate-x-3'
                                     : 'translate-x-0'
@@ -382,8 +381,8 @@ export function DataManagement() {
                                 }
                               }}
                             >
-                              <div className="text-[11px] font-semibold text-foreground flex items-center gap-1">
-                                <UserCheck className="w-3 h-3 text-primary flex-shrink-0" />
+                              <div className="text-[11px] font-medium text-foreground flex items-center gap-1">
+                                <UserCheck className="w-3 h-3 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                                 Show who added or created each recipe
                               </div>
                             </div>
@@ -396,21 +395,21 @@ export function DataManagement() {
               </div>
             </div>
 
-            {/* Right Card: Per-User Private Mode */}
+            {/* Right Card: Per-user private mode */}
             <button
               type="button"
               disabled={loadingSettings || savingSharingMode}
               onClick={handleEnablePrivateLibrary}
-              className={`h-full text-left p-4 rounded-xl border transition-all flex flex-col justify-start ${
+              className={`h-full text-left p-4 rounded-xl border transition-colors flex flex-col justify-start ${
                 !anySharedEnabled
                   ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
                   : 'border-border bg-background hover:bg-muted/40'
               }`}
             >
               <div className="flex items-center justify-between mb-1 w-full">
-                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Per-User Private Library
+                <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                  <Lock className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                  Per-user private library
                 </span>
                 {!anySharedEnabled && (
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
@@ -427,8 +426,8 @@ export function DataManagement() {
         <div className="border border-border bg-card rounded-2xl p-5 mb-6">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <MessageSquareShare className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                <MessageSquareShare className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                 Share anonymous feedback with Nommable developers
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -457,7 +456,7 @@ export function DataManagement() {
               }`}
             >
               <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${
                   settings.shareAnonymousFeedback ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
@@ -470,16 +469,16 @@ export function DataManagement() {
 
         {/* Danger Zone: Empty Database */}
         <div className="border border-destructive/30 bg-destructive/5 rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-destructive flex items-center gap-2 mb-1.5">
+          <h3 className="text-sm font-medium text-destructive flex items-center gap-2 mb-1.5">
             <Trash2 className="w-4 h-4" />
-            Empty User Data
+            Empty user data
           </h3>
           <p className="text-xs text-muted-foreground mb-3">
             Permanently delete your recipes, meal plans, shopping lists, pantry items, and other
             data. This action cannot be undone.
           </p>
           {confirming && (
-            <p className="text-xs font-semibold text-destructive mb-3">
+            <p className="text-xs font-medium text-destructive mb-3">
               Are you sure? This will permanently erase all your data.
             </p>
           )}
@@ -487,14 +486,14 @@ export function DataManagement() {
             <button
               onClick={handleEmptyDatabase}
               disabled={loading}
-              className="px-4 py-2 text-xs font-semibold bg-destructive text-destructive-foreground rounded-xl hover:bg-destructive/90 transition-all disabled:opacity-50"
+              className="px-4 py-2 text-xs font-medium bg-destructive text-destructive-foreground rounded-xl hover:bg-destructive/90 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Emptying...' : confirming ? 'Yes, Empty Database' : 'Empty Database'}
+              {loading ? 'Emptying' : confirming ? 'Yes, empty database' : 'Empty database'}
             </button>
             {confirming && (
               <button
                 onClick={() => setConfirming(false)}
-                className="px-4 py-2 text-xs font-semibold border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-all"
+                className="px-4 py-2 text-xs font-medium border border-input bg-background text-foreground rounded-xl hover:bg-muted transition-colors"
               >
                 Cancel
               </button>

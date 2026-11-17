@@ -82,7 +82,7 @@ describe('PantryPage (#30, #31, #32, #33)', () => {
     expect(gridContainer).toBeInTheDocument();
 
     // Check prominent low-stock styling & badge
-    expect(screen.getByText('LOW STOCK')).toBeInTheDocument();
+    expect(screen.getByText('Low stock')).toBeInTheDocument();
   });
 
   it('provides an AlertTriangle low-stock button with clear accessible labels and tooltips (#31)', async () => {
@@ -117,7 +117,7 @@ describe('PantryPage (#30, #31, #32, #33)', () => {
 
     // Dialog appears with pre-filled inputs
     expect(screen.getByText('Edit "Basmati Rice"')).toBeInTheDocument();
-    const nameInput = screen.getByLabelText('Item Name *');
+    const nameInput = screen.getByLabelText('Item name *');
     expect(nameInput).toHaveValue('Basmati Rice');
 
     // Change quantity and submit
@@ -125,7 +125,7 @@ describe('PantryPage (#30, #31, #32, #33)', () => {
     fireEvent.change(qtyInput, { target: { value: '3.5' } });
 
     (pantryApi.update as any).mockResolvedValue({ data: { ...mockItems[0], quantity: 3.5 } });
-    const saveBtn = screen.getByRole('button', { name: 'Save Changes' });
+    const saveBtn = screen.getByRole('button', { name: 'Save changes' });
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
@@ -151,8 +151,8 @@ describe('PantryPage (#30, #31, #32, #33)', () => {
     fireEvent.click(locationsBtn);
 
     // Verify modal header and locations list
-    expect(screen.getByText('Manage Storage Locations')).toBeInTheDocument();
-    expect(screen.getByText('Configured Locations (6)')).toBeInTheDocument();
+    expect(screen.getByText('Manage storage locations')).toBeInTheDocument();
+    expect(screen.getByText('Configured locations (6)')).toBeInTheDocument();
     expect(screen.getAllByText('1 item').length).toBe(2);
   });
 });

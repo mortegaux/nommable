@@ -33,7 +33,7 @@ export function SystemStatusPage() {
   }, [load]);
 
   if (loading && !status) {
-    return <p className="text-sm text-muted-foreground">Loading system status…</p>;
+    return <p className="text-sm text-muted-foreground">Loading system status</p>;
   }
 
   if (error && !status) {
@@ -52,9 +52,9 @@ export function SystemStatusPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1 flex items-center gap-2">
-          <Server className="w-5 h-5 text-primary" />
-          System Status
+        <h2 className="text-xl font-medium text-foreground mb-1 flex items-center gap-2">
+          <Server className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+          System status
         </h2>
         <p className="text-xs text-muted-foreground mb-4">
           Read-only diagnostics. Update checks detect new releases — they never download or
@@ -66,30 +66,30 @@ export function SystemStatusPage() {
       <section className="border border-border bg-card rounded-2xl p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-foreground">Version</h3>
+            <h3 className="text-sm font-medium text-foreground">Version</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Installed: <span className="font-semibold text-foreground">v{status.installedVersion}</span>
+              Installed: <span className="font-medium text-foreground">v{status.installedVersion}</span>
               {update.version && (
                 <>
                   {' · '}Available:{' '}
-                  <span className="font-semibold text-foreground">{update.version}</span>
+                  <span className="font-medium text-foreground">{update.version}</span>
                 </>
               )}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {update.updateAvailable ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                 <AlertCircle className="w-3.5 h-3.5" />
                 Update available
               </span>
             ) : update.status === 'up-to-date' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Up to date
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {update.status === 'unavailable' ? 'Couldn’t check for updates' : 'Version unknown'}
               </span>
@@ -98,7 +98,7 @@ export function SystemStatusPage() {
               type="button"
               onClick={load}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border border-input bg-background hover:bg-muted disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-input bg-background hover:bg-muted disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               Check again
@@ -130,7 +130,7 @@ export function SystemStatusPage() {
 
         {update.releaseNotes && (
           <div>
-            <h4 className="text-xs font-semibold text-foreground mb-2">
+            <h4 className="text-xs font-medium text-foreground mb-2">
               Release notes {update.version ? `(${update.version})` : ''}
             </h4>
             <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-background p-4 text-xs leading-relaxed text-foreground">
@@ -142,23 +142,23 @@ export function SystemStatusPage() {
 
       {/* Health + storage */}
       <section className="border border-border bg-card rounded-2xl p-5">
-        <h3 className="text-sm font-bold text-foreground mb-3">Health &amp; Storage</h3>
+        <h3 className="text-sm font-medium text-foreground mb-3">Health &amp; storage</h3>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs">
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Uptime</dt>
-            <dd className="font-semibold text-foreground">{formatUptime(status.uptimeSeconds)}</dd>
+            <dd className="font-medium tabular-nums text-foreground">{formatUptime(status.uptimeSeconds)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Database size</dt>
-            <dd className="font-semibold text-foreground">{formatBytes(status.database.sizeBytes)}</dd>
+            <dd className="font-medium tabular-nums text-foreground">{formatBytes(status.database.sizeBytes)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Uploads size</dt>
-            <dd className="font-semibold text-foreground">{formatBytes(status.uploads.sizeBytes)}</dd>
+            <dd className="font-medium tabular-nums text-foreground">{formatBytes(status.uploads.sizeBytes)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Migrations</dt>
-            <dd className="font-semibold text-foreground">
+            <dd className="font-medium tabular-nums text-foreground">
               {status.migrations.status === 'up-to-date'
                 ? `Up to date (${status.migrations.applied}/${status.migrations.total})`
                 : status.migrations.status === 'pending'
@@ -168,7 +168,7 @@ export function SystemStatusPage() {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Last backup</dt>
-            <dd className="font-semibold text-foreground">
+            <dd className="font-medium tabular-nums text-foreground">
               {status.lastBackup.status === 'ok' && status.lastBackup.at
                 ? new Date(status.lastBackup.at).toLocaleString()
                 : (
@@ -178,7 +178,7 @@ export function SystemStatusPage() {
                         tab param only on mount, so this full navigation is what
                         lands on the Data tab's Backup & Restore section. */}
                     <a href="/settings?tab=data#backup" className="text-primary hover:underline">
-                      export one from Data Management
+                      export one from Data management
                     </a>
                     .
                   </>
@@ -188,7 +188,7 @@ export function SystemStatusPage() {
           {status.lastBackup.lastRestoreAt && (
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Last restore</dt>
-              <dd className="font-semibold text-foreground">
+              <dd className="font-medium tabular-nums text-foreground">
                 {new Date(status.lastBackup.lastRestoreAt).toLocaleString()}
               </dd>
             </div>

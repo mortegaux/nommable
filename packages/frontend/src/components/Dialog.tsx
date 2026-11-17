@@ -1,5 +1,21 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+
+/**
+ * Dialog width family — every modal in the app uses one of these three
+ * sizes so dialogs read as one family:
+ * - `small` (max-w-md): confirms, alerts, and single-question pickers.
+ * - `default` (max-w-2xl): standard forms and content dialogs.
+ * - `wide` (max-w-4xl): browsers, previews, and grids with side-by-side
+ *   content (recipe browser, templates, pantry scan, image extract).
+ * Bespoke modals that don't use Dialog use the same three widths.
+ */
+const SIZE_CLASSES = {
+  small: 'max-w-md',
+  default: 'max-w-2xl',
+  wide: 'max-w-4xl',
+} as const;
 
 interface DialogProps {
   /** Accessible name for the dialog — rendered as the visible title. */
@@ -8,6 +24,8 @@ interface DialogProps {
   descriptionId?: string;
   onClose: () => void;
   children: ReactNode;
+  /** Dialog width from the size family. Default 'default'. */
+  size?: keyof typeof SIZE_CLASSES;
   /** Extra classes for the dialog panel. */
   panelClassName?: string;
   /** Show the × close button in the header. Default true. */
@@ -39,6 +57,7 @@ export function Dialog({
   descriptionId,
   onClose,
   children,
+  size = 'default',
   panelClassName = '',
   showCloseButton = true,
 }: DialogProps) {
@@ -120,10 +139,10 @@ export function Dialog({
         aria-describedby={descriptionId}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className={`flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-card shadow-2xl focus:outline-none ${panelClassName}`}
+        className={`flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-card shadow-lg focus:outline-none ${SIZE_CLASSES[size]} ${panelClassName}`}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-border p-6">
-          <h2 id={titleId.current} className="text-2xl font-bold text-foreground">
+          <h2 id={titleId.current} className="text-2xl font-medium leading-tight text-balance text-foreground">
             {title}
           </h2>
           {showCloseButton && (
@@ -132,9 +151,7 @@ export function Dialog({
               aria-label={`Close ${title}`}
               className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
             </button>
           )}
         </div>

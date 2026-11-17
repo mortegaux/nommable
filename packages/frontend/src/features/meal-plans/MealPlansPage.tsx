@@ -5,7 +5,7 @@ import { AIMealPlanGenerateModal } from './AIMealPlanGenerateModal';
 import { IntelligentMealPlanModal } from './IntelligentMealPlanModal';
 import { MealPlanPreviewModal } from './MealPlanPreviewModal';
 import { TemplatesModal } from './TemplatesModal';
-import { AutoAwesomeIcon } from '@/components/icons/MaterialIcon';
+import { Bookmark, Calendar, Loader2 } from 'lucide-react';
 import { AIConfigAlert } from '@/components/AIConfigAlert';
 import { checkAIConfiguration, aiUnavailableMessage, aiErrorMessage } from '@/utils/aiValidation';
 import { useAIStatus, aiNotConfiguredClass, AISetupBadge } from '@/hooks/useAIStatus';
@@ -203,7 +203,7 @@ export default function MealPlansPage() {
   };
 
   if (loading && mealPlans.length === 0) {
-    return <div>Loading meal plans...</div>;
+    return <div>Loading meal plans</div>;
   }
 
   return (
@@ -212,8 +212,8 @@ export default function MealPlansPage() {
         <SectionTabs
           label="Meal plans sections"
           tabs={[
-            { path: '/meal-plans', label: 'Meal Plans' },
-            { path: '/batch-cooking', label: 'Batch Cooking' },
+            { path: '/meal-plans', label: 'Meal plans' },
+            { path: '/batch-cooking', label: 'Batch cooking' },
           ]}
         />
         <PageHeader
@@ -223,27 +223,19 @@ export default function MealPlansPage() {
             <>
               <button
                 onClick={() => setShowTemplates(true)}
-                className="rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
+                className="rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
                 aria-label="View templates"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                  />
-                </svg>
+                <Bookmark className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
                 Templates
               </button>
               <button
                 onClick={handleSmartGenerateClick}
-                className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${aiNeedsSetup ? aiNotConfiguredClass : ''}`}
+                className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${aiNeedsSetup ? aiNotConfiguredClass : ''}`}
                 aria-label="Generate intelligent meal plan"
-                title={aiNeedsSetup ? 'Set up AI to unlock smart meal planning' : undefined}
+                title={aiNeedsSetup ? 'Set up AI to use smart meal planning' : undefined}
               >
-                <AutoAwesomeIcon size={18} />
-                Smart Generate
+                Smart generate
                 {aiNeedsSetup && <AISetupBadge />}
               </button>
             </>
@@ -251,10 +243,10 @@ export default function MealPlansPage() {
           primaryAction={
             <Link
               to="/meal-plans/new"
-              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
+              className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
               aria-label="Create new meal plan"
             >
-              Create Meal Plan
+              Create meal plan
             </Link>
           }
         />
@@ -263,33 +255,33 @@ export default function MealPlansPage() {
         {selectedMealPlans.size > 0 && (
           <div className="mb-4 bg-primary/10 border border-primary/30 rounded-lg p-4 flex items-center justify-between">
             <span className="text-foreground font-medium">
-              {selectedMealPlans.size} meal plan(s) selected
+              {selectedMealPlans.size} meal plan{selectedMealPlans.size !== 1 ? 's' : ''} selected
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setSelectedMealPlans(new Set())}
                 className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
               >
-                Clear Selection
+                Clear selection
               </button>
               <button
                 onClick={handleBulkDelete}
                 className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
               >
-                Delete Selected
+                Delete selected
               </button>
             </div>
           </div>
         )}
 
         {mealPlans.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
-            <p className="text-muted-foreground">No meal plans yet. Create your first meal plan!</p>
+          <div className="rounded-lg border border-dashed border-border bg-card p-12 text-center">
+            <p className="text-muted-foreground">No meal plans yet. Create your first meal plan.</p>
             <Link
               to="/meal-plans/new"
-              className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
-              Create Meal Plan
+              Create meal plan
             </Link>
           </div>
         ) : (
@@ -307,17 +299,17 @@ export default function MealPlansPage() {
                   className="w-5 h-5 absolute top-3 left-3 z-10 cursor-pointer accent-primary"
                   aria-label={`Select ${plan.name}`}
                 />
-                <div className="rounded-lg border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm hover:border-primary/30 transition-colors">
                   <Link
                     to={`/meal-plans/${plan.id}`}
                     className="block rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     aria-label={`Open meal plan ${plan.name}`}
                   >
-                    <h3 className="mb-2 text-xl font-semibold text-foreground pl-8">{plan.name}</h3>
+                    <h3 className="mb-2 text-base font-medium text-foreground pl-8">{plan.name}</h3>
                     {plan.description && (
                       <p className="mb-4 text-muted-foreground">{plan.description}</p>
                     )}
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-mono tabular-nums text-muted-foreground">
                       {parseLocalDate(plan.startDate).toLocaleDateString()} -{' '}
                       {parseLocalDate(plan.endDate).toLocaleDateString()}
                     </div>
@@ -325,24 +317,17 @@ export default function MealPlansPage() {
                   <div className="mt-4 flex items-center gap-2">
                     {plan.isAiGenerated && (
                       <span className="inline-block rounded bg-accent/20 px-2 py-1 text-xs font-medium text-accent-foreground">
-                        AI Generated
+                        AI generated
                       </span>
                     )}
                     <button
                       onClick={() => handleExportCalendar(plan.id)}
-                      className="inline-flex items-center gap-1 rounded bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary"
-                      title="Export to Calendar"
+                      className="inline-flex items-center gap-1 rounded border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                      title="Export to calendar"
                       aria-label={`Export ${plan.name} to calendar`}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      Export to Calendar
+                      <Calendar className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                      Export to calendar
                     </button>
                   </div>
                 </div>
@@ -397,12 +382,9 @@ export default function MealPlansPage() {
       {/* Loading overlay during generation */}
       {generating && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg p-8 shadow-2xl flex flex-col items-center gap-4">
-            <svg className="animate-spin h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p className="text-foreground font-medium">Generating intelligent meal plan...</p>
+          <div className="bg-card rounded-lg p-8 shadow-lg flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" strokeWidth={1.5} aria-hidden="true" />
+            <p className="text-foreground font-medium">Generating meal plan</p>
             <p className="text-sm text-muted-foreground">
               Analyzing your recipes, pantry, and preferences
             </p>

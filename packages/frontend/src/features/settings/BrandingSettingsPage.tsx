@@ -70,7 +70,7 @@ export default function BrandingSettingsPage() {
 
   if (!user || user.role !== 'admin') {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-7xl">
         <Callout tone="error">Only admins can change instance branding.</Callout>
       </div>
     );
@@ -195,7 +195,7 @@ export default function BrandingSettingsPage() {
     'rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50';
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-7xl space-y-8">
       <PageHeader
         title="Branding"
         subtitle="Customize this instance's name, logo, accent color, and favicon. Branding is stored on the server and applies to every user and browser."
@@ -214,7 +214,7 @@ export default function BrandingSettingsPage() {
 
       {/* App name */}
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-1 text-lg font-semibold text-card-foreground">App name</h2>
+        <h2 className="mb-1 text-base font-medium text-card-foreground">App name</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           Shown in the header, on the login page, and in the browser tab title. Leave blank
           to use the default “{DEFAULT_APP_NAME}”.
@@ -242,7 +242,7 @@ export default function BrandingSettingsPage() {
 
       {/* Accent color */}
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-1 text-lg font-semibold text-card-foreground">Accent color</h2>
+        <h2 className="mb-1 text-base font-medium text-card-foreground">Accent color</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           Applied to buttons, links, and highlights. It works in both light and dark mode —
           dark mode uses a lightened version of the same hue. Every accent keeps primary
@@ -318,14 +318,14 @@ export default function BrandingSettingsPage() {
             disabled={saving || customHexError !== ''}
             className={primaryButton}
           >
-            {saving ? 'Saving…' : 'Save name & accent'}
+            {saving ? 'Saving' : 'Save name & accent'}
           </button>
         </div>
       </section>
 
       {/* Logo */}
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-1 text-lg font-semibold text-card-foreground">Logo</h2>
+        <h2 className="mb-1 text-base font-medium text-card-foreground">Logo</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           Replaces the header logo. Images only, 5MB max. If the custom logo is missing or
           broken, the stock logo is shown instead — never a broken image.
@@ -366,7 +366,7 @@ export default function BrandingSettingsPage() {
             disabled={!logoFile || uploading === 'logo'}
             className={primaryButton}
           >
-            {uploading === 'logo' ? 'Uploading…' : 'Upload logo'}
+            {uploading === 'logo' ? 'Uploading' : 'Upload logo'}
           </button>
           {branding?.logoUrl && (
             <button type="button" onClick={() => handleRemove('logo')} className={quietButton}>
@@ -378,7 +378,7 @@ export default function BrandingSettingsPage() {
 
       {/* Favicon */}
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-1 text-lg font-semibold text-card-foreground">Favicon</h2>
+        <h2 className="mb-1 text-base font-medium text-card-foreground">Favicon</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           Replaces the browser-tab icon. A square PNG works best. Images only, 5MB max.
         </p>
@@ -418,7 +418,7 @@ export default function BrandingSettingsPage() {
             disabled={!faviconFile || uploading === 'favicon'}
             className={primaryButton}
           >
-            {uploading === 'favicon' ? 'Uploading…' : 'Upload favicon'}
+            {uploading === 'favicon' ? 'Uploading' : 'Upload favicon'}
           </button>
           {branding?.faviconUrl && (
             <button type="button" onClick={() => handleRemove('favicon')} className={quietButton}>
@@ -430,7 +430,7 @@ export default function BrandingSettingsPage() {
 
       {/* Reset */}
       <section className="rounded-lg border border-destructive/40 bg-card p-6">
-        <h2 className="mb-1 text-lg font-semibold text-card-foreground">Reset to defaults</h2>
+        <h2 className="mb-1 text-base font-medium text-card-foreground">Reset to defaults</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           Restores the stock Nommable name, logo, accent color, and favicon.
         </p>

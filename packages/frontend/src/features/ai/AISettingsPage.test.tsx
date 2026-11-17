@@ -47,12 +47,12 @@ function mockModels() {
 async function renderPage() {
   render(<AISettingsPage />);
   await waitFor(() => {
-    expect(screen.getByLabelText('AI Provider')).toBeInTheDocument();
+    expect(screen.getByLabelText('AI provider')).toBeInTheDocument();
   });
 }
 
 async function selectProvider(user: ReturnType<typeof userEvent.setup>, value: string) {
-  const select = screen.getByLabelText('AI Provider');
+  const select = screen.getByLabelText('AI provider');
   await user.selectOptions(select, value);
   await waitFor(() => {
     expect((select as HTMLSelectElement).value).toBe(value);
@@ -69,7 +69,7 @@ beforeEach(() => {
 describe('AISettingsPage — OpenRouter (issue #61)', () => {
   it('offers OpenRouter in the provider dropdown', async () => {
     await renderPage();
-    const select = screen.getByLabelText('AI Provider');
+    const select = screen.getByLabelText('AI provider');
     const options = within(select).getAllByRole('option').map((o) => o.textContent);
     expect(options).toContain('OpenRouter (one key, many models)');
   });
@@ -80,7 +80,7 @@ describe('AISettingsPage — OpenRouter (issue #61)', () => {
     await selectProvider(user, 'openrouter');
 
     await waitFor(() => {
-      expect(screen.getByText('OpenRouter Setup')).toBeInTheDocument();
+      expect(screen.getByText('OpenRouter setup')).toBeInTheDocument();
     });
     expect(
       screen.getByText(/all from this one key\. Billing stays on your OpenRouter account\./)
@@ -100,7 +100,7 @@ describe('AISettingsPage — OpenRouter (issue #61)', () => {
       );
     });
 
-    const imageSelect = screen.getByLabelText('Image Generation Model (Optional)');
+    const imageSelect = screen.getByLabelText('Image generation model (optional)');
     await waitFor(() => {
       expect(within(imageSelect).getByRole('option', { name: /FLUX 2 Dev/ })).toBeInTheDocument();
     });
@@ -115,14 +115,14 @@ describe('AISettingsPage — OpenRouter (issue #61)', () => {
     await renderPage();
 
     // Stay on OpenAI (default) but type an OpenRouter slug as a custom image model
-    const imageSelect = screen.getByLabelText('Image Generation Model (Optional)');
+    const imageSelect = screen.getByLabelText('Image generation model (optional)');
     await user.selectOptions(imageSelect, '__custom__');
     const customInput = screen.getByPlaceholderText(/gpt-image-1\.5, gemini-2\.0-flash/);
     await user.clear(customInput);
     await user.type(customInput, 'google/gemini-2.5-flash-image');
 
     await waitFor(() => {
-      expect(screen.getByText('OpenRouter API Key for Images (Optional)')).toBeInTheDocument();
+      expect(screen.getByText('OpenRouter API key for images (optional)')).toBeInTheDocument();
     });
   });
 
@@ -131,7 +131,7 @@ describe('AISettingsPage — OpenRouter (issue #61)', () => {
     await renderPage();
     await selectProvider(user, 'openai');
 
-    const imageSelect = screen.getByLabelText('Image Generation Model (Optional)');
+    const imageSelect = screen.getByLabelText('Image generation model (optional)');
     expect(
       within(imageSelect).getByRole('option', { name: /GPT-Image 1\.5 \(Recommended \/ Fast\)/ })
     ).toBeInTheDocument();
@@ -166,8 +166,8 @@ describe('AISettingsPage — managed instance', () => {
     });
     // No key-mode radios, provider/key form, or save/test actions.
     expect(screen.queryByText('Key mode')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('AI Provider')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/API Key/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('AI provider')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/API key/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /save settings/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /test connection/i })).not.toBeInTheDocument();
     // The operator-configured provider is named.

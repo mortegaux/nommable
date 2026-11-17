@@ -91,20 +91,19 @@ export function useAIStatus(): AIStatusResult {
  * CSS classes to visually distinguish an AI button when AI isn't set up.
  * Apply alongside the button's normal classes when `!isReady`.
  *
- * The treatment: dimmed, dashed amber border, and a not-allowed cursor on
- * hover — clearly "this exists but needs setup" rather than broken or
- * fully functional.
+ * The treatment: dimmed, with the button's normal border — clearly "this
+ * exists but needs setup" rather than broken or fully functional. The
+ * "Setup" label from AISetupBadge carries the explanation.
  */
-export const aiNotConfiguredClass =
-  'opacity-60 border-dashed !border-amber-500/60 hover:!border-amber-500';
+export const aiNotConfiguredClass = 'opacity-60';
 
 /**
- * Small badge label shown on AI buttons when AI isn't configured.
+ * Small label shown on AI buttons when AI isn't configured.
  * Render inside the button when `!isReady`.
  */
 export function AISetupBadge() {
   return (
-    <span className="ml-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+    <span className="ml-1 text-xs font-normal text-muted-foreground">
       Setup
     </span>
   );

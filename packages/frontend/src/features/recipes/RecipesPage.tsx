@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, X } from 'lucide-react';
+import { Check, ChevronDown, Clipboard, Clock, Flame, Loader2, Pencil, Refrigerator, UtensilsCrossed, X } from 'lucide-react';
 import { recipeApi, taxonomyApi, historyApi, suggestionApi } from '@/services/api';
-import { AutoAwesomeIcon, RestaurantIcon } from '@/components/icons/MaterialIcon';
 import { useAuthStore } from '@/store/auth.store';
 import { useRecipeCreateStore } from '@/store/recipeCreate.store';
 import type { Recipe, RecipeSearchQuery, Taxonomy, ContentRecipeSuggestion } from '@nommable/shared';
@@ -68,18 +67,7 @@ function MultiSelectDropdown({
         aria-label={displayLabel}
       >
         <span>{displayLabel}</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} strokeWidth={1.5} aria-hidden="true" />
       </button>
       {open && (
         <div className="absolute z-50 mt-1 min-w-[180px] rounded-md border border-border bg-card shadow-lg">
@@ -566,27 +554,26 @@ export default function RecipesPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-7xl">
       <SectionTabs
         label="Recipes sections"
         tabs={[
-          { path: '/recipes', label: 'All Recipes' },
+          { path: '/recipes', label: 'All recipes' },
           { path: '/collections', label: 'Collections' },
         ]}
       />
       {/* Header */}
       <PageHeader
         title="Recipes"
-        subtitle={`${total} delicious recipes`}
+        subtitle={`${total} recipes`}
         secondaryActions={
           <>
             <button
               onClick={() => void openAIGenerate()}
-              className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
+              className={`rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2 ${!aiReady && !aiLoading ? aiNotConfiguredClass : ''}`}
               aria-label="Generate recipe with AI"
-              title={!aiReady && !aiLoading ? 'Set up AI to unlock this feature' : undefined}
+              title={!aiReady && !aiLoading ? 'Set up AI to use this feature' : undefined}
             >
-              <AutoAwesomeIcon size={18} />
               Generate with AI
               {!aiReady && !aiLoading && <AISetupBadge />}
             </button>
@@ -595,10 +582,10 @@ export default function RecipesPage() {
         primaryAction={
           <Link
             to="/recipes/new"
-            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
+            className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inline-flex items-center gap-2"
             aria-label="Create new recipe"
           >
-            Create Recipe
+            Create recipe
           </Link>
         }
       />
@@ -606,10 +593,10 @@ export default function RecipesPage() {
       {/* Bulk Edit Modal */}
       {showBulkEdit && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-foreground mb-4">Add Tags and Categories</h3>
+          <div className="bg-card rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 className="text-2xl font-medium leading-tight text-balance text-foreground mb-4">Add tags and categories</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Add tags and categories to {selectedRecipes.size} selected recipe(s). These will be added to existing ones.
+              Add tags and categories to {selectedRecipes.size} selected {selectedRecipes.size === 1 ? 'recipe' : 'recipes'}. These will be added to existing ones.
             </p>
 
             <div className="space-y-4">
@@ -647,13 +634,13 @@ export default function RecipesPage() {
                   setBulkEditTags('');
                   setBulkEditCategories('');
                 }}
-                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent transition-all"
+                className="flex-1 rounded-lg border border-border bg-background px-4 py-2 font-medium text-foreground hover:bg-accent transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleBulkUpdate}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-all"
+                className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Apply to {selectedRecipes.size} recipes
               </button>
@@ -671,7 +658,7 @@ export default function RecipesPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search recipes..."
+              placeholder="Search recipes"
               className="w-full rounded-md border border-input bg-background px-4 py-2 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               aria-label="Search recipes"
             />
@@ -682,16 +669,14 @@ export default function RecipesPage() {
                 aria-label="Clear search"
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                </svg>
+                <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </button>
             )}
           </div>
           <div className="flex items-center gap-3 flex-wrap">
           {allCategories.length > 0 && (
             <MultiSelectDropdown
-              label="All Categories"
+              label="All categories"
               options={allCategories}
               selected={selectedCategories}
               onChange={setSelectedCategories}
@@ -699,7 +684,7 @@ export default function RecipesPage() {
           )}
           {allDietaryTags.length > 0 && (
             <MultiSelectDropdown
-              label="All Tags"
+              label="All tags"
               options={allDietaryTags}
               selected={selectedDietaryTags}
               onChange={setSelectedDietaryTags}
@@ -711,9 +696,7 @@ export default function RecipesPage() {
               className="text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
               title="Edit categories & tags"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
+              <Pencil className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             </Link>
           )}
           </div>
@@ -729,7 +712,7 @@ export default function RecipesPage() {
                 className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 pl-2.5 pr-1.5 py-1 text-xs font-medium text-accent-foreground hover:bg-accent/30 transition-colors"
               >
                 <span>Search: {searchQuery.trim()}</span>
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full hover:bg-accent/30" aria-hidden="true">&times;</span>
+                <X className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
               </button>
             )}
             {[...selectedCategories].map((cat) => (
@@ -746,7 +729,7 @@ export default function RecipesPage() {
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 pl-2.5 pr-1.5 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
               >
                 <span>{cat}</span>
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full hover:bg-primary/20" aria-hidden="true">&times;</span>
+                <X className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
               </button>
             ))}
             {[...selectedDietaryTags].map((tag) => (
@@ -763,7 +746,7 @@ export default function RecipesPage() {
                 className="inline-flex items-center gap-1.5 rounded-full bg-secondary/10 pl-2.5 pr-1.5 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/20 transition-colors"
               >
                 <span>{tag}</span>
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full hover:bg-secondary/20" aria-hidden="true">&times;</span>
+                <X className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
               </button>
             ))}
             <button
@@ -779,7 +762,7 @@ export default function RecipesPage() {
           </div>
         )}
 
-        {/* Advanced Filters Toggle */}
+        {/* Advanced filters Toggle */}
         {(() => {
           const activeFilterCount =
             (includeIngredients ? 1 : 0) +
@@ -798,19 +781,8 @@ export default function RecipesPage() {
                   className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
                   aria-expanded={showAdvancedFilters}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Advanced Filters
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} strokeWidth={1.5} aria-hidden="true" />
+                  Advanced filters
                   {activeFilterCount > 0 && (
                     <span className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium w-5 h-5">
                       {activeFilterCount}
@@ -971,11 +943,11 @@ export default function RecipesPage() {
       {/* Recently Viewed (hidden while filtering/searching) */}
       {!hasActiveFilters && recentRecipes.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">Recently Viewed</h2>
+          <h2 className="text-xl font-medium mb-3">Recently viewed</h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {recentRecipes.map((recipe) => (
               <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="flex-shrink-0 w-48">
-                <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-card">
+                <div className="border rounded-lg overflow-hidden bg-card">
                   {recipe.imageUrl ? (
                     <img
                       src={
@@ -987,8 +959,8 @@ export default function RecipesPage() {
                       className="w-full h-28 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-28 bg-muted flex items-center justify-center text-muted-foreground text-2xl">
-                      🍳
+                    <div className="w-full h-28 bg-muted flex items-center justify-center text-muted-foreground">
+                      <UtensilsCrossed className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
                     </div>
                   )}
                   <div className="p-2">
@@ -1011,20 +983,18 @@ export default function RecipesPage() {
 
       {/* Suggested from your pantry (hidden while filtering/searching) */}
       {!hasActiveFilters && suggestions.length > 0 && showSuggestions && (
-        <section aria-label="Suggested from your pantry" className="mb-8 rounded-xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 sm:p-5">
+        <section aria-label="Suggested from your pantry" className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-700 text-white shadow-sm" aria-hidden="true">
-                <AutoAwesomeIcon size={20} />
-              </span>
+              <Refrigerator className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               <div>
-                <h2 className="text-lg font-semibold text-emerald-950 dark:text-emerald-100">Suggested from your pantry</h2>
-                <p className="text-xs text-emerald-800 dark:text-emerald-200">Recipes you can cook with what's on hand</p>
+                <h2 className="text-xl font-medium text-foreground">Suggested from your pantry</h2>
+                <p className="text-xs text-muted-foreground">Recipes you can cook with what's on hand</p>
               </div>
             </div>
             <button
               onClick={() => setShowSuggestions(false)}
-              className="text-sm text-emerald-800 dark:text-emerald-200 hover:text-emerald-950 underline underline-offset-2 flex-shrink-0 ml-2"
+              className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 flex-shrink-0 ml-2 transition-colors"
             >
               Hide
             </button>
@@ -1034,7 +1004,7 @@ export default function RecipesPage() {
               const pantryMatch = parsePantryMatch(matchReason);
               return (
                 <Link key={recipe.id} to={`/recipes/${recipe.id}`}>
-                  <div className="border-2 border-emerald-300 dark:border-emerald-700 border-l-4 border-l-emerald-500 rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-card">
+                  <div className="border border-border rounded-lg overflow-hidden bg-card">
                     {recipe.imageUrl ? (
                       <img
                         src={
@@ -1046,15 +1016,15 @@ export default function RecipesPage() {
                         className="w-full h-36 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-36 bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-3xl">
-                        🍳
+                      <div className="w-full h-36 bg-muted flex items-center justify-center text-muted-foreground">
+                        <UtensilsCrossed className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
                       </div>
                     )}
                     <div className="p-3">
                       {pantryMatch ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-700 text-white px-2.5 py-0.5 text-xs font-semibold mb-1.5">
-                          <span aria-hidden="true">🧺</span> Uses {pantryMatch.matched} of {pantryMatch.total} pantry ingredients
-                        </span>
+                        <p className="font-mono text-xs tabular-nums text-muted-foreground mb-1.5">
+                          Uses {pantryMatch.matched} of {pantryMatch.total} pantry ingredients
+                        </p>
                       ) : (
                         <p className="text-sm text-muted-foreground mb-1.5">{matchReason}</p>
                       )}
@@ -1115,20 +1085,8 @@ export default function RecipesPage() {
           role="status"
           aria-live="polite"
         >
-          <svg
-            className="h-4 w-4 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          Updating results...
+          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" />
+          Updating results
         </div>
       )}
       {recipes.length === 0 && !isRefreshing ? (
@@ -1150,7 +1108,7 @@ export default function RecipesPage() {
             return (
               <div
                 key={recipe.id}
-                className={`group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-lg ${
+                className={`group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-colors ${
                   isSelected
                     ? 'border-primary ring-2 ring-primary/20'
                     : 'border-border hover:border-primary/30'
@@ -1204,42 +1162,28 @@ export default function RecipesPage() {
                         <img
                           src={recipe.imageUrl}
                           alt=""
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover"
                         />
                         {/* Gradient overlay for better text readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <RestaurantIcon size={64} className="text-muted-foreground" />
+                        <UtensilsCrossed className="h-16 w-16 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
                       </div>
                     )}
 
                     {/* Time Badge - Overlay on image */}
                     {totalTime > 0 && (
-                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium font-mono tabular-nums flex items-center gap-1">
+                        <Clock className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                         {formatTimeDisplay(totalTime)}
                       </div>
                     )}
 
                     {/* AI Generated Badge */}
                     {recipe.isAiGenerated && (
-                      <div className="absolute bottom-3 left-3 bg-accent/90 backdrop-blur-sm text-accent-foreground px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
-                        <AutoAwesomeIcon size={12} />
+                      <div className="absolute bottom-3 left-3 bg-accent/90 backdrop-blur-sm text-accent-foreground px-2 py-1 rounded-md text-xs font-medium">
                         AI
                       </div>
                     )}
@@ -1248,7 +1192,7 @@ export default function RecipesPage() {
                   {/* Card Content */}
                   <div className="p-4">
                     {/* Title */}
-                    <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                    <h3 className="text-base font-medium text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                       {recipe.title}
                     </h3>
 
@@ -1265,7 +1209,7 @@ export default function RecipesPage() {
                         {recipe.categories.slice(0, 2).map(category => (
                           <span
                             key={category}
-                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-primary/15 text-primary border border-primary/30"
+                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/15 text-primary border border-primary/30"
                           >
                             {category}
                           </span>
@@ -1307,39 +1251,13 @@ export default function RecipesPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         {recipe.prepTime && (
                           <span className="flex items-center gap-1" title="Prep time">
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                              />
-                            </svg>
+                            <Clipboard className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
                             {recipe.prepTime}m
                           </span>
                         )}
                         {recipe.cookTime && (
                           <span className="flex items-center gap-1" title="Cook time">
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
-                              />
-                            </svg>
+                            <Flame className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
                             {recipe.cookTime}m
                           </span>
                         )}
@@ -1357,7 +1275,7 @@ export default function RecipesPage() {
                     {/* Recipe Creator / Author Attribution */}
                     {recipe.author && (
                       <div className="mt-2.5 pt-2.5 border-t border-border/60 flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-medium text-primary flex-shrink-0 overflow-hidden">
                           {recipe.author.profilePhotoUrl ? (
                             <img
                               src={recipe.author.profilePhotoUrl}
@@ -1410,7 +1328,7 @@ export default function RecipesPage() {
         <div className="fixed inset-x-3 bottom-24 z-40 sm:inset-x-6 lg:inset-x-auto lg:bottom-6 lg:left-1/2 lg:w-auto lg:max-w-3xl lg:-translate-x-1/2">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-primary/30 bg-card/95 px-4 py-3 shadow-selection backdrop-blur-sm">
             <span className="text-sm font-medium text-foreground">
-              {selectedRecipes.size} recipe(s) selected
+              {selectedRecipes.size} {selectedRecipes.size === 1 ? 'recipe' : 'recipes'} selected
             </span>
             <button
               onClick={handleSelectPage}
@@ -1421,21 +1339,21 @@ export default function RecipesPage() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setShowBulkEdit(true)}
-                className="rounded-lg bg-background border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent shadow-sm transition-all"
+                className="rounded-lg bg-background border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent shadow-sm transition-colors"
               >
-                Add Tags/Categories
+                Add tags/categories
               </button>
               <button
                 onClick={() => setShowAddToCollection(true)}
-                className="rounded-lg bg-background border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent shadow-sm transition-all"
+                className="rounded-lg bg-background border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent shadow-sm transition-colors"
               >
-                Add to Collection
+                Add to collection
               </button>
               <button
                 onClick={handleBulkDelete}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 shadow-sm transition-all"
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 shadow-sm transition-colors"
               >
-                Delete Selected
+                Delete selected
               </button>
             </div>
             <button
@@ -1449,7 +1367,7 @@ export default function RecipesPage() {
         </div>
       )}
 
-      {/* Add to Collection Dialog */}
+      {/* Add to collection Dialog */}
       {showAddToCollection && (
         <AddToCollectionDialog
           recipeIds={Array.from(selectedRecipes)}

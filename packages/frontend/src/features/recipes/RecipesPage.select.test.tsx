@@ -114,18 +114,18 @@ describe('RecipesPage selection rework (#90)', () => {
       expect(checkboxFor(n).className).toContain('opacity-100');
       expect(checkboxFor(n).className).not.toContain('pointer-events-none');
     }
-    expect(await screen.findByText('1 recipe(s) selected')).toBeInTheDocument();
+    expect(await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
     // aria-live announcement
-    expect(screen.getByText('1 recipe selected')).toBeInTheDocument();
+    expect(screen.getByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
   });
 
   it('unchecking the last selected recipe exits selection mode', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    expect(await screen.findByText('1 recipe(s) selected')).toBeInTheDocument();
+    expect(await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
     fireEvent.click(checkboxFor(1));
     await waitFor(() =>
-      expect(screen.queryByText('1 recipe(s) selected')).toBeNull()
+      expect(screen.queryByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeNull()
     );
     expect(checkboxFor(1).className).toContain('opacity-0');
   });
@@ -133,10 +133,10 @@ describe('RecipesPage selection rework (#90)', () => {
   it('in selection mode, clicking a card toggles it instead of navigating', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     fireEvent.click(screen.getByText('Recipe 3'));
     expect(checkboxFor(3)).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByText('2 recipe(s) selected')).toBeInTheDocument();
+    expect(screen.getByText('2 recipes selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
     // and we did not navigate away
     expect(screen.queryByText('Recipe detail stub')).toBeNull();
   });
@@ -150,10 +150,10 @@ describe('RecipesPage selection rework (#90)', () => {
   it('Esc exits selection mode', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() =>
-      expect(screen.queryByText('1 recipe(s) selected')).toBeNull()
+      expect(screen.queryByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeNull()
     );
     expect(checkboxFor(1)).toHaveAttribute('aria-checked', 'false');
   });
@@ -161,9 +161,9 @@ describe('RecipesPage selection rework (#90)', () => {
   it('shift-click selects the range from the anchor', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(2));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     fireEvent.click(checkboxFor(5), { shiftKey: true });
-    expect(screen.getByText('4 recipe(s) selected')).toBeInTheDocument();
+    expect(screen.getByText('4 recipes selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
     for (const n of [2, 3, 4, 5]) {
       expect(checkboxFor(n)).toHaveAttribute('aria-checked', 'true');
     }
@@ -174,19 +174,19 @@ describe('RecipesPage selection rework (#90)', () => {
   it('"Select page (N)" in the bulk bar selects the whole page', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     fireEvent.click(screen.getByRole('button', { name: 'Select page (6)' }));
-    expect(screen.getByText('6 recipe(s) selected')).toBeInTheDocument();
+    expect(screen.getByText('6 recipes selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
   });
 
   it('the bulk bar clear (✕) button clears the selection and exits the mode', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
     fireEvent.click(checkboxFor(2));
-    await screen.findByText('2 recipe(s) selected');
+    await screen.findByText('2 recipes selected', { selector: 'span:not(.sr-only)' });
     fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
     await waitFor(() =>
-      expect(screen.queryByText('2 recipe(s) selected')).toBeNull()
+      expect(screen.queryByText('2 recipes selected', { selector: 'span:not(.sr-only)' })).toBeNull()
     );
     expect(checkboxFor(1).className).toContain('opacity-0');
   });
@@ -194,7 +194,7 @@ describe('RecipesPage selection rework (#90)', () => {
   it('bulk bar floats above the mobile tab bar (bottom-24 on mobile)', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    const count = await screen.findByText('1 recipe(s) selected');
+    const count = await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     const bar = count.closest('.fixed');
     expect(bar?.className).toContain('bottom-24');
     expect(bar?.className).toContain('lg:bottom-6');
@@ -211,7 +211,7 @@ describe('RecipesPage selection rework (#90)', () => {
       () => expect(checkboxFor(2)).toHaveAttribute('aria-checked', 'true'),
       { timeout: 2500 }
     );
-    expect(await screen.findByText('1 recipe(s) selected')).toBeInTheDocument();
+    expect(await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
     // the trailing click after a long-press is swallowed, not a toggle-off
     fireEvent.pointerUp(card as Element, { pointerType: 'touch' });
     fireEvent.click(card as Element);
@@ -231,7 +231,7 @@ describe('RecipesPage selection rework (#90)', () => {
     // card's checkbox — must still work.
     fireEvent.click(checkboxFor(4));
     expect(checkboxFor(4)).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByText('2 recipe(s) selected')).toBeInTheDocument();
+    expect(screen.getByText('2 recipes selected', { selector: 'span:not(.sr-only)' })).toBeInTheDocument();
   });
 
   it('a mouse press-and-hold does NOT trigger long-press selection', async () => {
@@ -245,12 +245,12 @@ describe('RecipesPage selection rework (#90)', () => {
   it('changing the search query clears the selection', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     fireEvent.change(screen.getByLabelText('Search recipes'), {
       target: { value: 'soup' },
     });
     await waitFor(() =>
-      expect(screen.queryByText('1 recipe(s) selected')).toBeNull()
+      expect(screen.queryByText('1 recipe selected', { selector: 'span:not(.sr-only)' })).toBeNull()
     );
   });
 
@@ -258,8 +258,8 @@ describe('RecipesPage selection rework (#90)', () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
     fireEvent.click(checkboxFor(3));
-    await screen.findByText('2 recipe(s) selected');
-    fireEvent.click(screen.getByRole('button', { name: 'Delete Selected' }));
+    await screen.findByText('2 recipes selected', { selector: 'span:not(.sr-only)' });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete selected' }));
     // the confirm store received the count-stating request
     await waitFor(() =>
       expect(useConfirmStore.getState().request?.title).toBe('Delete 2 recipes?')
@@ -270,7 +270,7 @@ describe('RecipesPage selection rework (#90)', () => {
       expect(mockedRecipeApi.bulkDelete).toHaveBeenCalledWith(['r1', 'r3'])
     );
     await waitFor(() =>
-      expect(screen.queryByText('2 recipe(s) selected')).toBeNull()
+      expect(screen.queryByText('2 recipes selected', { selector: 'span:not(.sr-only)' })).toBeNull()
     );
   });
 
@@ -287,7 +287,7 @@ describe('RecipesPage selection rework (#90)', () => {
     await renderWithRecipes();
     expect(screen.getByText(/press-and-hold a recipe/)).toBeInTheDocument();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
     expect(screen.queryByText(/press-and-hold a recipe/)).toBeNull();
     expect(localStorage.getItem('nommable:recipes-select-hint')).toBe('dismissed');
   });
@@ -301,10 +301,10 @@ describe('RecipesPage selection rework (#90)', () => {
   it('bulk bar contains the existing actions (tags/categories, collection, delete)', async () => {
     await renderWithRecipes();
     fireEvent.click(checkboxFor(1));
-    await screen.findByText('1 recipe(s) selected');
-    const bar = screen.getByText('1 recipe(s) selected').closest('.fixed') as HTMLElement;
-    expect(within(bar).getByRole('button', { name: 'Add Tags/Categories' })).toBeInTheDocument();
-    expect(within(bar).getByRole('button', { name: 'Add to Collection' })).toBeInTheDocument();
-    expect(within(bar).getByRole('button', { name: 'Delete Selected' })).toBeInTheDocument();
+    await screen.findByText('1 recipe selected', { selector: 'span:not(.sr-only)' });
+    const bar = screen.getByText('1 recipe selected', { selector: 'span:not(.sr-only)' }).closest('.fixed') as HTMLElement;
+    expect(within(bar).getByRole('button', { name: 'Add tags/categories' })).toBeInTheDocument();
+    expect(within(bar).getByRole('button', { name: 'Add to collection' })).toBeInTheDocument();
+    expect(within(bar).getByRole('button', { name: 'Delete selected' })).toBeInTheDocument();
   });
 });
