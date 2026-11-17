@@ -10,7 +10,7 @@ A self-hosted recipe management system with optional AI features powered by mult
 
 | Recipes                                                                                         | Recipe Detail                                                                                |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| ![Recipes page with sidebar navigation, recipe cards, and search](docs/screenshots/recipes.png) | ![Recipe detail page with photo, times, and ingredients](docs/screenshots/recipe-detail.png) |
+| ![Recipes page with sidebar navigation and recipe cards with photos](docs/screenshots/recipes.png) | ![Recipe detail page with photo, times, and ingredients](docs/screenshots/recipe-detail.png) |
 
 | Pantry                                                                       | Meal Plans                                                                     | Shopping Lists                                                                 |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
